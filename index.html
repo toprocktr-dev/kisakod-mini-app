@@ -279,14 +279,155 @@ body {
     color: #fff;
     font-size: 15px;
 }
+
+/* =========================
+   ERİŞİM ENGELİ
+========================= */
+
+.access-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: #f5f5f5;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 25px;
+}
+
+.access-overlay.show {
+    display: flex;
+}
+
+.access-box {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 30px 22px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.access-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.access-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.access-message {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #666;
+}
+
+/* =========================
+   YÜKLENİYOR
+========================= */
+
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 450;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-overlay.hidden {
+    display: none;
+}
+
+.loading-box {
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 42px;
+    height: 42px;
+    border: 4px solid #ddd;
+    border-top-color: #222;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 15px;
+}
+
+.loading-text {
+    font-size: 15px;
+    color: #666;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 </style>
 </head>
 
 <body>
 
+<!-- =========================
+     YÜKLENİYOR
+========================= -->
+
+<div id="loadingOverlay" class="loading-overlay">
+
+    <div class="loading-box">
+
+        <div class="loading-spinner"></div>
+
+        <div class="loading-text">
+            KısaKod hazırlanıyor...
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     ERİŞİM ENGELİ
+========================= -->
+
+<div id="accessOverlay" class="access-overlay">
+
+    <div class="access-box">
+
+        <div class="access-icon">
+            🔒
+        </div>
+
+        <div class="access-title">
+            KısaKod
+        </div>
+
+        <div
+            id="accessMessage"
+            class="access-message">
+            Kullanım bilgileriniz kontrol ediliyor...
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     ANA SAYFA
+========================= -->
+
 <div class="header">
 
-    <div class="title">KısaKod</div>
+    <div class="title">
+        KısaKod
+    </div>
 
     <div class="search-row">
 
@@ -311,22 +452,34 @@ body {
 
 </div>
 
-<div id="status" class="status">
+
+<div
+    id="status"
+    class="status">
     Ürün aramak için yukarıdaki alanı kullanın.
 </div>
 
-<div id="cards" class="cards"></div>
+
+<div
+    id="cards"
+    class="cards">
+</div>
 
 
 <!-- =========================
      ÜRÜN DETAY PENCERESİ
 ========================= -->
 
-<div id="productDialog" class="dialog-overlay">
+<div
+    id="productDialog"
+    class="dialog-overlay">
 
     <div class="dialog">
 
-        <button id="dialogClose" class="dialog-close">
+        <button
+            id="dialogClose"
+            class="dialog-close"
+            type="button">
             ×
         </button>
 
@@ -343,6 +496,7 @@ body {
         </div>
 
         <div class="detail-row">
+
             <div class="detail-label">
                 Kısa Kod
             </div>
@@ -351,9 +505,11 @@ body {
                 id="dialogCode"
                 class="detail-value">
             </div>
+
         </div>
 
         <div class="detail-row">
+
             <div class="detail-label">
                 Fiyat
             </div>
@@ -362,9 +518,11 @@ body {
                 id="dialogPrice"
                 class="detail-value">
             </div>
+
         </div>
 
         <div class="detail-row">
+
             <div class="detail-label">
                 Tarih
             </div>
@@ -373,12 +531,10 @@ body {
                 id="dialogDate"
                 class="detail-value">
             </div>
+
         </div>
 
-        <!--
-            BARKOD DETAY PENCERESİNDE
-            BİLEREK GÖSTERİLMİYOR.
-        -->
+        <!-- BARKOD BİLEREK GÖSTERİLMİYOR -->
 
     </div>
 
@@ -389,7 +545,9 @@ body {
      BARKOD TARAYICI
 ========================= -->
 
-<div id="scannerOverlay" class="scanner-overlay">
+<div
+    id="scannerOverlay"
+    class="scanner-overlay">
 
     <div class="scanner-header">
 
@@ -399,7 +557,8 @@ body {
 
         <button
             id="scannerClose"
-            class="scanner-close">
+            class="scanner-close"
+            type="button">
             ×
         </button>
 
@@ -421,21 +580,46 @@ body {
 </div>
 
 
+<!-- Telegram Web App kütüphanesi -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+
 <script>
 
 /* =====================================================
    TELEGRAM MINI APP
 ===================================================== */
 
-if (window.Telegram && Telegram.WebApp) {
-    Telegram.WebApp.ready();
-    Telegram.WebApp.expand();
+const telegramAvailable =
+    !!(
+        window.Telegram &&
+        Telegram.WebApp
+    );
+
+
+let telegramWebApp = null;
+let telegramInitData = "";
+
+
+/*
+   Telegram Mini App bilgilerini al.
+*/
+
+if (telegramAvailable) {
+
+    telegramWebApp = Telegram.WebApp;
+
+    telegramWebApp.ready();
+    telegramWebApp.expand();
+
+    telegramInitData =
+        telegramWebApp.initData || "";
+
 }
 
 
 /* =====================================================
    API ADRESİ
-   BURAYA YENİ APPS SCRIPT /exec ADRESİNİ KOY
 ===================================================== */
 
 const API_URL =
@@ -447,12 +631,199 @@ const API_URL =
 ===================================================== */
 
 let currentProducts = [];
+
 let searchTimer = null;
 
 let videoStream = null;
+
 let scannerRunning = false;
 
 let barcodeDetector = null;
+
+let miniAppAuthorized = false;
+
+
+/* =====================================================
+   HTML ELEMENTLERİ
+===================================================== */
+
+const loadingOverlay =
+    document.getElementById("loadingOverlay");
+
+const accessOverlay =
+    document.getElementById("accessOverlay");
+
+const accessMessage =
+    document.getElementById("accessMessage");
+
+const statusElement =
+    document.getElementById("status");
+
+const cardsElement =
+    document.getElementById("cards");
+
+const searchInput =
+    document.getElementById("searchInput");
+
+
+/* =====================================================
+   ERİŞİM MESAJI
+===================================================== */
+
+function showAccessMessage(message) {
+
+    loadingOverlay.classList.add("hidden");
+
+    accessMessage.textContent =
+        message || "Erişim izniniz bulunmuyor.";
+
+    accessOverlay.classList.add("show");
+
+}
+
+
+/* =====================================================
+   TELEGRAM KONTROLÜ
+===================================================== */
+
+async function miniAppYetkiKontrol() {
+
+    /*
+       Telegram dışından açılmışsa
+       çalışmasına izin verme.
+    */
+
+    if (!telegramAvailable) {
+
+        showAccessMessage(
+            "Bu uygulama yalnızca Telegram üzerinden kullanılabilir."
+        );
+
+        return false;
+    }
+
+
+    /*
+       Telegram initData yoksa
+       güvenli şekilde durdur.
+    */
+
+    if (!telegramInitData) {
+
+        showAccessMessage(
+            "Telegram kullanıcı bilgileri alınamadı. Lütfen uygulamayı Telegram içerisinden tekrar açın."
+        );
+
+        return false;
+    }
+
+
+    try {
+
+        /*
+           Boş URUN_ARA isteği gönderiyoruz.
+
+           Apps Script tarafı:
+           - initData doğrular
+           - Telegram ID'yi bulur
+           - 30 günlük süreyi başlatır
+           - süresi dolmuşsa erişimi reddeder
+        */
+
+        const url =
+            API_URL +
+            "?func=URUN_ARA" +
+            "&query=" +
+            encodeURIComponent("") +
+            "&initData=" +
+            encodeURIComponent(telegramInitData);
+
+
+        const response =
+            await fetch(url, {
+                method: "GET",
+                cache: "no-store"
+            });
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " + response.status
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        /*
+           Apps Script erişim hatasını
+           JSON içindeki mesajdan yakala.
+        */
+
+        if (
+            data &&
+            data.ok === false
+        ) {
+
+            showAccessMessage(
+                data.message ||
+                "Bu uygulamayı kullanma yetkiniz bulunmuyor."
+            );
+
+            return false;
+        }
+
+
+        /*
+           Bazı Apps Script sürümlerinde
+           hata şu şekilde dönebilir:
+        */
+
+        if (
+            data &&
+            data.hata
+        ) {
+
+            showAccessMessage(
+                data.hata
+            );
+
+            return false;
+        }
+
+
+        /*
+           Yetki kontrolü başarılı.
+        */
+
+        miniAppAuthorized = true;
+
+        loadingOverlay.classList.add("hidden");
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "Telegram yetki kontrolü hatası:",
+            error
+        );
+
+
+        showAccessMessage(
+            "Kullanım bilgileriniz kontrol edilemedi. Lütfen uygulamayı Telegram üzerinden tekrar açın."
+        );
+
+
+        return false;
+    }
+
+}
 
 
 /* =====================================================
@@ -461,7 +832,10 @@ let barcodeDetector = null;
 
 function normalizeText(value) {
 
-    if (value === null || value === undefined) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
         return "";
     }
 
@@ -480,6 +854,7 @@ function normalizeText(value) {
         .replace(/ç/g, "c")
         .replace(/Ç/g, "c")
         .trim();
+
 }
 
 
@@ -489,31 +864,36 @@ function normalizeText(value) {
 
 function normalizeBarcode(value) {
 
-    if (value === null || value === undefined) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
         return "";
     }
 
-    let str = String(value)
-        .trim()
-        .replace(/\s+/g, "")
-        .replace(/-/g, "");
+    let str =
+        String(value)
+            .trim()
+            .replace(/\s+/g, "")
+            .replace(/-/g, "");
 
-    /*
-       Google Sheets'ten 8691234567890.0
-       gibi gelebilecek değerleri düzelt.
-    */
 
-    if (/^\d+\.0+$/.test(str)) {
-        str = str.split(".")[0];
+    if (
+        /^\d+\.0+$/.test(str)
+    ) {
+
+        str =
+            str.split(".")[0];
+
     }
 
-    /*
-       Sadece rakamları bırak.
-    */
 
-    str = str.replace(/\D/g, "");
+    str =
+        str.replace(/\D/g, "");
+
 
     return str;
+
 }
 
 
@@ -523,29 +903,36 @@ function normalizeBarcode(value) {
 
 function barcodeEquals(a, b) {
 
-    const x = normalizeBarcode(a);
-    const y = normalizeBarcode(b);
+    const x =
+        normalizeBarcode(a);
+
+    const y =
+        normalizeBarcode(b);
+
 
     if (!x || !y) {
         return false;
     }
 
+
     if (x === y) {
         return true;
     }
 
-    /*
-       Başındaki sıfırları kaldırarak tekrar karşılaştır.
-       Örneğin:
 
-       08691234567890
-       8691234567890
-    */
+    const x2 =
+        x.replace(/^0+/, "");
 
-    const x2 = x.replace(/^0+/, "");
-    const y2 = y.replace(/^0+/, "");
+    const y2 =
+        y.replace(/^0+/, "");
 
-    return x2 !== "" && y2 !== "" && x2 === y2;
+
+    return (
+        x2 !== "" &&
+        y2 !== "" &&
+        x2 === y2
+    );
+
 }
 
 
@@ -555,7 +942,10 @@ function barcodeEquals(a, b) {
 
 function escapeHTML(value) {
 
-    if (value === null || value === undefined) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
         return "";
     }
 
@@ -565,31 +955,38 @@ function escapeHTML(value) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+
 }
 
 
 /* =====================================================
    ÜRÜN OBJESİ
-   API DÖNÜŞÜ:
-
-   0 = ÜRÜN KODU
-   1 = KOD
-   2 = FİYAT
-   3 = TARİH
-   4 = LİNK
-   5 = BARKOD
 ===================================================== */
 
 function convertRow(row) {
 
     return {
-        code: row[0] ?? "",
-        name: row[1] ?? "",
-        price: row[2] ?? "",
-        date: row[3] ?? "",
-        image: row[4] ?? "",
-        barcode: row[5] ?? ""
+
+        code:
+            row[0] ?? "",
+
+        name:
+            row[1] ?? "",
+
+        price:
+            row[2] ?? "",
+
+        date:
+            row[3] ?? "",
+
+        image:
+            row[4] ?? "",
+
+        barcode:
+            row[5] ?? ""
+
     };
+
 }
 
 
@@ -599,71 +996,152 @@ function convertRow(row) {
 
 async function searchProducts(query) {
 
-    query = String(query || "").trim();
+    /*
+       Yetki yoksa arama yapma.
+    */
+
+    if (!miniAppAuthorized) {
+
+        showAccessMessage(
+            "KısaKod kullanım izniniz bulunmuyor."
+        );
+
+        return;
+    }
+
+
+    query =
+        String(query || "").trim();
+
 
     if (!query) {
 
         currentProducts = [];
 
-        document.getElementById("cards").innerHTML = "";
+        cardsElement.innerHTML = "";
 
-        document.getElementById("status").textContent =
+        statusElement.textContent =
             "Ürün aramak için yukarıdaki alanı kullanın.";
 
         return;
     }
 
-    document.getElementById("status").textContent =
+
+    statusElement.textContent =
         "Aranıyor...";
+
 
     try {
 
-        /*
-           Barkod ise özel olarak temizle.
-        */
+        let searchQuery =
+            query;
 
-        let searchQuery = query;
 
         const digitsOnly =
             normalizeBarcode(query);
 
+
         /*
-           8-14 haneli sayı barkod olarak kabul edilir.
+           8-14 haneli sayı barkod
+           olarak kabul edilir.
         */
 
         if (
             digitsOnly.length >= 8 &&
             digitsOnly.length <= 14
         ) {
-            searchQuery = digitsOnly;
+
+            searchQuery =
+                digitsOnly;
+
         }
+
+
+        /*
+           Telegram initData
+           her ürün aramasında gönderiliyor.
+        */
 
         const url =
             API_URL +
-            "?func=URUN_ARA&query=" +
-            encodeURIComponent(searchQuery);
+            "?func=URUN_ARA" +
+            "&query=" +
+            encodeURIComponent(searchQuery) +
+            "&initData=" +
+            encodeURIComponent(telegramInitData);
 
-        const response = await fetch(url, {
-            method: "GET",
-            cache: "no-store"
-        });
+
+        const response =
+            await fetch(url, {
+                method: "GET",
+                cache: "no-store"
+            });
+
 
         if (!response.ok) {
-            throw new Error("HTTP " + response.status);
+
+            throw new Error(
+                "HTTP " + response.status
+            );
+
         }
 
-        const data = await response.json();
 
-        if (!Array.isArray(data)) {
-            throw new Error("Geçersiz veri");
-        }
+        const data =
+            await response.json();
 
-        currentProducts = data.map(convertRow);
 
         /*
-           Eğer bu bir barkod aramasıysa,
-           sonuçları tekrar HTML tarafında
-           kesin barkod eşleşmesine göre kontrol ediyoruz.
+           Yetki / süre hatası.
+        */
+
+        if (
+            data &&
+            data.ok === false
+        ) {
+
+            miniAppAuthorized = false;
+
+            showAccessMessage(
+                data.message ||
+                "Kullanım süreniz sona ermiş."
+            );
+
+            return;
+        }
+
+
+        if (
+            data &&
+            data.hata
+        ) {
+
+            miniAppAuthorized = false;
+
+            showAccessMessage(
+                data.hata
+            );
+
+            return;
+        }
+
+
+        if (!Array.isArray(data)) {
+
+            throw new Error(
+                "Geçersiz veri"
+            );
+
+        }
+
+
+        currentProducts =
+            data.map(convertRow);
+
+
+        /*
+           Barkod aramasıysa
+           kesin barkod eşleşmesi.
         */
 
         if (
@@ -672,36 +1150,49 @@ async function searchProducts(query) {
         ) {
 
             const exactMatches =
-                currentProducts.filter(product =>
-                    barcodeEquals(
-                        product.barcode,
-                        digitsOnly
-                    )
+                currentProducts.filter(
+                    product =>
+                        barcodeEquals(
+                            product.barcode,
+                            digitsOnly
+                        )
                 );
 
-            /*
-               Eğer endpoint sonuç döndürdüyse
-               ve kesin eşleşme varsa onu kullan.
-            */
 
-            if (exactMatches.length > 0) {
-                currentProducts = exactMatches;
+            if (
+                exactMatches.length > 0
+            ) {
+
+                currentProducts =
+                    exactMatches;
+
             }
+
         }
 
-        renderProducts(currentProducts);
+
+        renderProducts(
+            currentProducts
+        );
+
 
     } catch (error) {
 
-        console.error("Arama hatası:", error);
+        console.error(
+            "Arama hatası:",
+            error
+        );
+
 
         currentProducts = [];
 
-        document.getElementById("cards").innerHTML = "";
+        cardsElement.innerHTML = "";
 
-        document.getElementById("status").textContent =
+        statusElement.textContent =
             "Arama sırasında bir hata oluştu.";
+
     }
+
 }
 
 
@@ -711,84 +1202,103 @@ async function searchProducts(query) {
 
 function renderProducts(products) {
 
-    const cards =
-        document.getElementById("cards");
+    cardsElement.innerHTML = "";
 
-    cards.innerHTML = "";
 
     if (!products.length) {
 
-        document.getElementById("status").textContent =
+        statusElement.textContent =
             "Ürün bulunamadı.";
 
         return;
     }
 
-    document.getElementById("status").textContent =
-        products.length + " sonuç bulundu.";
+
+    statusElement.textContent =
+        products.length +
+        " sonuç bulundu.";
+
 
     const fragment =
         document.createDocumentFragment();
 
-    products.forEach((product, index) => {
 
-        const card =
-            document.createElement("div");
+    products.forEach(
+        (product, index) => {
 
-        card.className = "card";
+            const card =
+                document.createElement("div");
 
-        card.dataset.index = index;
 
-        const image =
-            product.image
-                ? escapeHTML(product.image)
-                : "";
+            card.className =
+                "card";
 
-        const imageHTML =
-            image
-                ? `
-                    <img
-                        class="card-image"
-                        src="${image}"
-                        alt=""
-                        loading="lazy"
-                        onerror="this.style.visibility='hidden'"
-                    >
-                  `
-                : `
-                    <div class="card-image"></div>
-                  `;
 
-        card.innerHTML = `
+            card.dataset.index =
+                index;
 
-            ${imageHTML}
 
-            <div class="card-info">
+            const image =
+                product.image
+                    ? escapeHTML(product.image)
+                    : "";
 
-                <div class="card-name">
-                    ${escapeHTML(product.name)}
+
+            const imageHTML =
+                image
+                    ? `
+                        <img
+                            class="card-image"
+                            src="${image}"
+                            alt=""
+                            loading="lazy"
+                            onerror="this.style.visibility='hidden'"
+                        >
+                      `
+                    : `
+                        <div class="card-image"></div>
+                      `;
+
+
+            card.innerHTML = `
+
+                ${imageHTML}
+
+                <div class="card-info">
+
+                    <div class="card-name">
+                        ${escapeHTML(product.name)}
+                    </div>
+
+                    <div class="card-code">
+                        Stok Kodu:
+                        ${escapeHTML(product.code)}
+                    </div>
+
+                    <div class="card-price">
+                        ${escapeHTML(product.price)}
+                    </div>
+
+                    <div class="card-date">
+                        Satış Tarihi:
+                        ${escapeHTML(product.date)}
+                    </div>
+
                 </div>
 
-                <div class="card-code">
-                    Kısa Kod:
-                    ${escapeHTML(product.code)}
-                </div>
+            `;
 
-                <div class="card-price">
-                    ${escapeHTML(product.price)}
-                </div>
 
-                <div class="card-date">
-                    ${escapeHTML(product.date)}
-                </div>
+            fragment.appendChild(card);
 
-            </div>
-        `;
+        }
+    );
 
-        fragment.appendChild(card);
-    });
 
-    cards.appendChild(fragment);
+    cardsElement.appendChild(
+        fragment
+    );
+
 }
 
 
@@ -796,29 +1306,38 @@ function renderProducts(products) {
    KART TIKLAMA
 ===================================================== */
 
-document
-    .getElementById("cards")
-    .addEventListener("click", function(event) {
+cardsElement.addEventListener(
+    "click",
+    function(event) {
 
         const card =
             event.target.closest(".card");
+
 
         if (!card) {
             return;
         }
 
+
         const index =
             Number(card.dataset.index);
 
+
         const product =
             currentProducts[index];
+
 
         if (!product) {
             return;
         }
 
-        openProductDialog(product);
-    });
+
+        openProductDialog(
+            product
+        );
+
+    }
+);
 
 
 /* =====================================================
@@ -828,39 +1347,59 @@ document
 function openProductDialog(product) {
 
     const dialog =
-        document.getElementById("productDialog");
+        document.getElementById(
+            "productDialog"
+        );
+
 
     const image =
-        document.getElementById("dialogImage");
+        document.getElementById(
+            "dialogImage"
+        );
+
 
     const title =
-        document.getElementById("dialogTitle");
+        document.getElementById(
+            "dialogTitle"
+        );
+
 
     const code =
-        document.getElementById("dialogCode");
+        document.getElementById(
+            "dialogCode"
+        );
+
 
     const price =
-        document.getElementById("dialogPrice");
+        document.getElementById(
+            "dialogPrice"
+        );
+
 
     const date =
-        document.getElementById("dialogDate");
+        document.getElementById(
+            "dialogDate"
+        );
 
 
     title.textContent =
         product.name || "-";
 
+
     code.textContent =
         product.code || "-";
 
+
     price.textContent =
         product.price || "-";
+
 
     date.textContent =
         product.date || "-";
 
 
     /*
-       BARKOD BURADA KESİNLİKLE GÖSTERİLMİYOR.
+       Barkod burada kesinlikle gösterilmiyor.
     */
 
 
@@ -878,10 +1417,14 @@ function openProductDialog(product) {
 
         image.style.visibility =
             "hidden";
+
     }
 
 
-    dialog.classList.add("show");
+    dialog.classList.add(
+        "show"
+    );
+
 }
 
 
@@ -892,12 +1435,20 @@ function openProductDialog(product) {
 function closeProductDialog() {
 
     document
-        .getElementById("productDialog")
-        .classList.remove("show");
+        .getElementById(
+            "productDialog"
+        )
+        .classList.remove(
+            "show"
+        );
+
 }
 
+
 document
-    .getElementById("dialogClose")
+    .getElementById(
+        "dialogClose"
+    )
     .addEventListener(
         "click",
         closeProductDialog
@@ -905,86 +1456,116 @@ document
 
 
 document
-    .getElementById("productDialog")
-    .addEventListener("click", function(event) {
+    .getElementById(
+        "productDialog"
+    )
+    .addEventListener(
+        "click",
+        function(event) {
 
-        if (event.target === this) {
-            closeProductDialog();
+            if (
+                event.target === this
+            ) {
+
+                closeProductDialog();
+
+            }
+
         }
-
-    });
+    );
 
 
 /* =====================================================
    ESC
 ===================================================== */
 
-document.addEventListener("keydown", function(event) {
+document.addEventListener(
+    "keydown",
+    function(event) {
 
-    if (event.key === "Escape") {
+        if (
+            event.key === "Escape"
+        ) {
 
-        closeProductDialog();
+            closeProductDialog();
 
-        closeScanner();
+            closeScanner();
+
+        }
+
     }
-
-});
+);
 
 
 /* =====================================================
    ARAMA KUTUSU
 ===================================================== */
 
-document
-    .getElementById("searchInput")
-    .addEventListener("input", function() {
+searchInput.addEventListener(
+    "input",
+    function() {
 
         const value =
             this.value.trim();
 
-        clearTimeout(searchTimer);
 
-        /*
-           Kullanıcı yazmayı bıraktıktan
-           350 ms sonra arama yap.
-        */
+        clearTimeout(
+            searchTimer
+        );
+
 
         searchTimer =
-            setTimeout(function() {
+            setTimeout(
+                function() {
 
-                searchProducts(value);
+                    searchProducts(
+                        value
+                    );
 
-            }, 350);
+                },
+                350
+            );
 
-    });
+    }
+);
 
 
 /* =====================================================
    ENTER İLE HEMEN ARA
 ===================================================== */
 
-document
-    .getElementById("searchInput")
-    .addEventListener("keydown", function(event) {
+searchInput.addEventListener(
+    "keydown",
+    function(event) {
 
-        if (event.key === "Enter") {
+        if (
+            event.key === "Enter"
+        ) {
 
             event.preventDefault();
 
-            clearTimeout(searchTimer);
+            clearTimeout(
+                searchTimer
+            );
 
-            searchProducts(this.value);
+            searchProducts(
+                this.value
+            );
+
         }
 
-    });
+    }
+);
 
 
 /* =====================================================
-   BARKOD TARAYICIYI AÇ
+   BARKOD TARAYICI
 ===================================================== */
 
 document
-    .getElementById("cameraBtn")
+    .getElementById(
+        "cameraBtn"
+    )
     .addEventListener(
         "click",
         startScanner
@@ -1016,7 +1597,19 @@ const barcodeFormats = [
 
 async function startScanner() {
 
-    if (!("BarcodeDetector" in window)) {
+    if (!miniAppAuthorized) {
+
+        showAccessMessage(
+            "KısaKod kullanım izniniz bulunmuyor."
+        );
+
+        return;
+    }
+
+
+    if (
+        !("BarcodeDetector" in window)
+    ) {
 
         alert(
             "Bu tarayıcı barkod taramayı desteklemiyor."
@@ -1024,6 +1617,7 @@ async function startScanner() {
 
         return;
     }
+
 
     try {
 
@@ -1035,65 +1629,93 @@ async function startScanner() {
                 await BarcodeDetector
                     .getSupportedFormats();
 
+
             const usableFormats =
                 barcodeFormats.filter(
                     format =>
-                        supported.includes(format)
+                        supported.includes(
+                            format
+                        )
                 );
+
 
             barcodeDetector =
                 new BarcodeDetector({
-                    formats: usableFormats
+                    formats:
+                        usableFormats
                 });
 
         } else {
 
             barcodeDetector =
                 new BarcodeDetector({
-                    formats: barcodeFormats
+                    formats:
+                        barcodeFormats
                 });
+
         }
 
 
         const stream =
-            await navigator.mediaDevices.getUserMedia({
+            await navigator.mediaDevices
+                .getUserMedia({
 
-                video: {
-                    facingMode: {
-                        ideal: "environment"
+                    video: {
+
+                        facingMode: {
+                            ideal:
+                                "environment"
+                        },
+
+                        width: {
+                            ideal:
+                                1280
+                        },
+
+                        height: {
+                            ideal:
+                                720
+                        }
+
                     },
-                    width: {
-                        ideal: 1280
-                    },
-                    height: {
-                        ideal: 720
-                    }
-                },
 
-                audio: false
+                    audio: false
 
-            });
+                });
 
 
-        videoStream = stream;
+        videoStream =
+            stream;
+
 
         const video =
-            document.getElementById("video");
+            document.getElementById(
+                "video"
+            );
+
 
         video.srcObject =
             stream;
+
 
         await video.play();
 
 
         document
-            .getElementById("scannerOverlay")
-            .classList.add("show");
+            .getElementById(
+                "scannerOverlay"
+            )
+            .classList.add(
+                "show"
+            );
 
 
-        scannerRunning = true;
+        scannerRunning =
+            true;
+
 
         scanBarcodeLoop();
+
 
     } catch (error) {
 
@@ -1102,12 +1724,16 @@ async function startScanner() {
             error
         );
 
+
         alert(
             "Kamera açılamadı. Kamera iznini kontrol edin."
         );
 
+
         closeScanner();
+
     }
+
 }
 
 
@@ -1121,8 +1747,12 @@ async function scanBarcodeLoop() {
         return;
     }
 
+
     const video =
-        document.getElementById("video");
+        document.getElementById(
+            "video"
+        );
+
 
     try {
 
@@ -1132,7 +1762,9 @@ async function scanBarcodeLoop() {
         ) {
 
             const codes =
-                await barcodeDetector.detect(video);
+                await barcodeDetector
+                    .detect(video);
+
 
             if (
                 codes &&
@@ -1142,6 +1774,7 @@ async function scanBarcodeLoop() {
                 const rawCode =
                     codes[0].rawValue;
 
+
                 if (rawCode) {
 
                     await handleScannedBarcode(
@@ -1149,8 +1782,11 @@ async function scanBarcodeLoop() {
                     );
 
                     return;
+
                 }
+
             }
+
         }
 
     } catch (error) {
@@ -1159,6 +1795,7 @@ async function scanBarcodeLoop() {
             "Tarama:",
             error
         );
+
     }
 
 
@@ -1167,7 +1804,9 @@ async function scanBarcodeLoop() {
         requestAnimationFrame(
             scanBarcodeLoop
         );
+
     }
+
 }
 
 
@@ -1175,40 +1814,36 @@ async function scanBarcodeLoop() {
    OKUNAN BARKODU ARA
 ===================================================== */
 
-async function handleScannedBarcode(rawCode) {
+async function handleScannedBarcode(
+    rawCode
+) {
 
     const barcode =
-        normalizeBarcode(rawCode);
+        normalizeBarcode(
+            rawCode
+        );
+
 
     if (!barcode) {
         return;
     }
 
 
-    /*
-       Aynı barkodu tekrar tekrar okumaması
-       için taramayı hemen durdur.
-    */
-
-    scannerRunning = false;
+    scannerRunning =
+        false;
 
 
-    document.getElementById("searchInput").value =
+    searchInput.value =
         barcode;
 
-
-    /*
-       Scanner kapanıyor.
-    */
 
     closeScanner();
 
 
-    /*
-       Sunucu tarafında barkod ara.
-    */
+    await searchProducts(
+        barcode
+    );
 
-    await searchProducts(barcode);
 }
 
 
@@ -1218,37 +1853,54 @@ async function handleScannedBarcode(rawCode) {
 
 function closeScanner() {
 
-    scannerRunning = false;
+    scannerRunning =
+        false;
 
 
     if (videoStream) {
 
         videoStream
             .getTracks()
-            .forEach(function(track) {
+            .forEach(
+                function(track) {
 
-                track.stop();
+                    track.stop();
 
-            });
+                }
+            );
 
-        videoStream = null;
+
+        videoStream =
+            null;
+
     }
 
 
     const video =
-        document.getElementById("video");
+        document.getElementById(
+            "video"
+        );
 
-    video.srcObject = null;
+
+    video.srcObject =
+        null;
 
 
     document
-        .getElementById("scannerOverlay")
-        .classList.remove("show");
+        .getElementById(
+            "scannerOverlay"
+        )
+        .classList.remove(
+            "show"
+        );
+
 }
 
 
 document
-    .getElementById("scannerClose")
+    .getElementById(
+        "scannerClose"
+    )
     .addEventListener(
         "click",
         closeScanner
@@ -1256,18 +1908,25 @@ document
 
 
 /* =====================================================
-   SAYFA YÜKLENDİ
+   SAYFA BAŞLANGICI
 ===================================================== */
 
-window.addEventListener("load", function() {
+window.addEventListener(
+    "load",
+    async function() {
 
-    document.getElementById("status").textContent =
-        "Ürün aramak için yukarıdaki alanı kullanın.";
+        /*
+           Uygulama açılır açılmaz
+           Telegram + 30 günlük kullanım
+           kontrolü yapılır.
+        */
 
-});
+        await miniAppYetkiKontrol();
+
+    }
+);
 
 </script>
 
 </body>
 </html>
-
