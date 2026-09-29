@@ -105,77 +105,47 @@ body {
 }
 
 /* =========================================================
-   YATAY ÜRÜN KARTI
+   ÜRÜN KARTI
 ========================================================= */
 
 .product-card {
     display: flex;
     align-items: center;
-
     background: white;
-
     border-radius: 10px;
-
     padding: 7px;
-
     min-height: 105px;
-
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-
     cursor: pointer;
 }
-
-/* Küçük ürün resmi */
 
 .product-image {
     width: 90px;
     height: 90px;
-
     flex-shrink: 0;
-
     object-fit: contain;
-
     border-radius: 8px;
-
     background: #fafafa;
-
     display: block;
-
     margin-right: 10px;
 }
-
-/* Ürün bilgileri */
 
 .product-info-area {
     flex: 1;
     min-width: 0;
 }
 
-/* Ürün adı */
-
 .product-name {
     font-size: 15px;
     font-weight: bold;
-
     line-height: 1.25;
-
     margin-bottom: 5px;
-
     word-break: break-word;
 }
-
-/* Ürün detay bilgileri */
 
 .product-info {
     font-size: 13px;
     line-height: 1.45;
-}
-
-/* Kart ayırıcı */
-
-.separator {
-    border-top: 1px solid #e5e5e5;
-    margin-top: 6px;
 }
 
 /* =========================================================
@@ -200,19 +170,12 @@ body {
 
 #scannerOverlay {
     display: none;
-
     position: fixed;
-
     inset: 0;
-
     background: rgba(0,0,0,0.94);
-
     z-index: 9999;
-
     align-items: center;
-
     justify-content: center;
-
     flex-direction: column;
 }
 
@@ -224,57 +187,37 @@ body {
     width: 92%;
     max-width: 500px;
     max-height: 70vh;
-
     object-fit: cover;
-
     border-radius: 15px;
-
     background: black;
 }
 
 .scanner-frame {
     position: absolute;
-
     width: 70%;
-
     max-width: 350px;
-
     height: 150px;
-
     border: 3px solid #00ff66;
-
     border-radius: 15px;
-
     pointer-events: none;
 }
 
 .scanner-text {
     color: white;
-
     margin-top: 20px;
-
     font-size: 15px;
-
     text-align: center;
-
     padding: 0 20px;
 }
 
 #closeScannerButton {
     margin-top: 20px;
-
     border: none;
-
     border-radius: 12px;
-
     padding: 13px 25px;
-
     background: white;
-
     color: black;
-
     font-size: 16px;
-
     font-weight: bold;
 }
 
@@ -284,19 +227,12 @@ body {
 
 #productModal {
     display: none;
-
     position: fixed;
-
     inset: 0;
-
     z-index: 10000;
-
     background: rgba(0,0,0,0.7);
-
     align-items: center;
-
     justify-content: center;
-
     padding: 15px;
 }
 
@@ -306,65 +242,43 @@ body {
 
 .modal-content {
     background: white;
-
     width: 100%;
-
     max-width: 500px;
-
     max-height: 90vh;
-
     overflow-y: auto;
-
     border-radius: 16px;
-
     padding: 15px;
-
     position: relative;
 }
 
 .modal-close {
     position: absolute;
-
     right: 12px;
-
     top: 8px;
-
     border: none;
-
     background: #eee;
-
     width: 35px;
-
     height: 35px;
-
     border-radius: 50%;
-
     font-size: 20px;
 }
 
 .modal-image {
     width: 100%;
-
     max-height: 300px;
-
     object-fit: contain;
-
     border-radius: 10px;
-
     margin-bottom: 12px;
 }
 
 .modal-title {
     font-size: 19px;
-
     font-weight: bold;
-
     margin-bottom: 10px;
 }
 
 .modal-info {
     font-size: 15px;
-
     line-height: 1.7;
 }
 
@@ -377,14 +291,7 @@ body {
 
 <div class="container">
 
-    <!-- HATA -->
-
     <div id="errorBox"></div>
-
-
-    <!-- =====================================================
-         ARAMA ALANI
-    ====================================================== -->
 
     <div class="search-box">
 
@@ -407,11 +314,6 @@ body {
         </button>
 
     </div>
-
-
-    <!-- =====================================================
-         SONUÇLAR
-    ====================================================== -->
 
     <div id="results"></div>
 
@@ -491,10 +393,6 @@ if (telegramWebApp) {
    API
 ========================================================= */
 
-/*
-   BURAYA MEVCUT APPS SCRIPT /exec ADRESİNİ AYNEN KOY.
-*/
-
 const API_URL =
     "https://script.google.com/macros/s/AKfycbz1_C6Tf3Tqyww60D9DwbeUMBENI_gTiewTzbzLxV2ZUWCxZosSug3Kl6JLP_EIl3erIw/exec";
 
@@ -511,7 +409,16 @@ let currentResults = [];
 
 
 /* =========================================================
-   BARKOD OKUYUCU DEĞİŞKENLERİ
+   KLAVYE DURUMU
+========================================================= */
+
+let keyboardWasOpen = false;
+
+let keyboardSearchTimer = null;
+
+
+/* =========================================================
+   BARKOD OKUYUCU
 ========================================================= */
 
 let barcodeReader = null;
@@ -566,10 +473,14 @@ const modalClose =
 function getInitData() {
 
     if (!telegramWebApp) {
+
         return "";
+
     }
 
-    return telegramWebApp.initData || "";
+    return String(
+        telegramWebApp.initData || ""
+    );
 
 }
 
@@ -580,18 +491,22 @@ function getInitData() {
 
 function showError(message) {
 
-    errorBox.textContent = message;
+    errorBox.textContent =
+        message;
 
-    errorBox.style.display = "block";
+    errorBox.style.display =
+        "block";
 
 }
 
 
 function hideError() {
 
-    errorBox.textContent = "";
+    errorBox.textContent =
+        "";
 
-    errorBox.style.display = "none";
+    errorBox.style.display =
+        "none";
 
 }
 
@@ -717,7 +632,7 @@ async function miniAppYetkiKontrol() {
         if (!initData) {
 
             showError(
-                "Telegram kullanıcı bilgisi alınamadı."
+                "Telegram kullanıcı bilgisi alınamadı. Mini App Telegram içinden açılmalıdır."
             );
 
             return false;
@@ -730,7 +645,9 @@ async function miniAppYetkiKontrol() {
             "?func=URUN_ARA" +
             "&query=" +
             "&initData=" +
-            encodeURIComponent(initData);
+            encodeURIComponent(
+                initData
+            );
 
 
         const response =
@@ -746,7 +663,8 @@ async function miniAppYetkiKontrol() {
         if (!response.ok) {
 
             throw new Error(
-                "HTTP " + response.status
+                "HTTP " +
+                response.status
             );
 
         }
@@ -772,7 +690,8 @@ async function miniAppYetkiKontrol() {
         }
 
 
-        miniAppAuthorized = true;
+        miniAppAuthorized =
+            true;
 
         hideError();
 
@@ -799,11 +718,6 @@ async function miniAppYetkiKontrol() {
 
 /* =========================================================
    ÜRÜN ARAMA
-   SADECE:
-   - ARA BUTONU
-   - ENTER
-   - BARKOD OKUMA
-   İLE ÇALIŞIR.
 ========================================================= */
 
 async function searchProducts(query) {
@@ -814,7 +728,24 @@ async function searchProducts(query) {
 
     if (!query) {
 
-        resultsDiv.innerHTML = "";
+        resultsDiv.innerHTML =
+            "";
+
+        return;
+
+    }
+
+
+    /*
+       Aynı aramayı tekrar gönderme.
+    */
+
+    if (
+        query === lastSearch &&
+        resultsDiv.querySelector(
+            ".product-card"
+        )
+    ) {
 
         return;
 
@@ -828,7 +759,9 @@ async function searchProducts(query) {
 
 
         if (!authorized) {
+
             return;
+
         }
 
     }
@@ -857,7 +790,8 @@ async function searchProducts(query) {
                 "Telegram kullanıcı bilgisi alınamadı."
             );
 
-            resultsDiv.innerHTML = "";
+            resultsDiv.innerHTML =
+                "";
 
             return;
 
@@ -868,9 +802,13 @@ async function searchProducts(query) {
             API_URL +
             "?func=URUN_ARA" +
             "&query=" +
-            encodeURIComponent(query) +
+            encodeURIComponent(
+                query
+            ) +
             "&initData=" +
-            encodeURIComponent(initData);
+            encodeURIComponent(
+                initData
+            );
 
 
         const response =
@@ -886,7 +824,8 @@ async function searchProducts(query) {
         if (!response.ok) {
 
             throw new Error(
-                "HTTP " + response.status
+                "HTTP " +
+                response.status
             );
 
         }
@@ -921,7 +860,8 @@ async function searchProducts(query) {
             );
 
 
-            resultsDiv.innerHTML = "";
+            resultsDiv.innerHTML =
+                "";
 
             return;
 
@@ -934,7 +874,8 @@ async function searchProducts(query) {
 
         if (!Array.isArray(data)) {
 
-            resultsDiv.innerHTML = "";
+            resultsDiv.innerHTML =
+                "";
 
             showError(
                 "Geçersiz ürün verisi."
@@ -946,7 +887,9 @@ async function searchProducts(query) {
 
 
         let products =
-            data.map(convertRow);
+            data.map(
+                convertRow
+            );
 
 
         /*
@@ -955,7 +898,9 @@ async function searchProducts(query) {
         */
 
         const normalizedBarcode =
-            normalizeBarcode(query);
+            normalizeBarcode(
+                query
+            );
 
 
         if (
@@ -1004,7 +949,8 @@ async function searchProducts(query) {
         );
 
 
-        resultsDiv.innerHTML = "";
+        resultsDiv.innerHTML =
+            "";
 
 
         showError(
@@ -1012,6 +958,129 @@ async function searchProducts(query) {
         );
 
     }
+
+}
+
+
+/* =========================================================
+   KLAVYE KAPANINCA ARAMA
+========================================================= */
+
+function klavyeDurumunuKontrolEt() {
+
+    if (
+        !window.visualViewport
+    ) {
+
+        return;
+
+    }
+
+
+    const viewportHeight =
+        window.visualViewport.height;
+
+    const ekranHeight =
+        window.innerHeight;
+
+
+    const klavyeAcilmis =
+        (
+            ekranHeight -
+            viewportHeight
+        ) > 120;
+
+
+    /*
+       Klavye açık.
+    */
+
+    if (
+        klavyeAcilmis
+    ) {
+
+        keyboardWasOpen =
+            true;
+
+        return;
+
+    }
+
+
+    /*
+       Klavye az önce kapandı.
+    */
+
+    if (
+        keyboardWasOpen
+    ) {
+
+        keyboardWasOpen =
+            false;
+
+
+        const query =
+            searchInput.value.trim();
+
+
+        if (!query) {
+
+            return;
+
+        }
+
+
+        /*
+           Aynı sonuç zaten ekrandaysa
+           tekrar arama yapma.
+        */
+
+        if (
+            query === lastSearch &&
+            resultsDiv.querySelector(
+                ".product-card"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        clearTimeout(
+            keyboardSearchTimer
+        );
+
+
+        keyboardSearchTimer =
+            setTimeout(
+                function() {
+
+                    searchProducts(
+                        query
+                    );
+
+                },
+                250
+            );
+
+    }
+
+}
+
+
+/*
+   Mobil klavye hareketlerini takip et.
+*/
+
+if (
+    window.visualViewport
+) {
+
+    window.visualViewport.addEventListener(
+        "resize",
+        klavyeDurumunuKontrolEt
+    );
 
 }
 
@@ -1037,14 +1106,17 @@ function renderResults(products) {
     }
 
 
-    resultsDiv.innerHTML = "";
+    resultsDiv.innerHTML =
+        "";
 
 
     products.forEach(
         function(product) {
 
             const card =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
 
             card.className =
@@ -1055,10 +1127,14 @@ function renderResults(products) {
                Küçük ürün görseli
             */
 
-            if (product.link) {
+            if (
+                product.link
+            ) {
 
                 const image =
-                    document.createElement("img");
+                    document.createElement(
+                        "img"
+                    );
 
 
                 image.className =
@@ -1099,7 +1175,9 @@ function renderResults(products) {
             */
 
             const infoArea =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
 
             infoArea.className =
@@ -1111,7 +1189,9 @@ function renderResults(products) {
             */
 
             const name =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
 
             name.className =
@@ -1134,7 +1214,9 @@ function renderResults(products) {
             */
 
             const info =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
 
             info.className =
@@ -1248,10 +1330,13 @@ function escapeHtml(value) {
 
 function showProductDetail(product) {
 
-    let html = "";
+    let html =
+        "";
 
 
-    if (product.link) {
+    if (
+        product.link
+    ) {
 
         html +=
             '<img class="modal-image" src="' +
@@ -1369,15 +1454,6 @@ searchInput.addEventListener(
 
 
 /* =========================================================
-   ÖNEMLİ:
-   YAZARKEN OTOMATİK ARAMA YOK.
-   
-   Burada input event'i özellikle
-   kullanılmıyor.
-========================================================= */
-
-
-/* =========================================================
    ZXING KAMERA BAŞLAT
 ========================================================= */
 
@@ -1389,14 +1465,18 @@ async function startScanner() {
     */
 
 
-    if (!miniAppAuthorized) {
+    if (
+        !miniAppAuthorized
+    ) {
 
         const authorized =
             await miniAppYetkiKontrol();
 
 
         if (!authorized) {
+
             return;
+
         }
 
     }
@@ -1495,13 +1575,17 @@ async function startScanner() {
                        Barkod bulundu.
                     */
 
-                    if (result) {
+                    if (
+                        result
+                    ) {
 
                         const barcode =
                             result.getText();
 
 
-                        if (!barcode) {
+                        if (
+                            !barcode
+                        ) {
 
                             return;
 
@@ -1566,8 +1650,7 @@ async function startScanner() {
         ) {
 
             message =
-                "Kamera izni verilmedi. " +
-                "Telegram'ın kamera iznini kontrol edin.";
+                "Kamera izni verilmedi. Telegram'ın kamera iznini kontrol edin.";
 
         }
         else if (
@@ -1615,7 +1698,9 @@ function stopScanner() {
        ZXing controls.stop()
     */
 
-    if (scannerControls) {
+    if (
+        scannerControls
+    ) {
 
         try {
 
@@ -1757,7 +1842,9 @@ productModal.addEventListener(
    TELEGRAM BACK BUTTON
 ========================================================= */
 
-if (telegramWebApp) {
+if (
+    telegramWebApp
+) {
 
     try {
 
@@ -1838,29 +1925,25 @@ document.addEventListener(
     async function() {
 
         /*
-           Burada SADECE yetki kontrolü yapılır.
-           
-           ÜRÜN ARAMASI YAPILMAZ.
-           
-           Kamera da başlatılmaz.
+           Burada sadece Telegram
+           kullanıcı yetkisi kontrol edilir.
+
+           Ürün araması yapılmaz.
+           Kamera başlatılmaz.
         */
 
         const authorized =
             await miniAppYetkiKontrol();
 
 
-        if (!authorized) {
+        if (
+            !authorized
+        ) {
 
             return;
 
         }
 
-
-        /*
-           Yetki başarılı.
-           Kullanıcı isterse yazıp
-           ARA butonuna basar.
-        */
 
         searchInput.focus();
 
