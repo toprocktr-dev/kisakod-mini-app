@@ -6,6 +6,11 @@
 
 <title>KısaKod</title>
 
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<!-- iOS + Android barkod okuyucu -->
+<script src="https://unpkg.com/@zxing/browser@0.2.1"></script>
+
 <style>
 * {
     box-sizing: border-box;
@@ -13,730 +18,675 @@
 
 body {
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    padding: 0;
+    font-family: Arial, sans-serif;
     background: #f5f5f5;
     color: #222;
 }
 
-.header {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: #ffffff;
-    padding: 14px 14px 10px;
-    border-bottom: 1px solid #e5e5e5;
-}
-
-.title {
-    font-size: 24px;
-    font-weight: 800;
-    margin-bottom: 12px;
-}
-
-.search-row {
-    display: flex;
-    gap: 8px;
+.container {
+    padding: 12px;
+    max-width: 700px;
+    margin: auto;
 }
 
 .search-box {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+#searchInput {
     flex: 1;
     height: 48px;
-    border: 1px solid #d5d5d5;
+    border: 1px solid #ddd;
     border-radius: 12px;
     padding: 0 14px;
     font-size: 16px;
     outline: none;
-    background: #fff;
+    background: white;
 }
 
-.search-box:focus {
-    border-color: #999;
-}
-
-.camera-btn {
-    width: 48px;
-    height: 48px;
-    border: 0;
+#searchButton,
+#scanButton {
+    border: none;
     border-radius: 12px;
-    background: #222;
-    color: #fff;
-    font-size: 22px;
-    cursor: pointer;
-}
-
-.status {
-    padding: 14px;
-    color: #777;
-    text-align: center;
-    font-size: 14px;
-}
-
-.cards {
-    padding: 10px;
-}
-
-.card {
-    background: #fff;
-    border-radius: 14px;
-    margin-bottom: 10px;
-    padding: 12px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    cursor: pointer;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-    transition: transform 0.08s ease;
-}
-
-.card:active {
-    transform: scale(0.98);
-}
-
-.card-image {
-    width: 76px;
-    height: 76px;
-    border-radius: 10px;
-    object-fit: contain;
-    background: #f7f7f7;
-    flex-shrink: 0;
-}
-
-.card-info {
-    min-width: 0;
-    flex: 1;
-}
-
-.card-name {
+    height: 48px;
+    padding: 0 15px;
     font-size: 15px;
-    font-weight: 700;
-    line-height: 1.3;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#searchButton {
+    background: #0088cc;
+    color: white;
+}
+
+#scanButton {
+    background: #222;
+    color: white;
+}
+
+#results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.product-card {
+    background: white;
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+}
+
+.product-image {
+    width: 100%;
+    max-height: 260px;
+    object-fit: contain;
+    border-radius: 10px;
+    background: #fafafa;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.product-name {
+    font-size: 17px;
+    font-weight: bold;
     margin-bottom: 7px;
 }
 
-.card-code {
+.product-info {
     font-size: 14px;
-    font-weight: 700;
-    color: #333;
+    line-height: 1.55;
 }
 
-.card-price {
-    font-size: 14px;
-    margin-top: 4px;
-    color: #555;
+.separator {
+    border-top: 1px solid #ddd;
+    margin-top: 9px;
 }
 
-.card-date {
-    font-size: 13px;
-    margin-top: 3px;
-    color: #888;
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #777;
 }
 
-/* =========================
-   DETAY PENCERESİ
-========================= */
+.no-result {
+    text-align: center;
+    padding: 25px;
+    color: #777;
+}
 
-.dialog-overlay {
+#errorBox {
+    display: none;
+    background: #ffecec;
+    color: #c00;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+/* Kamera */
+#scannerOverlay {
+    display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.58);
-    z-index: 100;
-    display: none;
+    background: rgba(0,0,0,0.94);
+    z-index: 9999;
     align-items: center;
     justify-content: center;
-    padding: 18px;
+    flex-direction: column;
 }
 
-.dialog-overlay.show {
+#scannerOverlay.show {
     display: flex;
 }
 
-.dialog {
+#scannerVideo {
+    width: 92%;
+    max-width: 500px;
+    max-height: 70vh;
+    object-fit: cover;
+    border-radius: 15px;
+    background: black;
+}
+
+.scanner-frame {
+    position: absolute;
+    width: 70%;
+    max-width: 350px;
+    height: 150px;
+    border: 3px solid #00ff66;
+    border-radius: 15px;
+    pointer-events: none;
+}
+
+.scanner-text {
+    color: white;
+    margin-top: 20px;
+    font-size: 15px;
+    text-align: center;
+    padding: 0 20px;
+}
+
+#closeScannerButton {
+    margin-top: 20px;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 25px;
+    background: white;
+    color: black;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Ürün detay */
+#productModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0,0,0,0.7);
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+}
+
+#productModal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
     width: 100%;
-    max-width: 420px;
+    max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;
-    background: #fff;
-    border-radius: 20px;
-    padding: 18px;
+    border-radius: 16px;
+    padding: 15px;
     position: relative;
 }
 
-.dialog-close {
+.modal-close {
     position: absolute;
     right: 12px;
-    top: 10px;
-    width: 36px;
-    height: 36px;
-    border: 0;
+    top: 8px;
+    border: none;
+    background: #eee;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
-    background: #eeeeee;
-    font-size: 22px;
-    cursor: pointer;
-}
-
-.dialog-image {
-    width: 100%;
-    height: 250px;
-    object-fit: contain;
-    background: #f7f7f7;
-    border-radius: 14px;
-    margin-bottom: 15px;
-}
-
-.dialog-title {
     font-size: 20px;
-    font-weight: 800;
-    line-height: 1.35;
-    margin-bottom: 16px;
-    padding-right: 35px;
 }
 
-.detail-row {
-    padding: 11px 0;
-    border-bottom: 1px solid #eeeeee;
-}
-
-.detail-label {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 4px;
-}
-
-.detail-value {
-    font-size: 16px;
-    font-weight: 700;
-}
-
-/* =========================
-   KAMERA
-========================= */
-
-.scanner-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    background: #000;
-    display: none;
-}
-
-.scanner-overlay.show {
-    display: block;
-}
-
-.scanner-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 210;
-    padding: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: #fff;
-}
-
-.scanner-title {
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.scanner-close {
-    width: 40px;
-    height: 40px;
-    border: 0;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.18);
-    color: #fff;
-    font-size: 22px;
-}
-
-#video {
+.modal-image {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.scan-box {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 75%;
-    max-width: 340px;
-    height: 180px;
-    transform: translate(-50%, -50%);
-    border: 2px solid #fff;
-    border-radius: 14px;
-    box-shadow: 0 0 0 9999px rgba(0,0,0,0.35);
-}
-
-.scan-text {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 25px;
-    text-align: center;
-    color: #fff;
-    font-size: 15px;
-}
-
-/* =========================
-   ERİŞİM ENGELİ
-========================= */
-
-.access-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 500;
-    background: #f5f5f5;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 25px;
-}
-
-.access-overlay.show {
-    display: flex;
-}
-
-.access-box {
-    width: 100%;
-    max-width: 420px;
-    background: #fff;
-    border-radius: 20px;
-    padding: 30px 22px;
-    text-align: center;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-}
-
-.access-icon {
-    font-size: 48px;
-    margin-bottom: 15px;
-}
-
-.access-title {
-    font-size: 22px;
-    font-weight: 800;
+    max-height: 350px;
+    object-fit: contain;
+    border-radius: 10px;
     margin-bottom: 12px;
 }
 
-.access-message {
+.modal-title {
+    font-size: 19px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.modal-info {
     font-size: 15px;
-    line-height: 1.5;
-    color: #666;
-}
-
-/* =========================
-   YÜKLENİYOR
-========================= */
-
-.loading-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 450;
-    background: #f5f5f5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.loading-overlay.hidden {
-    display: none;
-}
-
-.loading-box {
-    text-align: center;
-}
-
-.loading-spinner {
-    width: 42px;
-    height: 42px;
-    border: 4px solid #ddd;
-    border-top-color: #222;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 15px;
-}
-
-.loading-text {
-    font-size: 15px;
-    color: #666;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+    line-height: 1.7;
 }
 </style>
 </head>
 
 <body>
 
-<!-- =========================
-     YÜKLENİYOR
-========================= -->
+<div class="container">
 
-<div id="loadingOverlay" class="loading-overlay">
+    <div id="errorBox"></div>
 
-    <div class="loading-box">
-
-        <div class="loading-spinner"></div>
-
-        <div class="loading-text">
-            KısaKod hazırlanıyor...
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- =========================
-     ERİŞİM ENGELİ
-========================= -->
-
-<div id="accessOverlay" class="access-overlay">
-
-    <div class="access-box">
-
-        <div class="access-icon">
-            🔒
-        </div>
-
-        <div class="access-title">
-            KısaKod
-        </div>
-
-        <div
-            id="accessMessage"
-            class="access-message">
-            Kullanım bilgileriniz kontrol ediliyor...
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- =========================
-     ANA SAYFA
-========================= -->
-
-<div class="header">
-
-    <div class="title">
-        KısaKod
-    </div>
-
-    <div class="search-row">
+    <div class="search-box">
 
         <input
             id="searchInput"
-            class="search-box"
             type="search"
-            placeholder="Ürün ara..."
+            placeholder="Ürün veya barkod ara..."
             autocomplete="off"
-            autocapitalize="off"
+            autocorrect="off"
+            autocapitalize="none"
             spellcheck="false"
         >
 
-        <button
-            id="cameraBtn"
-            class="camera-btn"
-            type="button">
-            📷
-        </button>
+        <button id="searchButton">Ara</button>
+
+        <button id="scanButton">📷</button>
 
     </div>
 
-</div>
-
-
-<div
-    id="status"
-    class="status">
-    Ürün aramak için yukarıdaki alanı kullanın.
-</div>
-
-
-<div
-    id="cards"
-    class="cards">
-</div>
-
-
-<!-- =========================
-     ÜRÜN DETAY PENCERESİ
-========================= -->
-
-<div
-    id="productDialog"
-    class="dialog-overlay">
-
-    <div class="dialog">
-
-        <button
-            id="dialogClose"
-            class="dialog-close"
-            type="button">
-            ×
-        </button>
-
-        <img
-            id="dialogImage"
-            class="dialog-image"
-            src=""
-            alt=""
-        >
-
-        <div
-            id="dialogTitle"
-            class="dialog-title">
-        </div>
-
-        <div class="detail-row">
-
-            <div class="detail-label">
-                Kısa Kod
-            </div>
-
-            <div
-                id="dialogCode"
-                class="detail-value">
-            </div>
-
-        </div>
-
-        <div class="detail-row">
-
-            <div class="detail-label">
-                Fiyat
-            </div>
-
-            <div
-                id="dialogPrice"
-                class="detail-value">
-            </div>
-
-        </div>
-
-        <div class="detail-row">
-
-            <div class="detail-label">
-                Tarih
-            </div>
-
-            <div
-                id="dialogDate"
-                class="detail-value">
-            </div>
-
-        </div>
-
-        <!-- BARKOD BİLEREK GÖSTERİLMİYOR -->
-
-    </div>
+    <div id="results"></div>
 
 </div>
 
 
-<!-- =========================
-     BARKOD TARAYICI
-========================= -->
-
-<div
-    id="scannerOverlay"
-    class="scanner-overlay">
-
-    <div class="scanner-header">
-
-        <div class="scanner-title">
-            Barkod Tara
-        </div>
-
-        <button
-            id="scannerClose"
-            class="scanner-close"
-            type="button">
-            ×
-        </button>
-
-    </div>
+<!-- BARKOD OKUYUCU -->
+<div id="scannerOverlay">
 
     <video
-        id="video"
+        id="scannerVideo"
         autoplay
         muted
-        playsinline>
-    </video>
+        playsinline
+    ></video>
 
-    <div class="scan-box"></div>
+    <div class="scanner-frame"></div>
 
-    <div class="scan-text">
-        Barkodu çerçevenin içine getirin
+    <div class="scanner-text">
+        Barkodu yeşil alanın içine getiriniz
     </div>
+
+    <button id="closeScannerButton">
+        Kapat
+    </button>
 
 </div>
 
 
-<!-- Telegram Web App kütüphanesi -->
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- ÜRÜN DETAY -->
+<div id="productModal">
+
+    <div class="modal-content">
+
+        <button class="modal-close" id="modalClose">
+            ×
+        </button>
+
+        <div id="modalBody"></div>
+
+    </div>
+
+</div>
 
 
 <script>
 
-/* =====================================================
-   TELEGRAM MINI APP
-===================================================== */
+/* =========================================================
+   TELEGRAM
+========================================================= */
 
-const telegramAvailable =
-    !!(
-        window.Telegram &&
-        Telegram.WebApp
-    );
+const telegramWebApp = window.Telegram && window.Telegram.WebApp
+    ? window.Telegram.WebApp
+    : null;
 
-
-let telegramWebApp = null;
-let telegramInitData = "";
-
-
-/*
-   Telegram Mini App bilgilerini al.
-*/
-
-if (telegramAvailable) {
-
-    telegramWebApp = Telegram.WebApp;
+if (telegramWebApp) {
 
     telegramWebApp.ready();
-    telegramWebApp.expand();
 
-    telegramInitData =
-        telegramWebApp.initData || "";
+    telegramWebApp.expand();
 
 }
 
 
-/* =====================================================
-   API ADRESİ
-===================================================== */
+/* =========================================================
+   API
+========================================================= */
+
+/*
+   BURAYA MEVCUT API ADRESİNİ AYNEN KOY.
+*/
 
 const API_URL =
-    "https://script.google.com/macros/s/AKfycbwdNLKE8cwW6GXOAfq2-WBWRbPoKI8W261erNS0JNq-OQak6682zhnuaZQO__zPudVBIg/exec";
+    "BURAYA_MEVCUT_APPS_SCRIPT_API_ADRESIN";
 
 
-/* =====================================================
+/* =========================================================
    DEĞİŞKENLER
-===================================================== */
-
-let currentProducts = [];
-
-let searchTimer = null;
-
-let videoStream = null;
-
-let scannerRunning = false;
-
-let barcodeDetector = null;
+========================================================= */
 
 let miniAppAuthorized = false;
 
+let searchTimer = null;
 
-/* =====================================================
-   HTML ELEMENTLERİ
-===================================================== */
+let lastSearch = "";
 
-const loadingOverlay =
-    document.getElementById("loadingOverlay");
+let currentResults = [];
 
-const accessOverlay =
-    document.getElementById("accessOverlay");
 
-const accessMessage =
-    document.getElementById("accessMessage");
+/* =========================================================
+   ZXING BARKOD OKUYUCU
+========================================================= */
 
-const statusElement =
-    document.getElementById("status");
+let barcodeReader = null;
 
-const cardsElement =
-    document.getElementById("cards");
+let scannerControls = null;
+
+let scannerRunning = false;
+
+
+/* =========================================================
+   ELEMENTLER
+========================================================= */
 
 const searchInput =
     document.getElementById("searchInput");
 
+const searchButton =
+    document.getElementById("searchButton");
 
-/* =====================================================
-   ERİŞİM MESAJI
-===================================================== */
+const scanButton =
+    document.getElementById("scanButton");
 
-function showAccessMessage(message) {
+const resultsDiv =
+    document.getElementById("results");
 
-    loadingOverlay.classList.add("hidden");
+const errorBox =
+    document.getElementById("errorBox");
 
-    accessMessage.textContent =
-        message || "Erişim izniniz bulunmuyor.";
+const scannerOverlay =
+    document.getElementById("scannerOverlay");
 
-    accessOverlay.classList.add("show");
+const scannerVideo =
+    document.getElementById("scannerVideo");
+
+const closeScannerButton =
+    document.getElementById("closeScannerButton");
+
+const productModal =
+    document.getElementById("productModal");
+
+const modalBody =
+    document.getElementById("modalBody");
+
+const modalClose =
+    document.getElementById("modalClose");
+
+
+/* =========================================================
+   INIT DATA
+========================================================= */
+
+function getInitData() {
+
+    if (!telegramWebApp) {
+        return "";
+    }
+
+    return telegramWebApp.initData || "";
 
 }
 
 
-/* =====================================================
-   TELEGRAM KONTROLÜ
-===================================================== */
+/* =========================================================
+   HATA GÖSTER
+========================================================= */
+
+function showError(message) {
+
+    errorBox.textContent = message;
+
+    errorBox.style.display = "block";
+
+}
+
+
+function hideError() {
+
+    errorBox.textContent = "";
+
+    errorBox.style.display = "none";
+
+}
+
+
+/* =========================================================
+   TÜRKÇE NORMALİZASYON
+========================================================= */
+
+function normalizeText(value) {
+
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .toLowerCase()
+        .replace(/İ/g, "i")
+        .replace(/I/g, "ı")
+        .replace(/Ğ/g, "ğ")
+        .replace(/Ü/g, "ü")
+        .replace(/Ş/g, "ş")
+        .replace(/Ö/g, "ö")
+        .replace(/Ç/g, "ç")
+        .replace(/\s+/g, " ")
+        .trim();
+
+}
+
+
+/* =========================================================
+   BARKOD NORMALİZASYON
+========================================================= */
+
+function normalizeBarcode(value) {
+
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .replace(/\D/g, "")
+        .trim();
+
+}
+
+
+/* =========================================================
+   ROW DÖNÜŞTÜR
+========================================================= */
+
+function convertRow(row) {
+
+    return {
+
+        urunKodu:
+            row && row.length > 0
+                ? row[0]
+                : "",
+
+        kod:
+            row && row.length > 1
+                ? row[1]
+                : "",
+
+        fiyat:
+            row && row.length > 2
+                ? row[2]
+                : "",
+
+        tarih:
+            row && row.length > 3
+                ? row[3]
+                : "",
+
+        link:
+            row && row.length > 4
+                ? row[4]
+                : "",
+
+        barkod:
+            row && row.length > 5
+                ? row[5]
+                : ""
+
+    };
+
+}
+
+
+/* =========================================================
+   MINI APP YETKİ KONTROLÜ
+========================================================= */
 
 async function miniAppYetkiKontrol() {
 
-    /*
-       Telegram dışından açılmışsa
-       çalışmasına izin verme.
-    */
-
-    if (!telegramAvailable) {
-
-        showAccessMessage(
-            "Bu uygulama yalnızca Telegram üzerinden kullanılabilir."
-        );
-
-        return false;
-    }
-
-
-    /*
-       Telegram initData yoksa
-       güvenli şekilde durdur.
-    */
-
-    if (!telegramInitData) {
-
-        showAccessMessage(
-            "Telegram kullanıcı bilgileri alınamadı. Lütfen uygulamayı Telegram içerisinden tekrar açın."
-        );
-
-        return false;
-    }
-
-
     try {
 
-        /*
-           Boş URUN_ARA isteği gönderiyoruz.
+        if (!telegramWebApp) {
 
-           Apps Script tarafı:
-           - initData doğrular
-           - Telegram ID'yi bulur
-           - 30 günlük süreyi başlatır
-           - süresi dolmuşsa erişimi reddeder
-        */
+            showError(
+                "Telegram Mini App üzerinden açılmalıdır."
+            );
+
+            return false;
+
+        }
+
+
+        const initData = getInitData();
+
+        if (!initData) {
+
+            showError(
+                "Telegram kullanıcı bilgisi alınamadı."
+            );
+
+            return false;
+
+        }
+
 
         const url =
             API_URL +
             "?func=URUN_ARA" +
             "&query=" +
-            encodeURIComponent("") +
             "&initData=" +
-            encodeURIComponent(telegramInitData);
+            encodeURIComponent(initData);
+
+
+        const response =
+            await fetch(url, {
+                method: "GET",
+                cache: "no-store"
+            });
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            data &&
+            data.ok === false &&
+            data.yetkili === false
+        ) {
+
+            showError(
+                data.hata ||
+                "Mini App kullanım yetkiniz bulunmuyor."
+            );
+
+            return false;
+
+        }
+
+
+        /*
+           Normalde yetkili kullanıcıda
+           boş arama [] dönecek.
+        */
+
+        miniAppAuthorized = true;
+
+        hideError();
+
+        return true;
+
+    }
+    catch (error) {
+
+        console.error(
+            "Yetki kontrol hatası:",
+            error
+        );
+
+        showError(
+            "Bağlantı sırasında hata oluştu."
+        );
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   ÜRÜN ARAMA
+========================================================= */
+
+async function searchProducts(query) {
+
+    query = String(query || "").trim();
+
+
+    if (!query) {
+
+        resultsDiv.innerHTML = "";
+
+        return;
+
+    }
+
+
+    if (!miniAppAuthorized) {
+
+        const authorized =
+            await miniAppYetkiKontrol();
+
+        if (!authorized) {
+            return;
+        }
+
+    }
+
+
+    hideError();
+
+    resultsDiv.innerHTML =
+        '<div class="loading">Ürünler aranıyor...</div>';
+
+
+    lastSearch = query;
+
+
+    try {
+
+        const initData =
+            getInitData();
+
+
+        if (!initData) {
+
+            showError(
+                "Telegram kullanıcı bilgisi alınamadı."
+            );
+
+            resultsDiv.innerHTML = "";
+
+            return;
+
+        }
+
+
+        const url =
+            API_URL +
+            "?func=URUN_ARA" +
+            "&query=" +
+            encodeURIComponent(query) +
+            "&initData=" +
+            encodeURIComponent(initData);
 
 
         const response =
@@ -760,8 +710,7 @@ async function miniAppYetkiKontrol() {
 
 
         /*
-           Apps Script erişim hatasını
-           JSON içindeki mesajdan yakala.
+           Yetki API tarafından reddedilirse
         */
 
         if (
@@ -769,184 +718,240 @@ async function miniAppYetkiKontrol() {
             data.ok === false
         ) {
 
-            showAccessMessage(
-                data.message ||
-                "Bu uygulamayı kullanma yetkiniz bulunmuyor."
+            if (data.yetkili === false) {
+
+                miniAppAuthorized = false;
+
+            }
+
+            showError(
+                data.hata ||
+                "Arama yapılamadı."
             );
 
-            return false;
+            resultsDiv.innerHTML = "";
+
+            return;
+
         }
 
 
         /*
-           Bazı Apps Script sürümlerinde
-           hata şu şekilde dönebilir:
+           API normalde direkt array döndürüyor.
         */
+
+        if (!Array.isArray(data)) {
+
+            resultsDiv.innerHTML = "";
+
+            showError(
+                "Geçersiz ürün verisi."
+            );
+
+            return;
+
+        }
+
+
+        let products =
+            data.map(convertRow);
+
+
+        /*
+           Barkod tarandıysa kesin barkod eşleşmesini
+           mümkün olduğunca öne çıkar.
+        */
+
+        const normalizedBarcode =
+            normalizeBarcode(query);
+
 
         if (
-            data &&
-            data.hata
+            normalizedBarcode &&
+            normalizedBarcode.length >= 6
         ) {
 
-            showAccessMessage(
-                data.hata
-            );
+            const exactBarcode =
+                products.filter(product => {
 
-            return false;
+                    return normalizeBarcode(
+                        product.barkod
+                    ) === normalizedBarcode;
+
+                });
+
+
+            if (exactBarcode.length > 0) {
+
+                products = exactBarcode;
+
+            }
+
         }
 
 
-        /*
-           Yetki kontrolü başarılı.
-        */
+        currentResults = products;
 
-        miniAppAuthorized = true;
-
-        loadingOverlay.classList.add("hidden");
-
-        return true;
+        renderResults(products);
 
 
-    } catch (error) {
+    }
+    catch (error) {
 
         console.error(
-            "Telegram yetki kontrolü hatası:",
+            "Arama hatası:",
             error
         );
 
+        resultsDiv.innerHTML = "";
 
-        showAccessMessage(
-            "Kullanım bilgileriniz kontrol edilemedi. Lütfen uygulamayı Telegram üzerinden tekrar açın."
+        showError(
+            "Ürün aranırken bir hata oluştu."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SONUÇLARI GÖSTER
+========================================================= */
+
+function renderResults(products) {
+
+    if (!products || products.length === 0) {
+
+        resultsDiv.innerHTML =
+            '<div class="no-result">' +
+            'Ürün bulunamadı.' +
+            '</div>';
+
+        return;
+
+    }
+
+
+    resultsDiv.innerHTML = "";
+
+
+    products.forEach(function(product) {
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "product-card";
+
+
+        if (product.link) {
+
+            const image =
+                document.createElement("img");
+
+            image.className =
+                "product-image";
+
+            image.src =
+                product.link;
+
+            image.alt =
+                product.kod || "Ürün";
+
+            image.loading =
+                "lazy";
+
+            image.onerror =
+                function() {
+                    this.style.display = "none";
+                };
+
+
+            card.appendChild(image);
+
+        }
+
+
+        const name =
+            document.createElement("div");
+
+        name.className =
+            "product-name";
+
+        name.textContent =
+            product.kod || product.urunKodu || "Ürün";
+
+
+        card.appendChild(name);
+
+
+        const info =
+            document.createElement("div");
+
+        info.className =
+            "product-info";
+
+
+        info.innerHTML =
+            "🔢 Kod: " +
+            escapeHtml(product.urunKodu) +
+            "<br>" +
+
+            "💰 Fiyat: " +
+            escapeHtml(product.fiyat) +
+            "<br>" +
+
+            "📅 Satış Tarihi: " +
+            escapeHtml(product.tarih);
+
+
+        card.appendChild(info);
+
+
+        const separator =
+            document.createElement("div");
+
+        separator.className =
+            "separator";
+
+
+        card.appendChild(separator);
+
+
+        /*
+           Ürüne tıklayınca detay.
+           Barkod gösterilmiyor.
+        */
+
+        card.addEventListener(
+            "click",
+            function() {
+
+                showProductDetail(product);
+
+            }
         );
 
 
-        return false;
-    }
+        resultsDiv.appendChild(card);
+
+    });
 
 }
 
 
-/* =====================================================
-   TÜRKÇE NORMALİZASYON
-===================================================== */
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
 
-function normalizeText(value) {
+function escapeHtml(value) {
 
     if (
         value === null ||
         value === undefined
     ) {
         return "";
-    }
 
-    return String(value)
-        .toLocaleLowerCase("tr-TR")
-        .replace(/ı/g, "i")
-        .replace(/İ/g, "i")
-        .replace(/ğ/g, "g")
-        .replace(/Ğ/g, "g")
-        .replace(/ü/g, "u")
-        .replace(/Ü/g, "u")
-        .replace(/ş/g, "s")
-        .replace(/Ş/g, "s")
-        .replace(/ö/g, "o")
-        .replace(/Ö/g, "o")
-        .replace(/ç/g, "c")
-        .replace(/Ç/g, "c")
-        .trim();
-
-}
-
-
-/* =====================================================
-   BARKOD NORMALİZASYONU
-===================================================== */
-
-function normalizeBarcode(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-        return "";
-    }
-
-    let str =
-        String(value)
-            .trim()
-            .replace(/\s+/g, "")
-            .replace(/-/g, "");
-
-
-    if (
-        /^\d+\.0+$/.test(str)
-    ) {
-
-        str =
-            str.split(".")[0];
-
-    }
-
-
-    str =
-        str.replace(/\D/g, "");
-
-
-    return str;
-
-}
-
-
-/* =====================================================
-   BARKOD KARŞILAŞTIRMA
-===================================================== */
-
-function barcodeEquals(a, b) {
-
-    const x =
-        normalizeBarcode(a);
-
-    const y =
-        normalizeBarcode(b);
-
-
-    if (!x || !y) {
-        return false;
-    }
-
-
-    if (x === y) {
-        return true;
-    }
-
-
-    const x2 =
-        x.replace(/^0+/, "");
-
-    const y2 =
-        y.replace(/^0+/, "");
-
-
-    return (
-        x2 !== "" &&
-        y2 !== "" &&
-        x2 === y2
-    );
-
-}
-
-
-/* =====================================================
-   HTML GÜVENLİ METİN
-===================================================== */
-
-function escapeHTML(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-        return "";
     }
 
     return String(value)
@@ -959,580 +964,96 @@ function escapeHTML(value) {
 }
 
 
-/* =====================================================
-   ÜRÜN OBJESİ
-===================================================== */
+/* =========================================================
+   ÜRÜN DETAY
+========================================================= */
 
-function convertRow(row) {
+function showProductDetail(product) {
 
-    return {
-
-        code:
-            row[0] ?? "",
-
-        name:
-            row[1] ?? "",
-
-        price:
-            row[2] ?? "",
-
-        date:
-            row[3] ?? "",
-
-        image:
-            row[4] ?? "",
-
-        barcode:
-            row[5] ?? ""
-
-    };
-
-}
+    let html = "";
 
 
-/* =====================================================
-   ÜRÜN ARAMA
-===================================================== */
+    if (product.link) {
 
-async function searchProducts(query) {
+        html +=
+            '<img class="modal-image" src="' +
+            escapeHtml(product.link) +
+            '" onerror="this.style.display=\'none\'">';
 
-    /*
-       Yetki yoksa arama yapma.
-    */
-
-    if (!miniAppAuthorized) {
-
-        showAccessMessage(
-            "KısaKod kullanım izniniz bulunmuyor."
-        );
-
-        return;
     }
 
 
-    query =
-        String(query || "").trim();
-
-
-    if (!query) {
-
-        currentProducts = [];
-
-        cardsElement.innerHTML = "";
-
-        statusElement.textContent =
-            "Ürün aramak için yukarıdaki alanı kullanın.";
-
-        return;
-    }
-
-
-    statusElement.textContent =
-        "Aranıyor...";
-
-
-    try {
-
-        let searchQuery =
-            query;
-
-
-        const digitsOnly =
-            normalizeBarcode(query);
-
-
-        /*
-           8-14 haneli sayı barkod
-           olarak kabul edilir.
-        */
-
-        if (
-            digitsOnly.length >= 8 &&
-            digitsOnly.length <= 14
-        ) {
-
-            searchQuery =
-                digitsOnly;
-
-        }
-
-
-        /*
-           Telegram initData
-           her ürün aramasında gönderiliyor.
-        */
-
-        const url =
-            API_URL +
-            "?func=URUN_ARA" +
-            "&query=" +
-            encodeURIComponent(searchQuery) +
-            "&initData=" +
-            encodeURIComponent(telegramInitData);
-
-
-        const response =
-            await fetch(url, {
-                method: "GET",
-                cache: "no-store"
-            });
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "HTTP " + response.status
-            );
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        /*
-           Yetki / süre hatası.
-        */
-
-        if (
-            data &&
-            data.ok === false
-        ) {
-
-            miniAppAuthorized = false;
-
-            showAccessMessage(
-                data.message ||
-                "Kullanım süreniz sona ermiş."
-            );
-
-            return;
-        }
-
-
-        if (
-            data &&
-            data.hata
-        ) {
-
-            miniAppAuthorized = false;
-
-            showAccessMessage(
-                data.hata
-            );
-
-            return;
-        }
-
-
-        if (!Array.isArray(data)) {
-
-            throw new Error(
-                "Geçersiz veri"
-            );
-
-        }
-
-
-        currentProducts =
-            data.map(convertRow);
-
-
-        /*
-           Barkod aramasıysa
-           kesin barkod eşleşmesi.
-        */
-
-        if (
-            digitsOnly.length >= 8 &&
-            digitsOnly.length <= 14
-        ) {
-
-            const exactMatches =
-                currentProducts.filter(
-                    product =>
-                        barcodeEquals(
-                            product.barcode,
-                            digitsOnly
-                        )
-                );
-
-
-            if (
-                exactMatches.length > 0
-            ) {
-
-                currentProducts =
-                    exactMatches;
-
-            }
-
-        }
-
-
-        renderProducts(
-            currentProducts
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Arama hatası:",
-            error
-        );
-
-
-        currentProducts = [];
-
-        cardsElement.innerHTML = "";
-
-        statusElement.textContent =
-            "Arama sırasında bir hata oluştu.";
-
-    }
-
-}
-
-
-/* =====================================================
-   ÜRÜN KARTLARINI GÖSTER
-===================================================== */
-
-function renderProducts(products) {
-
-    cardsElement.innerHTML = "";
-
-
-    if (!products.length) {
-
-        statusElement.textContent =
-            "Ürün bulunamadı.";
-
-        return;
-    }
-
-
-    statusElement.textContent =
-        products.length +
-        " sonuç bulundu.";
-
-
-    const fragment =
-        document.createDocumentFragment();
-
-
-    products.forEach(
-        (product, index) => {
-
-            const card =
-                document.createElement("div");
-
-
-            card.className =
-                "card";
-
-
-            card.dataset.index =
-                index;
-
-
-            const image =
-                product.image
-                    ? escapeHTML(product.image)
-                    : "";
-
-
-            const imageHTML =
-                image
-                    ? `
-                        <img
-                            class="card-image"
-                            src="${image}"
-                            alt=""
-                            loading="lazy"
-                            onerror="this.style.visibility='hidden'"
-                        >
-                      `
-                    : `
-                        <div class="card-image"></div>
-                      `;
-
-
-            card.innerHTML = `
-
-                ${imageHTML}
-
-                <div class="card-info">
-
-                    <div class="card-name">
-                        ${escapeHTML(product.name)}
-                    </div>
-
-                    <div class="card-code">
-                        Stok Kodu:
-                        ${escapeHTML(product.code)}
-                    </div>
-
-                    <div class="card-price">
-                        ${escapeHTML(product.price)}
-                    </div>
-
-                    <div class="card-date">
-                        Satış Tarihi:
-                        ${escapeHTML(product.date)}
-                    </div>
-
-                </div>
-
-            `;
-
-
-            fragment.appendChild(card);
-
-        }
-    );
-
-
-    cardsElement.appendChild(
-        fragment
-    );
-
-}
-
-
-/* =====================================================
-   KART TIKLAMA
-===================================================== */
-
-cardsElement.addEventListener(
-    "click",
-    function(event) {
-
-        const card =
-            event.target.closest(".card");
-
-
-        if (!card) {
-            return;
-        }
-
-
-        const index =
-            Number(card.dataset.index);
-
-
-        const product =
-            currentProducts[index];
-
-
-        if (!product) {
-            return;
-        }
-
-
-        openProductDialog(
-            product
-        );
-
-    }
-);
-
-
-/* =====================================================
-   ÜRÜN DETAY PENCERESİ
-===================================================== */
-
-function openProductDialog(product) {
-
-    const dialog =
-        document.getElementById(
-            "productDialog"
-        );
-
-
-    const image =
-        document.getElementById(
-            "dialogImage"
-        );
-
-
-    const title =
-        document.getElementById(
-            "dialogTitle"
-        );
-
-
-    const code =
-        document.getElementById(
-            "dialogCode"
-        );
-
-
-    const price =
-        document.getElementById(
-            "dialogPrice"
-        );
-
-
-    const date =
-        document.getElementById(
-            "dialogDate"
-        );
-
-
-    title.textContent =
-        product.name || "-";
-
-
-    code.textContent =
-        product.code || "-";
-
-
-    price.textContent =
-        product.price || "-";
-
-
-    date.textContent =
-        product.date || "-";
+    html +=
+        '<div class="modal-title">' +
+        escapeHtml(
+            product.kod ||
+            product.urunKodu ||
+            "Ürün"
+        ) +
+        '</div>';
+
+
+    html +=
+        '<div class="modal-info">' +
+
+        "🔢 Kod: " +
+        escapeHtml(product.urunKodu) +
+        "<br>" +
+
+        "💰 Fiyat: " +
+        escapeHtml(product.fiyat) +
+        "<br>" +
+
+        "📅 Satış Tarihi: " +
+        escapeHtml(product.tarih) +
+
+        "</div>";
 
 
     /*
-       Barkod burada kesinlikle gösterilmiyor.
+       BARKOD BİLEREK GÖSTERİLMİYOR.
     */
 
 
-    if (product.image) {
-
-        image.src =
-            product.image;
-
-        image.style.visibility =
-            "visible";
-
-    } else {
-
-        image.removeAttribute("src");
-
-        image.style.visibility =
-            "hidden";
-
-    }
+    modalBody.innerHTML =
+        html;
 
 
-    dialog.classList.add(
+    productModal.classList.add(
         "show"
     );
 
 }
 
 
-/* =====================================================
-   DETAY PENCERESİNİ KAPAT
-===================================================== */
+function closeProductDetail() {
 
-function closeProductDialog() {
-
-    document
-        .getElementById(
-            "productDialog"
-        )
-        .classList.remove(
-            "show"
-        );
+    productModal.classList.remove(
+        "show"
+    );
 
 }
 
 
-document
-    .getElementById(
-        "dialogClose"
-    )
-    .addEventListener(
-        "click",
-        closeProductDialog
-    );
+/* =========================================================
+   ARAMA BUTONU
+========================================================= */
 
-
-document
-    .getElementById(
-        "productDialog"
-    )
-    .addEventListener(
-        "click",
-        function(event) {
-
-            if (
-                event.target === this
-            ) {
-
-                closeProductDialog();
-
-            }
-
-        }
-    );
-
-
-/* =====================================================
-   ESC
-===================================================== */
-
-document.addEventListener(
-    "keydown",
-    function(event) {
-
-        if (
-            event.key === "Escape"
-        ) {
-
-            closeProductDialog();
-
-            closeScanner();
-
-        }
-
-    }
-);
-
-
-/* =====================================================
-   ARAMA KUTUSU
-===================================================== */
-
-searchInput.addEventListener(
-    "input",
+searchButton.addEventListener(
+    "click",
     function() {
 
-        const value =
-            this.value.trim();
-
-
-        clearTimeout(
-            searchTimer
+        searchProducts(
+            searchInput.value
         );
-
-
-        searchTimer =
-            setTimeout(
-                function() {
-
-                    searchProducts(
-                        value
-                    );
-
-                },
-                350
-            );
 
     }
 );
 
 
-/* =====================================================
-   ENTER İLE HEMEN ARA
-===================================================== */
+/* =========================================================
+   ENTER
+========================================================= */
 
 searchInput.addEventListener(
     "keydown",
@@ -1544,12 +1065,10 @@ searchInput.addEventListener(
 
             event.preventDefault();
 
-            clearTimeout(
-                searchTimer
-            );
+            clearTimeout(searchTimer);
 
             searchProducts(
-                this.value
+                searchInput.value
             );
 
         }
@@ -1558,370 +1077,504 @@ searchInput.addEventListener(
 );
 
 
-/* =====================================================
-   BARKOD TARAYICI
-===================================================== */
+/* =========================================================
+   YAZARKEN ARAMA
+========================================================= */
 
-document
-    .getElementById(
-        "cameraBtn"
-    )
-    .addEventListener(
-        "click",
-        startScanner
-    );
+searchInput.addEventListener(
+    "input",
+    function() {
+
+        clearTimeout(searchTimer);
 
 
-/* =====================================================
-   BARKOD FORMATLARI
-===================================================== */
-
-const barcodeFormats = [
-
-    "ean_13",
-    "ean_8",
-    "upc_a",
-    "upc_e",
-    "code_128",
-    "code_39",
-    "itf",
-    "codabar",
-    "qr_code"
-
-];
+        const query =
+            searchInput.value.trim();
 
 
-/* =====================================================
-   SCANNER BAŞLAT
-===================================================== */
+        if (!query) {
+
+            resultsDiv.innerHTML = "";
+
+            return;
+
+        }
+
+
+        /*
+           Çok sık API isteği gitmesini önlemek
+           için 350 ms bekliyoruz.
+        */
+
+        searchTimer =
+            setTimeout(
+                function() {
+
+                    searchProducts(query);
+
+                },
+                350
+            );
+
+    }
+);
+
+
+/* =========================================================
+   ZXING KAMERA BAŞLAT
+========================================================= */
 
 async function startScanner() {
 
     if (!miniAppAuthorized) {
 
-        showAccessMessage(
-            "KısaKod kullanım izniniz bulunmuyor."
-        );
+        const authorized =
+            await miniAppYetkiKontrol();
 
-        return;
-    }
+        if (!authorized) {
+            return;
+        }
 
-
-    if (
-        !("BarcodeDetector" in window)
-    ) {
-
-        alert(
-            "Bu tarayıcı barkod taramayı desteklemiyor."
-        );
-
-        return;
     }
 
 
     try {
 
+        hideError();
+
+
+        /*
+           ZXing Browser kütüphanesi yüklendi mi?
+        */
+
         if (
-            BarcodeDetector.getSupportedFormats
+            typeof ZXingBrowser ===
+            "undefined"
         ) {
 
-            const supported =
-                await BarcodeDetector
-                    .getSupportedFormats();
-
-
-            const usableFormats =
-                barcodeFormats.filter(
-                    format =>
-                        supported.includes(
-                            format
-                        )
-                );
-
-
-            barcodeDetector =
-                new BarcodeDetector({
-                    formats:
-                        usableFormats
-                });
-
-        } else {
-
-            barcodeDetector =
-                new BarcodeDetector({
-                    formats:
-                        barcodeFormats
-                });
+            throw new Error(
+                "Barkod okuyucu kütüphanesi yüklenemedi."
+            );
 
         }
 
 
-        const stream =
-            await navigator.mediaDevices
-                .getUserMedia({
+        /*
+           Önce eski okuyucuyu temizle
+        */
 
-                    video: {
+        stopScanner();
 
-                        facingMode: {
-                            ideal:
-                                "environment"
-                        },
 
-                        width: {
-                            ideal:
-                                1280
-                        },
+        /*
+           Multi format okuyucu:
+           EAN-13
+           EAN-8
+           UPC
+           Code128
+           Code39
+           ITF
+           QR vb.
+        */
 
-                        height: {
-                            ideal:
-                                720
+        barcodeReader =
+            new ZXingBrowser.BrowserMultiFormatReader();
+
+
+        scannerOverlay.classList.add(
+            "show"
+        );
+
+
+        scannerRunning = true;
+
+
+        /*
+           iOS Safari / Telegram WebView
+           için playsinline çok önemli.
+        */
+
+        scannerVideo.setAttribute(
+            "playsinline",
+            ""
+        );
+
+        scannerVideo.setAttribute(
+            "autoplay",
+            ""
+        );
+
+        scannerVideo.setAttribute(
+            "muted",
+            ""
+        );
+
+
+        /*
+           Arka kamera.
+           ZXing kendi tarafında
+           facingMode: environment
+           kullanıyor.
+        */
+
+        scannerControls =
+            await barcodeReader.decodeFromVideoDevice(
+
+                undefined,
+
+                scannerVideo,
+
+                function(result, error) {
+
+                    if (!scannerRunning) {
+                        return;
+                    }
+
+
+                    /*
+                       Barkod bulundu.
+                    */
+
+                    if (result) {
+
+                        const barcode =
+                            result.getText();
+
+
+                        if (!barcode) {
+                            return;
                         }
 
-                    },
 
-                    audio: false
+                        /*
+                           Aynı barkodu kamera
+                           birkaç kez algılayabilir.
+                        */
 
-                });
+                        scannerRunning =
+                            false;
 
 
-        videoStream =
-            stream;
+                        stopScanner();
 
 
-        const video =
-            document.getElementById(
-                "video"
+                        searchInput.value =
+                            barcode;
+
+
+                        searchProducts(
+                            barcode
+                        );
+
+                    }
+
+                }
+
             );
 
 
-        video.srcObject =
-            stream;
-
-
-        await video.play();
-
-
-        document
-            .getElementById(
-                "scannerOverlay"
-            )
-            .classList.add(
-                "show"
-            );
-
-
-        scannerRunning =
-            true;
-
-
-        scanBarcodeLoop();
-
-
-    } catch (error) {
+    }
+    catch (error) {
 
         console.error(
-            "Kamera hatası:",
+            "Scanner error:",
             error
         );
 
 
-        alert(
-            "Kamera açılamadı. Kamera iznini kontrol edin."
-        );
+        stopScanner();
 
 
-        closeScanner();
+        let message =
+            "Kamera açılamadı.";
+
+
+        if (
+            error &&
+            error.name ===
+            "NotAllowedError"
+        ) {
+
+            message =
+                "Kamera izni verilmedi. " +
+                "Telegram'ın kamera iznini kontrol edin.";
+
+        }
+        else if (
+            error &&
+            error.name ===
+            "NotFoundError"
+        ) {
+
+            message =
+                "Kamera bulunamadı.";
+
+        }
+        else if (
+            error &&
+            error.name ===
+            "NotReadableError"
+        ) {
+
+            message =
+                "Kamera başka bir uygulama tarafından kullanılıyor.";
+
+        }
+
+
+        alert(message);
 
     }
 
 }
 
 
-/* =====================================================
-   BARKOD TARAMA DÖNGÜSÜ
-===================================================== */
+/* =========================================================
+   SCANNER DURDUR
+========================================================= */
 
-async function scanBarcodeLoop() {
+function stopScanner() {
 
-    if (!scannerRunning) {
-        return;
+    scannerRunning = false;
+
+
+    /*
+       ZXing controls.stop()
+    */
+
+    if (scannerControls) {
+
+        try {
+
+            scannerControls.stop();
+
+        }
+        catch (error) {
+
+            console.log(
+                "Scanner stop:",
+                error
+            );
+
+        }
+
+        scannerControls = null;
+
     }
 
 
-    const video =
-        document.getElementById(
-            "video"
-        );
-
+    /*
+       Kütüphanenin kullandığı
+       video stream'i ayrıca kapat.
+    */
 
     try {
 
         if (
-            video.readyState >= 2 &&
-            barcodeDetector
+            scannerVideo &&
+            scannerVideo.srcObject
         ) {
 
-            const codes =
-                await barcodeDetector
-                    .detect(video);
+            const stream =
+                scannerVideo.srcObject;
 
 
             if (
-                codes &&
-                codes.length > 0
+                stream &&
+                stream.getTracks
             ) {
 
-                const rawCode =
-                    codes[0].rawValue;
-
-
-                if (rawCode) {
-
-                    await handleScannedBarcode(
-                        rawCode
+                stream
+                    .getTracks()
+                    .forEach(
+                        function(track) {
+                            track.stop();
+                        }
                     );
+
+            }
+
+            scannerVideo.srcObject =
+                null;
+
+        }
+
+    }
+    catch (error) {
+
+        console.log(
+            "Video stop:",
+            error
+        );
+
+    }
+
+
+    scannerOverlay.classList.remove(
+        "show"
+    );
+
+}
+
+
+/* =========================================================
+   KAMERA BUTONU
+========================================================= */
+
+scanButton.addEventListener(
+    "click",
+    function() {
+
+        startScanner();
+
+    }
+);
+
+
+/* =========================================================
+   KAMERA KAPAT
+========================================================= */
+
+closeScannerButton.addEventListener(
+    "click",
+    function() {
+
+        stopScanner();
+
+    }
+);
+
+
+/* =========================================================
+   MODAL KAPAT
+========================================================= */
+
+modalClose.addEventListener(
+    "click",
+    function() {
+
+        closeProductDetail();
+
+    }
+);
+
+
+productModal.addEventListener(
+    "click",
+    function(event) {
+
+        if (
+            event.target ===
+            productModal
+        ) {
+
+            closeProductDetail();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   TELEGRAM ANA BUTON / BACK BUTTON
+========================================================= */
+
+if (telegramWebApp) {
+
+    try {
+
+        telegramWebApp.BackButton.onClick(
+            function() {
+
+                if (
+                    productModal.classList.contains(
+                        "show"
+                    )
+                ) {
+
+                    closeProductDetail();
+
+                    return;
+
+                }
+
+
+                if (
+                    scannerOverlay.classList.contains(
+                        "show"
+                    )
+                ) {
+
+                    stopScanner();
 
                     return;
 
                 }
 
             }
+        );
 
-        }
-
-    } catch (error) {
+    }
+    catch (error) {
 
         console.log(
-            "Tarama:",
+            "Telegram BackButton:",
             error
         );
 
     }
 
-
-    if (scannerRunning) {
-
-        requestAnimationFrame(
-            scanBarcodeLoop
-        );
-
-    }
-
 }
 
 
-/* =====================================================
-   OKUNAN BARKODU ARA
-===================================================== */
-
-async function handleScannedBarcode(
-    rawCode
-) {
-
-    const barcode =
-        normalizeBarcode(
-            rawCode
-        );
-
-
-    if (!barcode) {
-        return;
-    }
-
-
-    scannerRunning =
-        false;
-
-
-    searchInput.value =
-        barcode;
-
-
-    closeScanner();
-
-
-    await searchProducts(
-        barcode
-    );
-
-}
-
-
-/* =====================================================
-   SCANNER KAPAT
-===================================================== */
-
-function closeScanner() {
-
-    scannerRunning =
-        false;
-
-
-    if (videoStream) {
-
-        videoStream
-            .getTracks()
-            .forEach(
-                function(track) {
-
-                    track.stop();
-
-                }
-            );
-
-
-        videoStream =
-            null;
-
-    }
-
-
-    const video =
-        document.getElementById(
-            "video"
-        );
-
-
-    video.srcObject =
-        null;
-
-
-    document
-        .getElementById(
-            "scannerOverlay"
-        )
-        .classList.remove(
-            "show"
-        );
-
-}
-
-
-document
-    .getElementById(
-        "scannerClose"
-    )
-    .addEventListener(
-        "click",
-        closeScanner
-    );
-
-
-/* =====================================================
-   SAYFA BAŞLANGICI
-===================================================== */
+/* =========================================================
+   SAYFA KAPANIRKEN KAMERA KAPAT
+========================================================= */
 
 window.addEventListener(
-    "load",
+    "pagehide",
+    function() {
+
+        stopScanner();
+
+    }
+);
+
+
+window.addEventListener(
+    "beforeunload",
+    function() {
+
+        stopScanner();
+
+    }
+);
+
+
+/* =========================================================
+   MINI APP BAŞLANGIÇ
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
     async function() {
 
+        const authorized =
+            await miniAppYetkiKontrol();
+
+
+        if (!authorized) {
+            return;
+        }
+
+
         /*
-           Uygulama açılır açılmaz
-           Telegram + 30 günlük kullanım
-           kontrolü yapılır.
+           Yetki başarılı.
+           Arama kutusu kullanılabilir.
         */
 
-        await miniAppYetkiKontrol();
+        searchInput.focus();
 
     }
 );
