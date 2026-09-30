@@ -132,6 +132,12 @@ body {
   border-radius: 9px;
   object-fit: cover;
   background: #eee;
+
+  /* Resme uzun basınca URL/menü çıkmasını engeller */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
 }
 
 .product-info {
@@ -204,6 +210,11 @@ body {
   object-fit: contain;
   border-radius: 12px;
   background: #f2f2f2;
+
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
 }
 
 .modal-title {
@@ -416,7 +427,7 @@ if (telegramWebApp) {
  *************************************************/
 
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbzkHyVncpfGkoX-XoQ8FrYqf037nWs-ZrIkFrGfP4rGzNyHRNnBdiWtxw7V6zpX5AP6kA/exec";
+  "https://script.google.com/macros/s/AKfycbyX6_Tkt8Jv9rrEw-uyqJe3O40ni5vWpMGiFfm_QcllxdyfPuwAs7Y2PwGRQX4h_7-fjQ/exec";
 
 
 /*************************************************
