@@ -696,11 +696,12 @@ async function searchProducts(
     }
 
 
-    renderResults(
-      Array.isArray(data.products)
-        ? data.products
-        : []
-    );
+    const urunler =
+  Array.isArray(data.products)
+    ? data.products
+    : [];
+
+renderResults(urunler);
 
 
   } catch (err) {
@@ -727,16 +728,24 @@ async function searchProducts(
  * SONUÇLARI GÖSTER
  *************************************************/
 
-function renderResults(
-  data
-) {
+let tumUrunler = [];
+let gosterilenUrunSayisi = 0;
+
+const ILK_GOSTERIM = 20;
+const SONRAKI_GOSTERIM = 10;
+
+function renderResults(data) {
 
   results.innerHTML = "";
 
+  tumUrunler = Array.isArray(data)
+    ? data
+    : [];
+
+  gosterilenUrunSayisi = 0;
 
   if (
-    !data ||
-    data.length === 0
+    tumUrunler.length === 0
   ) {
 
     status.textContent =
@@ -748,167 +757,181 @@ function renderResults(
     return;
   }
 
-
   status.textContent =
-    data.length +
+    tumUrunler.length +
     " ürün bulundu.";
 
-
-  data.forEach(
-    function(urun) {
-
-      const card =
-        document.createElement(
-          "div"
-        );
-
-      card.className =
-        "product-card";
-
-
-      const img =
-        document.createElement(
-          "img"
-        );
-
-      img.className =
-        "product-image";
-
-      img.alt =
-        urun.kod ||
-        "Ürün";
-
-
-      if (
-        urun.link
-      ) {
-
-        img.src =
-          urun.link;
-
-      } else {
-
-        img.style.visibility =
-          "hidden";
-      }
-
-
-      const info =
-        document.createElement(
-          "div"
-        );
-
-      info.className =
-        "product-info";
-
-
-      const name =
-        document.createElement(
-          "div"
-        );
-
-      name.className =
-        "product-name";
-
-      name.textContent =
-        urun.kod ||
-        "Ürün";
-
-
-      const code =
-        document.createElement(
-          "div"
-        );
-
-      code.className =
-        "product-code";
-
-      code.textContent =
-        "🔢 Kod: " +
-        (
-          urun.urunKodu ||
-          ""
-        );
-
-
-      const price =
-        document.createElement(
-          "div"
-        );
-
-      price.className =
-        "product-price";
-
-      price.textContent =
-        "💰 Fiyat: " +
-        (
-          urun.fiyat ||
-          ""
-        );
-
-
-      const date =
-        document.createElement(
-          "div"
-        );
-
-      date.className =
-        "product-date";
-
-      date.textContent =
-        "📅 Satış Tarihi: " +
-        (
-          urun.tarih ||
-          ""
-        );
-
-
-      info.appendChild(
-        name
-      );
-
-      info.appendChild(
-        code
-      );
-
-      info.appendChild(
-        price
-      );
-
-      info.appendChild(
-        date
-      );
-
-
-      card.appendChild(
-        img
-      );
-
-      card.appendChild(
-        info
-      );
-
-
-      card.addEventListener(
-        "click",
-        function() {
-
-          showProductDetail(
-            urun
-          );
-
-        }
-      );
-
-
-      results.appendChild(
-        card
-      );
-
-    }
+  sonrakiUrunleriGoster(
+    ILK_GOSTERIM
   );
 }
+  function sonrakiUrunleriGoster(adet) {
 
+  const baslangic =
+    gosterilenUrunSayisi;
+
+  const bitis =
+    Math.min(
+      gosterilenUrunSayisi + adet,
+      tumUrunler.length
+    );
+
+  for (
+    let i = baslangic;
+    i < bitis;
+    i++
+  ) {
+
+    const urun =
+      tumUrunler[i];
+
+    const card =
+      document.createElement(
+        "div"
+      );
+
+    card.className =
+      "product-card";
+
+    const img =
+      document.createElement(
+        "img"
+      );
+
+    img.className =
+      "product-image";
+
+    img.alt =
+      urun.kod ||
+      "Ürün";
+
+    if (
+      urun.link
+    ) {
+
+      img.src =
+        urun.link;
+
+    } else {
+
+      img.style.visibility =
+        "hidden";
+    }
+
+    const info =
+      document.createElement(
+        "div"
+      );
+
+    info.className =
+      "product-info";
+
+    const name =
+      document.createElement(
+        "div"
+      );
+
+    name.className =
+      "product-name";
+
+    name.textContent =
+      urun.kod ||
+      "Ürün";
+
+    const code =
+      document.createElement(
+        "div"
+      );
+
+    code.className =
+      "product-code";
+
+    code.textContent =
+      "🔢 Kod: " +
+      (
+        urun.urunKodu ||
+        ""
+      );
+
+    const price =
+      document.createElement(
+        "div"
+      );
+
+    price.className =
+      "product-price";
+
+    price.textContent =
+      "💰 Fiyat: " +
+      (
+        urun.fiyat ||
+        ""
+      );
+
+    const date =
+      document.createElement(
+        "div"
+      );
+
+    date.className =
+      "product-date";
+
+    date.textContent =
+      "📅 Satış Tarihi: " +
+      (
+        urun.tarih ||
+        ""
+      );
+
+    info.appendChild(
+      name
+    );
+
+    info.appendChild(
+      code
+    );
+
+    info.appendChild(
+      price
+    );
+
+    info.appendChild(
+      date
+    );
+
+    card.appendChild(
+      img
+    );
+
+    card.appendChild(
+      info
+    );
+
+    card.addEventListener(
+      "click",
+      function() {
+
+        showProductDetail(
+          urun
+        );
+
+      }
+    );
+
+    results.appendChild(
+      card
+    );
+  }
+
+  gosterilenUrunSayisi =
+    bitis;
+
+  status.textContent =
+    gosterilenUrunSayisi +
+    " / " +
+    tumUrunler.length +
+    " ürün gösteriliyor.";
+}
 
 /*************************************************
  * ÜRÜN DETAY
@@ -1391,7 +1414,34 @@ document.addEventListener(
 
   }
 );
+window.addEventListener(
+  "scroll",
+  function() {
 
+    const scrollPosition =
+      window.innerHeight +
+      window.scrollY;
+
+    const documentHeight =
+      document.documentElement.scrollHeight;
+
+    if (
+      scrollPosition >=
+      documentHeight - 300
+    ) {
+
+      if (
+        gosterilenUrunSayisi <
+        tumUrunler.length
+      ) {
+
+        sonrakiUrunleriGoster(
+          SONRAKI_GOSTERIM
+        );
+      }
+    }
+  }
+);
 </script>
 
 </body>
