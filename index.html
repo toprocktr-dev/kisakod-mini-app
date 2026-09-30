@@ -460,10 +460,32 @@ function getInitData() {
     return "";
   }
 
-  return (
+  const initData =
     telegramWebApp.initData ||
-    ""
-  );
+    "";
+
+  if (initData) {
+
+    return initData;
+  }
+
+  const unsafeUser =
+    telegramWebApp.initDataUnsafe &&
+    telegramWebApp.initDataUnsafe.user
+      ? telegramWebApp.initDataUnsafe.user
+      : null;
+
+  if (unsafeUser && unsafeUser.id) {
+
+    return (
+      "user=" +
+      encodeURIComponent(
+        JSON.stringify(unsafeUser)
+      )
+    );
+  }
+
+  return "";
 }
 
 
@@ -511,13 +533,17 @@ async function miniAppYetkiKontrol() {
 
 
     if (
-      data &&
-      data.ok === false
+      !data ||
+      data.success !== true ||
+      data.authorized !== true
     ) {
 
       status.textContent =
-        data.hata ||
-        "❌ Kullanım yetkiniz yok.";
+        data && data.message
+          ? "❌ " + data.message
+          : "❌ Kullanım yetkiniz yok.";
+
+      results.innerHTML = "";
 
       return false;
     }
@@ -629,23 +655,39 @@ async function searchProducts(
 
 
     if (
-      data &&
-      data.ok === false
+      !data ||
+      data.success !== true
     ) {
 
       results.innerHTML = "";
 
       status.textContent =
-        data.hata ||
-        "❌ Arama yapılamadı.";
+        data && data.message
+          ? "❌ " + data.message
+          : "❌ Arama yapılamadı.";
+
+      return;
+    }
+
+
+    if (
+      data.authorized !== true
+    ) {
+
+      results.innerHTML = "";
+
+      status.textContent =
+        data.message
+          ? "❌ " + data.message
+          : "❌ Kullanım yetkiniz yok.";
 
       return;
     }
 
 
     renderResults(
-      Array.isArray(data)
-        ? data
+      Array.isArray(data.products)
+        ? data.products
         : []
     );
 
