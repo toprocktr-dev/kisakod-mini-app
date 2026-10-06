@@ -1413,17 +1413,89 @@ document.addEventListener(
     ) {
 
       status.textContent =
-        "❌ Telegram Mini App başlatılamadı.";
+        "❌ Telegram WebApp bulunamadı.";
+
+      return;
+    }
+
+    const tg =
+      window.Telegram.WebApp;
+
+    tg.ready();
+    tg.expand();
+
+
+    status.textContent =
+      "🔐 Telegram bilgisi kontrol ediliyor...";
+
+
+    // Telegram'ın initData bilgisini bekle
+    let initData = "";
+
+    for (
+      let i = 0;
+      i < 20;
+      i++
+    ) {
+
+      initData =
+        tg.initData || "";
+
+      if (initData) {
+        break;
+      }
+
+      await new Promise(
+        function(resolve) {
+          setTimeout(
+            resolve,
+            500
+          );
+        }
+      );
+    }
+
+
+    // TEST
+    if (!initData) {
+
+      status.innerHTML =
+        "❌ <b>initData BOŞ</b><br><br>" +
+        "Telegram WebApp açıldı fakat " +
+        "Telegram kullanıcı bilgisi alınamadı.";
+
+      console.log(
+        "Telegram WebApp:",
+        tg
+      );
+
+      console.log(
+        "initData:",
+        tg.initData
+      );
+
+      console.log(
+        "initDataUnsafe:",
+        tg.initDataUnsafe
+      );
 
       return;
     }
 
 
-    window.Telegram.WebApp.ready();
+    // initData geldi
+    status.innerHTML =
+      "✅ <b>Telegram initData alındı.</b><br><br>" +
+      "Doğrulama sunucuya gönderiliyor...";
 
-    window.Telegram.WebApp.expand();
+
+    console.log(
+      "INIT DATA:",
+      initData
+    );
 
 
+    // Gerçek yetki kontrolüne devam
     await miniAppYetkiKontrol();
 
   }
