@@ -1,0 +1,3114 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Haftalık Çalışma Programı</title>
+
+
+<!-- =====================================================
+     TABLOYU RESME ÇEVİRME
+===================================================== -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
+<style>
+
+/* =====================================================
+   GENEL
+===================================================== */
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:6px;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#eeeeee;
+    color:#111;
+}
+
+.container{
+    width:100%;
+    max-width:1100px;
+    margin:auto;
+    background:#fff;
+    padding:7px;
+    border-radius:7px;
+    box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+
+.baslik{
+    text-align:center;
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:7px;
+}
+
+
+/* =====================================================
+   TARİH
+===================================================== */
+
+.tarih-alani{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    margin-bottom:6px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.tarih-alani input{
+    height:25px;
+    border:1px solid #999;
+    border-radius:4px;
+    padding:2px 6px;
+}
+
+
+/* =====================================================
+   TABLO
+===================================================== */
+
+.tablo-wrapper{
+    width:100%;
+    overflow-x:auto;
+}
+
+table{
+    border-collapse:collapse;
+    width:auto;
+    margin:auto;
+    table-layout:fixed;
+}
+
+th,
+td{
+    border:1px solid #777;
+    text-align:center;
+    vertical-align:middle;
+    padding:2px;
+    font-size:10px;
+}
+
+
+/* =====================================================
+   BAŞLIK
+===================================================== */
+
+.baslik-gri{
+    background:#eeeeee;
+}
+
+
+/* =====================================================
+   GÖREV
+===================================================== */
+
+.gorev{
+    width:43px;
+    min-width:43px;
+    max-width:43px;
+    height:24px;
+}
+
+
+/* =====================================================
+   ADI SOYADI
+===================================================== */
+
+.ad{
+    width:78px;
+    min-width:78px;
+    max-width:78px;
+    height:24px;
+}
+
+.isim-input{
+    width:100%;
+    height:22px;
+    border:0;
+    outline:none;
+    background:#fff;
+    padding:2px 4px;
+    text-align:left;
+    font-size:10px;
+}
+
+
+/* =====================================================
+   GÜNLER
+===================================================== */
+
+.gun{
+    width:57px;
+    min-width:57px;
+    max-width:57px;
+}
+
+.tarih{
+    width:57px;
+    min-width:57px;
+    max-width:57px;
+}
+
+
+/* =====================================================
+   HAFTALIK TOPLAM
+===================================================== */
+
+.toplam{
+    width:65px;
+    min-width:65px;
+    max-width:65px;
+}
+
+
+/* =====================================================
+   ÜST SATIR
+===================================================== */
+
+thead tr:first-child th{
+    height:22px;
+    line-height:14px;
+    font-weight:bold;
+    padding:2px;
+}
+
+
+/* =====================================================
+   TARİH SATIRI
+===================================================== */
+
+thead tr:nth-child(2) th{
+    height:20px;
+    line-height:14px;
+    font-weight:bold;
+    padding:2px;
+}
+
+
+/* =====================================================
+   PERSONEL GÖREV
+===================================================== */
+
+.personel-gorev{
+    background:#f5f5f5;
+    font-weight:bold;
+    height:30px;
+}
+
+
+/* =====================================================
+   VARDİYA HÜCRELERİ
+===================================================== */
+
+.vardiya{
+    width:57px;
+    min-width:57px;
+    max-width:57px;
+
+    height:30px;
+    min-height:30px;
+
+    cursor:pointer;
+
+    background:#fffde8;
+
+    transition:.15s;
+
+    white-space:normal;
+}
+
+.vardiya:hover{
+    background:#fff4b8;
+}
+
+.vardiya-secili{
+    background:#ffffff !important;
+    font-weight:bold;
+}
+
+.vardiya-bos{
+    color:#999;
+}
+
+
+/* =====================================================
+   TABLO İÇİNDEKİ SAATLER
+===================================================== */
+
+.saat-yazi{
+    display:block;
+    font-size:9px;
+    line-height:11px;
+    white-space:normal;
+}
+
+
+/* =====================================================
+   İZİN / RAPOR DURUMLARI
+===================================================== */
+
+.durum-b{
+    background:#d9ead3 !important;
+    color:#38761d !important;
+    font-weight:bold;
+}
+
+.durum-y{
+    background:#cfe2f3 !important;
+    color:#1155cc !important;
+    font-weight:bold;
+}
+
+.durum-r{
+    background:#f4cccc !important;
+    color:#cc0000 !important;
+    font-weight:bold;
+}
+
+
+/* =====================================================
+   TOPLAM SAAT
+===================================================== */
+
+.saat-toplam{
+    background:#e2efda;
+    font-weight:bold;
+    font-size:10px;
+}
+
+
+/* =====================================================
+   RESİM OLARAK PAYLAŞ
+===================================================== */
+
+.resim-paylas-alani{
+    text-align:center;
+    margin-top:7px;
+}
+
+.resim-paylas{
+    border:1px solid #999;
+    background:#eeeeee;
+    border-radius:5px;
+    padding:7px 12px;
+    cursor:pointer;
+    font-size:10px;
+    font-weight:bold;
+}
+
+.resim-paylas:hover{
+    background:#e2efda;
+}
+
+
+/* =====================================================
+   UYARI PENCERESİ
+===================================================== */
+
+.uyari-overlay{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.35);
+
+    display:none;
+
+    align-items:center;
+
+    justify-content:center;
+
+    z-index:9999;
+}
+
+.uyari-overlay.acik{
+    display:flex;
+}
+
+@media(min-width:701px){
+    .uyari-overlay{
+        align-items:flex-start;
+    }
+}
+
+.uyari{
+
+    width:310px;
+
+    max-width:94%;
+
+    max-height:94vh;
+
+    background:#fff;
+
+    border-radius:9px;
+
+    box-shadow:0 8px 30px rgba(0,0,0,.30);
+
+    overflow-y:auto;
+
+    animation:acilis .15s ease-out;
+}
+
+
+@keyframes acilis{
+
+    from{
+        transform:scale(.92);
+        opacity:0;
+    }
+
+    to{
+        transform:scale(1);
+        opacity:1;
+    }
+
+}
+
+
+/* =====================================================
+   UYARI BAŞLIĞI
+===================================================== */
+
+.uyari-baslik{
+
+    background:#eeeeee;
+
+    padding:8px;
+
+    font-size:13px;
+
+    font-weight:bold;
+
+    text-align:center;
+
+    border-bottom:1px solid #ddd;
+}
+
+
+.uyari-bilgi{
+
+    padding:7px 10px;
+
+    text-align:center;
+
+    font-size:11px;
+
+    color:#555;
+
+    font-weight:bold;
+}
+
+
+/* =====================================================
+   VARDİYA LİSTESİ
+===================================================== */
+
+.vardiya-listesi{
+
+    padding:4px 7px 7px;
+
+}
+
+
+/* =====================================================
+   VARDİYA BÖLÜMÜ
+===================================================== */
+
+.vardiya-bolum{
+
+    margin-bottom:7px;
+
+}
+
+.vardiya-bolum-baslik{
+
+    text-align:center;
+
+    font-size:10px;
+
+    font-weight:bold;
+
+    color:#555;
+
+    margin-bottom:3px;
+
+}
+
+
+/* =====================================================
+   4 SÜTUNLU VARDİYA SATIRI
+===================================================== */
+
+.vardiya-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap:4px;
+
+    width:100%;
+}
+
+
+/* =====================================================
+   VARDİYA KUTUSU
+===================================================== */
+
+.vardiya-butonu{
+
+    width:auto;
+
+    min-width:0;
+
+    min-height:50px;
+
+    border:1px solid #bbb;
+
+    background:#fff;
+
+    border-radius:5px;
+
+    padding:4px 2px;
+
+    cursor:pointer;
+
+    font-size:10px;
+
+    font-weight:bold;
+
+    text-align:center;
+
+    line-height:11px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.vardiya-butonu:hover{
+    background:#e2efda;
+}
+
+
+/* =====================================================
+   DİĞER UZUN VARDİYALAR
+===================================================== */
+
+.vardiya-diger-uzun{
+
+    min-height:55px;
+
+    font-size:9px;
+
+    line-height:11px;
+
+}
+
+
+/* =====================================================
+   SAATLER
+===================================================== */
+
+.vardiya-saat{
+
+    display:block;
+
+    font-size:10px;
+
+    line-height:11px;
+
+}
+
+
+/* =====================================================
+   SÜRE
+   KULLANICIYA GÖSTERİLMEZ
+===================================================== */
+
+.vardiya-sure{
+
+    display:none;
+
+}
+
+
+/* =====================================================
+   B - Y - R BUTONLARI
+===================================================== */
+
+.durum-listesi{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:5px;
+
+    padding:2px 7px 8px;
+
+}
+
+
+.durum-butonu{
+
+    border:1px solid #aaa;
+
+    border-radius:5px;
+
+    padding:7px 3px;
+
+    background:#f5f5f5;
+
+    cursor:pointer;
+
+    font-size:9px;
+
+    font-weight:bold;
+
+    line-height:11px;
+
+    min-height:35px;
+
+}
+
+.durum-butonu:hover{
+    opacity:.85;
+}
+
+
+.durum-b-butonu{
+    background:#d9ead3;
+}
+
+.durum-y-butonu{
+    background:#cfe2f3;
+}
+
+.durum-r-butonu{
+    background:#f4cccc;
+}
+
+
+/* =====================================================
+   TEMİZLE
+===================================================== */
+
+.temizle-alani{
+
+    padding:0 9px 8px;
+
+    text-align:center;
+
+}
+
+.vardiya-temizle{
+
+    width:210px;
+
+    max-width:100%;
+
+    border:0;
+
+    background:#f4cccc;
+
+    border-radius:5px;
+
+    padding:7px;
+
+    cursor:pointer;
+
+    font-size:10px;
+
+    font-weight:bold;
+
+}
+
+
+/* =====================================================
+   KAPAT
+===================================================== */
+
+.uyari-kapat{
+
+    width:100%;
+
+    border:0;
+
+    border-top:1px solid #ddd;
+
+    background:#f7f7f7;
+
+    padding:8px;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+    font-size:12px;
+
+}
+
+
+/* =====================================================
+   ALT AÇIKLAMA
+===================================================== */
+
+.aciklama{
+
+    margin-top:7px;
+
+    padding:6px;
+
+    background:#f7f7f7;
+
+    border:1px solid #ddd;
+
+    border-radius:5px;
+
+    font-size:10px;
+
+    line-height:1.4;
+}
+
+
+/* =====================================================
+   MOBİL
+===================================================== */
+
+@media(max-width:700px){
+
+    body{
+        padding:2px;
+    }
+
+    .container{
+        padding:4px;
+    }
+
+    .baslik{
+        font-size:16px;
+    }
+
+    .tablo-wrapper{
+        overflow-x:auto;
+    }
+
+    .gorev{
+        width:40px;
+        min-width:40px;
+        max-width:40px;
+    }
+
+    .ad{
+        width:78px;
+        min-width:78px;
+        max-width:78px;
+    }
+
+    .gun,
+    .tarih,
+    .vardiya{
+        width:54px;
+        min-width:54px;
+        max-width:54px;
+    }
+
+    .toplam{
+        width:60px;
+        min-width:60px;
+        max-width:60px;
+    }
+
+    th,
+    td{
+        font-size:9px;
+    }
+
+    .saat-yazi.diger-uzun-secili{
+        font-size:8px;
+        line-height:10px;
+    }
+
+    .uyari{
+        width:310px;
+        max-width:94%;
+    }
+
+    .vardiya-grid{
+        gap:3px;
+    }
+
+    .vardiya-butonu{
+        min-height:48px;
+        padding:3px 1px;
+    }
+
+}
+
+
+/* =====================================================
+   ÇOK KÜÇÜK EKRAN
+===================================================== */
+
+@media(max-width:350px){
+
+    .uyari{
+        width:300px;
+    }
+
+    .vardiya-butonu{
+        font-size:9px;
+    }
+
+    .vardiya-saat{
+        font-size:9px;
+    }
+
+    .durum-butonu{
+        font-size:8px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<div class="baslik">
+    HAFTALIK ÇALIŞMA PROGRAMI
+</div>
+
+
+<div class="tarih-alani">
+
+    <span>HAFTA:</span>
+
+    <input
+        type="date"
+        id="baslangicTarihi"
+    >
+
+</div>
+
+
+<div class="tablo-wrapper">
+
+<table id="programTablosu">
+
+
+<thead>
+
+<tr>
+
+    <th
+        rowspan="2"
+        class="gorev baslik-gri"
+    >
+        GÖREV
+    </th>
+
+
+    <th
+        rowspan="2"
+        class="ad baslik-gri"
+    >
+        ADI SOYADI
+    </th>
+
+
+    <th class="gun baslik-gri">
+        P.TESİ
+    </th>
+
+    <th class="gun baslik-gri">
+        SALI
+    </th>
+
+    <th class="gun baslik-gri">
+        ÇARŞ.
+    </th>
+
+    <th class="gun baslik-gri">
+        PERŞ.
+    </th>
+
+    <th class="gun baslik-gri">
+        CUMA
+    </th>
+
+    <th class="gun baslik-gri">
+        C.TESİ
+    </th>
+
+    <th class="gun baslik-gri">
+        PAZAR
+    </th>
+
+    <th
+        rowspan="2"
+        class="toplam baslik-gri"
+    >
+        HAF.TOP.<br>
+        ÇAL.SAAT
+    </th>
+
+</tr>
+
+
+<tr>
+
+    <th class="tarih baslik-gri">
+        TARİH
+    </th>
+
+    <th class="tarih baslik-gri">
+        TARİH
+    </th>
+
+    <th class="tarih baslik-gri">
+        TARİH
+    </th>
+
+    <th class="tarih baslik-gri">
+        TARİH
+    </th>
+
+    <th class="tarih baslik-gri">
+        TARİH
+    </th>
+
+    <th class="tarih baslik-gri">
+        TARİH
+    </th>
+
+    <th class="tarih baslik-gri">
+        TARİH
+    </th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="programBody">
+</tbody>
+
+
+</table>
+
+</div>
+
+
+<!-- =====================================================
+     RESİM OLARAK PAYLAŞ
+===================================================== -->
+
+<div class="resim-paylas-alani">
+
+    <button
+        class="resim-paylas"
+        onclick="tabloyuResimOlarakPaylas()"
+    >
+        TABLOYU RESİM OLARAK PAYLAŞ
+    </button>
+
+</div>
+
+
+<div class="aciklama">
+
+    Hücreye tıklayarak çalışma saatini seçebilirsiniz.
+
+</div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     VARDİYA UYARI PENCERESİ
+===================================================== -->
+
+<div
+    class="uyari-overlay"
+    id="uyariOverlay"
+>
+
+    <div class="uyari">
+
+
+        <div class="uyari-baslik">
+            ÇALIŞMA SAATİ SEÇ
+        </div>
+
+
+        <div
+            class="uyari-bilgi"
+            id="uyariBilgi"
+        >
+            Vardiya seçiniz
+        </div>
+
+
+        <div
+            class="vardiya-listesi"
+            id="vardiyaListesi"
+        >
+        </div>
+
+
+        <!-- =================================================
+             B - Y - R
+        ================================================= -->
+
+        <div class="durum-listesi">
+
+
+            <button
+                class="durum-butonu durum-b-butonu"
+                onclick="durumSec('B')"
+            >
+                HAFTA TATİLİ<br>
+                (B)
+            </button>
+
+
+            <button
+                class="durum-butonu durum-y-butonu"
+                onclick="durumSec('Y')"
+            >
+                YILLIK İZİN<br>
+                (Y)
+            </button>
+
+
+            <button
+                class="durum-butonu durum-r-butonu"
+                onclick="durumSec('R')"
+            >
+                RAPOR<br>
+                (R)
+            </button>
+
+
+        </div>
+
+
+        <div class="temizle-alani">
+
+            <button
+                class="vardiya-temizle"
+                onclick="vardiyaTemizle()"
+            >
+                VARDİYAYI TEMİZLE
+            </button>
+
+        </div>
+
+
+        <button
+            class="uyari-kapat"
+            onclick="pencereKapat()"
+        >
+            KAPAT
+        </button>
+
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+/* =====================================================
+   PERSONEL / GÖREV
+===================================================== */
+
+const personeller = [
+
+    {
+        gorev:"M.S",
+        isim:""
+    },
+
+    {
+        gorev:"M.S.Y",
+        isim:""
+    },
+
+    {
+        gorev:"G.T",
+        isim:""
+    },
+
+    {
+        gorev:"PERS.",
+        isim:""
+    },
+
+    {
+        gorev:"PERS.",
+        isim:""
+    },
+
+    {
+        gorev:"PERS.",
+        isim:""
+    },
+
+    {
+        gorev:"PERS.",
+        isim:""
+    },
+
+    {
+        gorev:"PERS.",
+        isim:""
+    },
+
+    {
+        gorev:"PERS.",
+        isim:""
+    }
+
+];
+
+
+/* =====================================================
+   GÜNLER
+===================================================== */
+
+const gunler = [
+
+    "P.TESİ",
+    "SALI",
+    "ÇARŞ.",
+    "PERŞ.",
+    "CUMA",
+    "C.TESİ",
+    "PAZAR"
+
+];
+
+
+/* =====================================================
+   SABAH VARDİYALARI
+===================================================== */
+
+const sabahVardiyalari = [
+
+    {
+        baslangic:"08:45",
+        bitis:"12:45",
+        sure:4
+    },
+
+    {
+        baslangic:"08:45",
+        bitis:"13:15",
+        sure:4
+    },
+
+    {
+        baslangic:"08:45",
+        bitis:"15:45",
+        sure:6
+    },
+
+    {
+        baslangic:"08:45",
+        bitis:"16:45",
+        sure:7
+    },
+
+    {
+        baslangic:"08:45",
+        bitis:"17:45",
+        sure:7.5
+    },
+
+    {
+        baslangic:"08:45",
+        bitis:"18:45",
+        sure:8.5
+    },
+
+    {
+        baslangic:"08:45",
+        bitis:"19:45",
+        sure:9.5
+    },
+
+    {
+        baslangic:"08:45",
+        bitis:"21:15",
+        sure:11
+    }
+
+];
+
+
+/* =====================================================
+   AKŞAM VARDİYALARI
+===================================================== */
+
+const aksamVardiyalari = [
+
+    {
+        baslangic:"11:15",
+        bitis:"21:15",
+        sure:8.5
+    },
+
+    {
+        baslangic:"12:15",
+        bitis:"21:15",
+        sure:7.5
+    },
+
+    {
+        baslangic:"13:15",
+        bitis:"21:15",
+        sure:7
+    },
+
+    {
+        baslangic:"14:15",
+        bitis:"21:15",
+        sure:6
+    },
+
+    {
+        baslangic:"14:45",
+        bitis:"21:15",
+        sure:5.5
+    },
+
+    {
+        baslangic:"15:45",
+        bitis:"21:15",
+        sure:5
+    },
+
+    {
+        baslangic:"16:45",
+        bitis:"21:15",
+        sure:4
+    },
+
+    {
+        baslangic:"17:15",
+        bitis:"21:15",
+        sure:4
+    }
+
+];
+
+
+/* =====================================================
+   DİĞER VARDİYALAR
+===================================================== */
+
+const digerVardiyalari = [
+
+    {
+        baslangic:"09:45",
+        bitis:"18:45",
+        sure:7.5
+    },
+
+    {
+        baslangic:"10:15",
+        bitis:"19:15",
+        sure:7.5
+    },
+
+    {
+        baslangic:"10:45",
+        bitis:"19:45",
+        sure:7.5
+    },
+
+    {
+        baslangic:"11:15",
+        bitis:"20:15",
+        sure:7.5
+    }
+
+];
+
+
+/* =====================================================
+   DİĞER UZUN VARDİYALAR
+===================================================== */
+
+const digerUzunVardiyalari = [
+
+    {
+        satir1:"08:45-10:15",
+        satir2:"14:15-21:15",
+        sure:7.5
+    },
+
+    {
+        satir1:"08:45-11:15",
+        satir2:"15:15-21:15",
+        sure:7.5
+    },
+
+    {
+        satir1:"08:45-12:15",
+        satir2:"16:45-21:15",
+        sure:7.5
+    }
+
+];
+
+
+let seciliHucre = null;
+
+let aktifHafta = null;
+
+
+/* =====================================================
+   HAFIZA ANAHTARI
+===================================================== */
+
+const HAFIZA_ANAHTARI =
+    "haftalik_calisma_programi_v2";
+
+const ISIM_HAFIZA_ANAHTARI =
+    "haftalik_calisma_programi_isimleri_v1";
+
+
+/* =====================================================
+   TABLO OLUŞTUR
+===================================================== */
+
+function tabloOlustur(){
+
+    const body =
+        document.getElementById(
+            "programBody"
+        );
+
+    body.innerHTML = "";
+
+
+    personeller.forEach(
+        (personel,personelIndex) => {
+
+
+            const tr =
+                document.createElement("tr");
+
+
+            /* GÖREV */
+
+            const gorevTd =
+                document.createElement("td");
+
+            gorevTd.className =
+                "personel-gorev";
+
+            gorevTd.textContent =
+                personel.gorev;
+
+            tr.appendChild(
+                gorevTd
+            );
+
+
+            /* ADI SOYADI */
+
+            const isimTd =
+                document.createElement("td");
+
+            isimTd.className =
+                "personel";
+
+
+            const isimInput =
+                document.createElement(
+                    "input"
+                );
+
+            isimInput.type =
+                "text";
+
+            isimInput.className =
+                "isim-input";
+
+            isimInput.placeholder =
+                "İsim";
+
+
+            isimInput.value =
+                personel.isim;
+
+
+            isimInput.addEventListener(
+                "input",
+                function(){
+
+                    personel.isim =
+                        this.value;
+
+                    isimleriKaydet();
+                    programKaydet();
+
+                }
+            );
+
+
+            isimTd.appendChild(
+                isimInput
+            );
+
+
+            tr.appendChild(
+                isimTd
+            );
+
+
+            /* 7 GÜN */
+
+            for(
+                let gunIndex = 0;
+                gunIndex < 7;
+                gunIndex++
+            ){
+
+                const td =
+                    document.createElement("td");
+
+
+                td.className =
+                    "vardiya vardiya-bos";
+
+
+                td.dataset.personel =
+                    personelIndex;
+
+
+                td.dataset.gun =
+                    gunIndex;
+
+
+                td.textContent =
+                    "—";
+
+
+                td.addEventListener(
+                    "click",
+                    function(){
+
+                        pencereAc(
+                            td,
+                            personel,
+                            gunIndex
+                        );
+
+                    }
+                );
+
+
+                tr.appendChild(
+                    td
+                );
+
+            }
+
+
+            /* HAFTALIK TOPLAM */
+
+            const toplamTd =
+                document.createElement("td");
+
+
+            toplamTd.className =
+                "saat-toplam";
+
+
+            toplamTd.id =
+                "toplam-" +
+                personelIndex;
+
+
+            toplamTd.textContent =
+                "0";
+
+
+            tr.appendChild(
+                toplamTd
+            );
+
+
+            body.appendChild(
+                tr
+            );
+
+        }
+    );
+
+
+    tarihleriOlustur();
+
+}
+
+
+/* =====================================================
+   TARİHLER
+===================================================== */
+
+function tarihleriOlustur(){
+
+    const input =
+        document.getElementById(
+            "baslangicTarihi"
+        );
+
+
+    let baslangic =
+        input.value;
+
+
+    if(!baslangic){
+
+        const bugun =
+            new Date();
+
+
+        const gun =
+            String(
+                bugun.getDate()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const ay =
+            String(
+                bugun.getMonth()+1
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const yil =
+            bugun.getFullYear();
+
+
+        baslangic =
+            yil +
+            "-" +
+            ay +
+            "-" +
+            gun;
+
+
+        input.value =
+            baslangic;
+
+    }
+
+
+    const tarih =
+        new Date(
+            baslangic +
+            "T00:00:00"
+        );
+
+
+    const thler =
+        document.querySelectorAll(
+            "thead tr:nth-child(2) th"
+        );
+
+
+    for(
+        let i = 0;
+        i < 7;
+        i++
+    ){
+
+        const yeniTarih =
+            new Date(
+                tarih
+            );
+
+
+        yeniTarih.setDate(
+            tarih.getDate() +
+            i
+        );
+
+
+        thler[i].textContent =
+            yeniTarih.toLocaleDateString(
+                "tr-TR",
+                {
+                    day:"2-digit",
+                    month:"2-digit"
+                }
+            );
+
+    }
+
+}
+
+
+/* =====================================================
+   VARDİYA KUTUSU OLUŞTUR
+===================================================== */
+
+function vardiyaButonuOlustur(
+    vardiya
+){
+
+    const button =
+        document.createElement(
+            "button"
+        );
+
+
+    button.type =
+        "button";
+
+
+    button.className =
+        "vardiya-butonu";
+
+
+    button.innerHTML =
+
+        '<span class="vardiya-saat">' +
+
+        vardiya.baslangic +
+
+        "<br>" +
+
+        vardiya.bitis +
+
+        "</span>";
+
+
+    button.onclick =
+        function(){
+
+            vardiyaSec(
+                vardiya
+            );
+
+        };
+
+
+    return button;
+
+}
+
+
+/* =====================================================
+   DİĞER UZUN VARDİYA KUTUSU
+===================================================== */
+
+function digerUzunButonuOlustur(
+    vardiya
+){
+
+    const button =
+        document.createElement(
+            "button"
+        );
+
+
+    button.type =
+        "button";
+
+
+    button.className =
+        "vardiya-butonu vardiya-diger-uzun";
+
+
+    button.innerHTML =
+
+        '<span class="vardiya-saat">' +
+
+        vardiya.satir1 +
+
+        "<br>" +
+
+        vardiya.satir2 +
+
+        "</span>";
+
+
+    button.onclick =
+        function(){
+
+            vardiyaSec(
+                {
+
+                    baslangic:
+                        vardiya.satir1,
+
+                    bitis:
+                        vardiya.satir2,
+
+                    sure:
+                        vardiya.sure,
+
+                    digerUzun:
+                        true
+
+                }
+            );
+
+        };
+
+
+    return button;
+
+}
+
+
+/* =====================================================
+   VARDİYA PENCERESİ
+===================================================== */
+
+function masaustuUyariKonumu(){
+
+    const overlay =
+        document.getElementById("uyariOverlay");
+
+    const uyari =
+        overlay.querySelector(".uyari");
+
+    if(window.innerWidth <= 700){
+        uyari.style.marginTop = "0px";
+        return;
+    }
+
+    const buton =
+        document.querySelector(".resim-paylas");
+
+    if(!buton){
+        return;
+    }
+
+    const rect = buton.getBoundingClientRect();
+
+    let ust = rect.top;
+
+    const yukseklik = uyari.offsetHeight;
+
+    if(ust + yukseklik > window.innerHeight - 8){
+        ust = window.innerHeight - yukseklik - 8;
+    }
+
+    if(ust < 8){
+        ust = 8;
+    }
+
+    uyari.style.marginTop = ust + "px";
+
+}
+
+
+function pencereAc(
+    hucre,
+    personel,
+    gunIndex
+){
+
+    seciliHucre =
+        hucre;
+
+
+    const overlay =
+        document.getElementById(
+            "uyariOverlay"
+        );
+
+
+    const bilgi =
+        document.getElementById(
+            "uyariBilgi"
+        );
+
+
+    /* PERSONEL BİLGİSİ */
+
+    const isim =
+        personel.isim.trim();
+
+
+    let personelBilgisi =
+        personel.gorev;
+
+
+    if(isim){
+
+        personelBilgisi +=
+            " " +
+            isim.toUpperCase();
+
+    }
+
+
+    personelBilgisi +=
+        " • " +
+        gunler[gunIndex];
+
+
+    bilgi.textContent =
+        personelBilgisi;
+
+
+    const liste =
+        document.getElementById(
+            "vardiyaListesi"
+        );
+
+
+    liste.innerHTML =
+        "";
+
+
+    /* =================================================
+       SABAH
+    ================================================= */
+
+    const sabahBolum =
+        document.createElement(
+            "div"
+        );
+
+
+    sabahBolum.className =
+        "vardiya-bolum";
+
+
+    const sabahBaslik =
+        document.createElement(
+            "div"
+        );
+
+
+    sabahBaslik.className =
+        "vardiya-bolum-baslik";
+
+
+    sabahBaslik.textContent =
+        "SABAH";
+
+
+    sabahBolum.appendChild(
+        sabahBaslik
+    );
+
+
+    const sabahGrid =
+        document.createElement(
+            "div"
+        );
+
+
+    sabahGrid.className =
+        "vardiya-grid";
+
+
+    sabahVardiyalari.forEach(
+        vardiya => {
+
+            sabahGrid.appendChild(
+                vardiyaButonuOlustur(
+                    vardiya
+                )
+            );
+
+        }
+    );
+
+
+    sabahBolum.appendChild(
+        sabahGrid
+    );
+
+
+    liste.appendChild(
+        sabahBolum
+    );
+
+
+    /* =================================================
+       AKŞAM
+    ================================================= */
+
+    const aksamBolum =
+        document.createElement(
+            "div"
+        );
+
+
+    aksamBolum.className =
+        "vardiya-bolum";
+
+
+    const aksamBaslik =
+        document.createElement(
+            "div"
+        );
+
+
+    aksamBaslik.className =
+        "vardiya-bolum-baslik";
+
+
+    aksamBaslik.textContent =
+        "AKŞAM";
+
+
+    aksamBolum.appendChild(
+        aksamBaslik
+    );
+
+
+    const aksamGrid =
+        document.createElement(
+            "div"
+        );
+
+
+    aksamGrid.className =
+        "vardiya-grid";
+
+
+    aksamVardiyalari.forEach(
+        vardiya => {
+
+            aksamGrid.appendChild(
+                vardiyaButonuOlustur(
+                    vardiya
+                )
+            );
+
+        }
+    );
+
+
+    aksamBolum.appendChild(
+        aksamGrid
+    );
+
+
+    liste.appendChild(
+        aksamBolum
+    );
+
+
+    /* =================================================
+       DİĞER
+    ================================================= */
+
+    const digerBolum =
+        document.createElement(
+            "div"
+        );
+
+
+    digerBolum.className =
+        "vardiya-bolum";
+
+
+    const digerBaslik =
+        document.createElement(
+            "div"
+        );
+
+
+    digerBaslik.className =
+        "vardiya-bolum-baslik";
+
+
+    digerBaslik.textContent =
+        "DİĞER";
+
+
+    digerBolum.appendChild(
+        digerBaslik
+    );
+
+
+    /* İlk 4 seçenek */
+
+    const digerGrid =
+        document.createElement(
+            "div"
+        );
+
+
+    digerGrid.className =
+        "vardiya-grid";
+
+
+    digerVardiyalari.forEach(
+        vardiya => {
+
+            digerGrid.appendChild(
+                vardiyaButonuOlustur(
+                    vardiya
+                )
+            );
+
+        }
+    );
+
+
+    digerBolum.appendChild(
+        digerGrid
+    );
+
+
+    /* Son 3 uzun seçenek */
+
+    const digerUzunGrid =
+        document.createElement(
+            "div"
+        );
+
+
+    digerUzunGrid.className =
+        "vardiya-grid";
+
+
+    digerUzunGrid.style.marginTop =
+        "4px";
+
+
+    digerUzunVardiyalari.forEach(
+        vardiya => {
+
+            digerUzunGrid.appendChild(
+                digerUzunButonuOlustur(
+                    vardiya
+                )
+            );
+
+        }
+    );
+
+
+    digerBolum.appendChild(
+        digerUzunGrid
+    );
+
+
+    liste.appendChild(
+        digerBolum
+    );
+
+
+    overlay.classList.add(
+        "acik"
+    );
+
+    requestAnimationFrame(function(){
+        masaustuUyariKonumu();
+    });
+
+}
+
+
+/* =====================================================
+   VARDİYA SEÇ
+===================================================== */
+
+function vardiyaSec(
+    vardiya
+){
+
+    if(!seciliHucre){
+        return;
+    }
+
+
+    /*
+       Önce durum sınıflarını temizle
+    */
+
+    seciliHucre.classList.remove(
+        "durum-b",
+        "durum-y",
+        "durum-r",
+        "vardiya-bos"
+    );
+
+
+    seciliHucre.classList.add(
+        "vardiya-secili"
+    );
+
+
+    /*
+       Hücreye saatleri yaz
+    */
+
+    seciliHucre.innerHTML =
+
+        '<span class="saat-yazi' +
+        (vardiya.digerUzun ? ' diger-uzun-secili' : '') +
+        '">' +
+
+        vardiya.baslangic +
+
+        "<br>" +
+
+        vardiya.bitis +
+
+        "</span>";
+
+
+    /*
+       Hesaplama için süre
+    */
+
+    seciliHucre.dataset.sure =
+        vardiya.sure;
+
+
+    seciliHucre.dataset.tip =
+        "vardiya";
+
+
+    toplamHesapla();
+
+    programKaydet();
+
+    pencereKapat();
+
+}
+
+
+/* =====================================================
+   B / Y / R SEÇ
+===================================================== */
+
+function durumSec(
+    durum
+){
+
+    if(!seciliHucre){
+        return;
+    }
+
+
+    seciliHucre.classList.remove(
+        "vardiya-bos",
+        "vardiya-secili",
+        "durum-b",
+        "durum-y",
+        "durum-r"
+    );
+
+
+    seciliHucre.dataset.sure =
+        "0";
+
+
+    seciliHucre.dataset.tip =
+        durum;
+
+
+    if(durum === "B"){
+
+        seciliHucre.classList.add(
+            "durum-b"
+        );
+
+        seciliHucre.textContent =
+            "B";
+
+    }
+
+
+    if(durum === "Y"){
+
+        seciliHucre.classList.add(
+            "durum-y"
+        );
+
+        seciliHucre.textContent =
+            "Y";
+
+    }
+
+
+    if(durum === "R"){
+
+        seciliHucre.classList.add(
+            "durum-r"
+        );
+
+        seciliHucre.textContent =
+            "R";
+
+    }
+
+
+    toplamHesapla();
+
+    programKaydet();
+
+    pencereKapat();
+
+}
+
+
+/* =====================================================
+   VARDİYA TEMİZLE
+===================================================== */
+
+function vardiyaTemizle(){
+
+    if(!seciliHucre){
+
+        pencereKapat();
+
+        return;
+
+    }
+
+
+    seciliHucre.classList.remove(
+        "vardiya-secili",
+        "durum-b",
+        "durum-y",
+        "durum-r"
+    );
+
+
+    seciliHucre.classList.add(
+        "vardiya-bos"
+    );
+
+
+    seciliHucre.textContent =
+        "—";
+
+
+    seciliHucre.dataset.sure =
+        "";
+
+
+    seciliHucre.dataset.tip =
+        "";
+
+
+    toplamHesapla();
+
+    programKaydet();
+
+    pencereKapat();
+
+}
+
+
+/* =====================================================
+   TOPLAM SAAT
+===================================================== */
+
+function toplamHesapla(){
+
+    const satirlar =
+        document.querySelectorAll(
+            "#programBody tr"
+        );
+
+
+    satirlar.forEach(
+        (tr,personelIndex) => {
+
+
+            let toplam = 0;
+
+
+            const hucreler =
+                tr.querySelectorAll(
+                    ".vardiya"
+                );
+
+
+            hucreler.forEach(
+                hucre => {
+
+
+                    const sure =
+                        Number(
+                            hucre.dataset.sure
+                        ) || 0;
+
+
+                    toplam +=
+                        sure;
+
+                }
+            );
+
+
+            document.getElementById(
+                "toplam-" +
+                personelIndex
+            ).textContent =
+
+                toplam.toLocaleString(
+                    "tr-TR",
+                    {
+                        minimumFractionDigits:0,
+                        maximumFractionDigits:1
+                    }
+                );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   PENCERE KAPAT
+===================================================== */
+
+function pencereKapat(){
+
+    document
+        .getElementById(
+            "uyariOverlay"
+        )
+        .classList.remove(
+            "acik"
+        );
+
+}
+
+
+/* =====================================================
+   DIŞARI TIKLAYINCA KAPAT
+===================================================== */
+
+document
+    .getElementById(
+        "uyariOverlay"
+    )
+    .addEventListener(
+        "click",
+        function(e){
+
+            if(
+                e.target === this
+            ){
+
+                pencereKapat();
+
+            }
+
+        }
+    );
+
+
+/* =====================================================
+   PROGRAM VERİSİNİ HAFIZAYA KAYDET
+===================================================== */
+
+function isimleriKaydet(){
+
+    try{
+
+        localStorage.setItem(
+            ISIM_HAFIZA_ANAHTARI,
+            JSON.stringify(
+                personeller.map(
+                    personel => personel.isim || ""
+                )
+            )
+        );
+
+    }
+    catch(hata){
+        console.error("İsim hafıza kayıt hatası:", hata);
+    }
+
+}
+
+
+function isimleriYukle(){
+
+    try{
+
+        const kayit =
+            localStorage.getItem(ISIM_HAFIZA_ANAHTARI);
+
+        if(!kayit){
+            return;
+        }
+
+        const isimler = JSON.parse(kayit);
+
+        if(!Array.isArray(isimler)){
+            return;
+        }
+
+        isimler.forEach((isim,index) => {
+
+            if(personeller[index]){
+                personeller[index].isim = isim || "";
+            }
+
+        });
+
+        document
+            .querySelectorAll(".isim-input")
+            .forEach((input,index) => {
+
+                if(personeller[index]){
+                    input.value = personeller[index].isim;
+                }
+
+            });
+
+    }
+    catch(hata){
+        console.error("İsim hafıza yükleme hatası:", hata);
+    }
+
+}
+
+
+function programKaydet(){
+
+    if(!aktifHafta){
+        return;
+    }
+
+
+    const veri = {
+
+        personeller:
+            personeller.map(
+                personel => ({
+                    gorev:
+                        personel.gorev,
+
+                    isim:
+                        personel.isim
+                })
+            ),
+
+        hucreler:[]
+
+    };
+
+
+    document
+        .querySelectorAll(
+            ".vardiya"
+        )
+        .forEach(
+            hucre => {
+
+                veri.hucreler.push({
+
+                    personel:
+                        Number(
+                            hucre.dataset.personel
+                        ),
+
+                    gun:
+                        Number(
+                            hucre.dataset.gun
+                        ),
+
+                    sure:
+                        hucre.dataset.sure || "",
+
+                    tip:
+                        hucre.dataset.tip || "",
+
+                    text:
+                        hucre.innerText
+
+                });
+
+            }
+        );
+
+
+    try{
+
+        const mevcut =
+            JSON.parse(
+                localStorage.getItem(
+                    HAFIZA_ANAHTARI
+                ) || "{}"
+            );
+
+
+        mevcut[aktifHafta] =
+            veri;
+
+
+        localStorage.setItem(
+            HAFIZA_ANAHTARI,
+            JSON.stringify(
+                mevcut
+            )
+        );
+
+    }
+    catch(hata){
+
+        console.error(
+            "Hafıza kayıt hatası:",
+            hata
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   PROGRAMI HAFIZADAN YÜKLE
+===================================================== */
+
+function programYukle(){
+
+    if(!aktifHafta){
+        return;
+    }
+
+
+    try{
+
+        const mevcut =
+            JSON.parse(
+                localStorage.getItem(
+                    HAFIZA_ANAHTARI
+                ) || "{}"
+            );
+
+
+        const veri =
+            mevcut[aktifHafta];
+
+
+        if(!veri){
+            toplamHesapla();
+            return;
+        }
+
+
+        /* İsimler haftadan bağımsız hafızadan yüklenir. */
+
+
+        /*
+           Hücreleri yükle
+        */
+
+        if(veri.hucreler){
+
+            veri.hucreler.forEach(
+                kayit => {
+
+
+                    const hucre =
+                        document.querySelector(
+                            '.vardiya[data-personel="' +
+                            kayit.personel +
+                            '"][data-gun="' +
+                            kayit.gun +
+                            '"]'
+                        );
+
+
+                    if(!hucre){
+                        return;
+                    }
+
+
+                    hucre.dataset.sure =
+                        kayit.sure || "";
+
+
+                    hucre.dataset.tip =
+                        kayit.tip || "";
+
+
+                    hucre.classList.remove(
+                        "vardiya-bos",
+                        "vardiya-secili",
+                        "durum-b",
+                        "durum-y",
+                        "durum-r"
+                    );
+
+
+                    if(
+                        kayit.tip ===
+                        "B"
+                    ){
+
+                        hucre.classList.add(
+                            "durum-b"
+                        );
+
+                        hucre.textContent =
+                            "B";
+
+                    }
+                    else if(
+                        kayit.tip ===
+                        "Y"
+                    ){
+
+                        hucre.classList.add(
+                            "durum-y"
+                        );
+
+                        hucre.textContent =
+                            "Y";
+
+                    }
+                    else if(
+                        kayit.tip ===
+                        "R"
+                    ){
+
+                        hucre.classList.add(
+                            "durum-r"
+                        );
+
+                        hucre.textContent =
+                            "R";
+
+                    }
+                    else if(
+                        kayit.sure !== ""
+                    ){
+
+                        hucre.classList.add(
+                            "vardiya-secili"
+                        );
+
+                        const uzunSinif =
+                            kayit.text &&
+                            kayit.text.includes("-")
+                                ? " diger-uzun-secili"
+                                : "";
+
+                        hucre.innerHTML =
+                            '<span class="saat-yazi' +
+                            uzunSinif +
+                            '">' +
+                            kayit.text.replace(
+                                /\n/g,
+                                "<br>"
+                            ) +
+                            "</span>";
+
+                    }
+                    else{
+
+                        hucre.classList.add(
+                            "vardiya-bos"
+                        );
+
+                        hucre.textContent =
+                            "—";
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        toplamHesapla();
+
+    }
+    catch(hata){
+
+        console.error(
+            "Hafıza yükleme hatası:",
+            hata
+        );
+
+    }
+
+}
+
+
+window.addEventListener("resize", function(){
+
+    const overlay =
+        document.getElementById("uyariOverlay");
+
+    if(overlay.classList.contains("acik")){
+        masaustuUyariKonumu();
+    }
+
+});
+
+
+/* =====================================================
+   TARİH DEĞİŞİNCE
+===================================================== */
+
+document
+    .getElementById(
+        "baslangicTarihi"
+    )
+    .addEventListener(
+        "change",
+        function(){
+
+            /*
+               Eski haftayı kaydet
+            */
+
+            programKaydet();
+
+
+            /*
+               Yeni haftaya geç
+            */
+
+            aktifHafta =
+                this.value;
+
+
+            /*
+               Tabloyu temizle
+            */
+
+            document
+                .querySelectorAll(
+                    ".vardiya"
+                )
+                .forEach(
+                    hucre => {
+
+                        hucre.classList.remove(
+                            "vardiya-secili",
+                            "durum-b",
+                            "durum-y",
+                            "durum-r"
+                        );
+
+
+                        hucre.classList.add(
+                            "vardiya-bos"
+                        );
+
+
+                        hucre.textContent =
+                            "—";
+
+
+                        hucre.dataset.sure =
+                            "";
+
+
+                        hucre.dataset.tip =
+                            "";
+
+                    }
+                );
+
+
+            /*
+               İsimler tarih değişiminde silinmez.
+            */
+
+            isimleriYukle();
+
+
+            /*
+               Yeni haftanın kayıtlarını yükle
+            */
+
+            programYukle();
+
+
+            /*
+               Tarihleri yenile
+            */
+
+            tarihleriOlustur();
+
+        }
+    );
+
+
+/* =====================================================
+   TABLOYU RESİM OLARAK PAYLAŞ
+===================================================== */
+
+async function tabloyuResimOlarakPaylas(){
+
+    /*
+       Önce son değişiklikleri kaydet
+    */
+
+    programKaydet();
+
+
+    const tablo =
+        document.getElementById(
+            "programTablosu"
+        );
+
+
+    if(!tablo){
+
+        alert(
+            "Tablo bulunamadı."
+        );
+
+        return;
+
+    }
+
+
+    if(
+        typeof html2canvas ===
+        "undefined"
+    ){
+
+        alert(
+            "Resim oluşturma özelliği yüklenemedi. İnternet bağlantınızı kontrol edin."
+        );
+
+        return;
+
+    }
+
+
+    const buton =
+        document.querySelector(
+            ".resim-paylas"
+        );
+
+
+    const eskiYazi =
+        buton.textContent;
+
+
+    buton.textContent =
+        "RESİM HAZIRLANIYOR...";
+
+
+    buton.disabled =
+        true;
+
+
+    try{
+
+
+        /*
+           Input değerlerini görüntü için
+           value özelliğine aktar
+        */
+
+        const inputlar =
+            tablo.querySelectorAll(
+                ".isim-input"
+            );
+
+
+        inputlar.forEach(
+            input => {
+
+                input.setAttribute(
+                    "value",
+                    input.value
+                );
+
+            }
+        );
+
+
+        const canvas =
+            await html2canvas(
+                tablo,
+                {
+
+                    backgroundColor:
+                        "#ffffff",
+
+                    scale:3,
+
+                    useCORS:true,
+
+                    logging:false,
+
+                    allowTaint:false
+
+                }
+            );
+
+
+        canvas.toBlob(
+            async function(blob){
+
+                if(!blob){
+
+                    alert(
+                        "Tablo resmi oluşturulamadı."
+                    );
+
+                    buton.textContent =
+                        eskiYazi;
+
+                    buton.disabled =
+                        false;
+
+                    return;
+
+                }
+
+
+                const dosya =
+                    new File(
+                        [
+                            blob
+                        ],
+                        "haftalik-calisma-programi.png",
+                        {
+                            type:
+                                "image/png"
+                        }
+                    );
+
+
+                if(
+                    navigator.share &&
+                    navigator.canShare &&
+                    navigator.canShare(
+                        {
+                            files:[
+                                dosya
+                            ]
+                        }
+                    )
+                ){
+
+                    try{
+
+                        await navigator.share({
+
+                            title:
+                                "Haftalık Çalışma Programı",
+
+                            files:[
+                                dosya
+                            ]
+
+                        });
+
+                    }
+                    catch(hata){
+
+                        if(
+                            hata.name !==
+                            "AbortError"
+                        ){
+
+                            pngIndir(
+                                blob
+                            );
+
+                        }
+
+                    }
+
+                }
+                else{
+
+                    pngIndir(
+                        blob
+                    );
+
+                }
+
+
+                buton.textContent =
+                    eskiYazi;
+
+
+                buton.disabled =
+                    false;
+
+            },
+            "image/png"
+        );
+
+
+    }
+    catch(hata){
+
+        console.error(
+            "Resim oluşturma hatası:",
+            hata
+        );
+
+
+        alert(
+            "Tablo resmi oluşturulamadı."
+        );
+
+
+        buton.textContent =
+            eskiYazi;
+
+
+        buton.disabled =
+            false;
+
+    }
+
+}
+
+
+/* =====================================================
+   PNG İNDİR
+===================================================== */
+
+function pngIndir(
+    blob
+){
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
+
+
+    link.download =
+        "haftalik-calisma-programi.png";
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    document.body.removeChild(
+        link
+    );
+
+
+    setTimeout(
+        function(){
+
+            URL.revokeObjectURL(
+                url
+            );
+
+        },
+        1000
+    );
+
+}
+
+
+/* =====================================================
+   BAŞLAT
+===================================================== */
+
+tabloOlustur();
+
+
+/*
+   İsimleri tarihten bağımsız hafızadan yükle
+*/
+
+isimleriYukle();
+
+
+/*
+   Başlangıç haftasını belirle
+*/
+
+aktifHafta =
+    document.getElementById(
+        "baslangicTarihi"
+    ).value;
+
+
+/*
+   Kayıtlı programı yükle
+*/
+
+programYukle();
+
+
+/*
+   Toplamları hesapla
+*/
+
+toplamHesapla();
+
+</script>
+
+</body>
+</html>
