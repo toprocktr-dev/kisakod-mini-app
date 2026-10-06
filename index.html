@@ -464,41 +464,48 @@ const status =
  * INIT DATA
  *************************************************/
 
+/*************************************************
+ * TELEGRAM INIT DATA
+ *************************************************/
+
 function getInitData() {
 
-  if (!telegramWebApp) {
-
+  if (
+    !window.Telegram ||
+    !window.Telegram.WebApp
+  ) {
     return "";
   }
 
-  const initData =
-    telegramWebApp.initData ||
-    "";
+  return (
+    window.Telegram.WebApp.initData ||
+    ""
+  );
+}
 
-  if (initData) {
 
-    return initData;
-  }
+/*************************************************
+ * TELEGRAM INIT DATA BEKLE
+ *************************************************/
 
-  const unsafeUser =
-    telegramWebApp.initDataUnsafe &&
-    telegramWebApp.initDataUnsafe.user
-      ? telegramWebApp.initDataUnsafe.user
-      : null;
+async function getTelegramInitData() {
 
-  if (unsafeUser && unsafeUser.id) {
+  for (let i = 0; i < 20; i++) {
 
-    return (
-      "user=" +
-      encodeURIComponent(
-        JSON.stringify(unsafeUser)
-      )
-    );
+    const initData =
+      getInitData();
+
+    if (initData) {
+      return initData;
+    }
+
+    await new Promise(function(resolve) {
+      setTimeout(resolve, 250);
+    });
   }
 
   return "";
 }
-
 
 /*************************************************
  * YETKİ KONTROL
@@ -506,14 +513,17 @@ function getInitData() {
 
 async function miniAppYetkiKontrol() {
 
+  status.textContent =
+    "🔐 Telegram doğrulanıyor...";
+
   const initData =
-    getInitData();
+    await getTelegramInitData();
 
 
   if (!initData) {
 
     status.textContent =
-      "❌ Telegram doğrulaması bulunamadı.";
+      "❌ Telegram doğrulaması alınamadı.";
 
     results.innerHTML = "";
 
@@ -534,9 +544,7 @@ async function miniAppYetkiKontrol() {
 
 
     const response =
-      await fetch(
-        url
-      );
+      await fetch(url);
 
 
     const data =
@@ -569,6 +577,7 @@ async function miniAppYetkiKontrol() {
   } catch (err) {
 
     console.error(
+      "Telegram yetki hatası:",
       err
     );
 
@@ -578,7 +587,6 @@ async function miniAppYetkiKontrol() {
     return false;
   }
 }
-
 
 /*************************************************
  * ÜRÜN ARA
@@ -618,16 +626,16 @@ async function searchProducts(
 
 
   const initData =
-    getInitData();
+  await getTelegramInitData();
 
 
-  if (!initData) {
+if (!initData) {
 
-    status.textContent =
-      "❌ Telegram doğrulaması bulunamadı.";
+  status.textContent =
+    "❌ Telegram doğrulaması alınamadı.";
 
-    return;
-  }
+  return;
+}
 
 
   searchButton.disabled =
@@ -1400,14 +1408,20 @@ document.addEventListener(
   async function() {
 
     if (
-      !telegramWebApp
+      !window.Telegram ||
+      !window.Telegram.WebApp
     ) {
 
       status.textContent =
-        "❌ Bu uygulama Telegram içinden açılmalıdır.";
+        "❌ Telegram Mini App başlatılamadı.";
 
       return;
     }
+
+
+    window.Telegram.WebApp.ready();
+
+    window.Telegram.WebApp.expand();
 
 
     await miniAppYetkiKontrol();
