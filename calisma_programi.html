@@ -2788,231 +2788,209 @@ document
 
 /* =====================================================
    TABLOYU RESİM OLARAK PAYLAŞ
+   Telegram Mini App + normal tarayıcı uyumlu
 ===================================================== */
 
 async function tabloyuResimOlarakPaylas(){
 
-    /*
-       Önce son değişiklikleri kaydet
-    */
-
     programKaydet();
 
-
-    const tablo =
-        document.getElementById(
-            "programTablosu"
-        );
-
+    const tablo = document.getElementById("programTablosu");
+    const buton = document.querySelector(".resim-paylas");
 
     if(!tablo){
-
-        alert(
-            "Tablo bulunamadı."
-        );
-
+        alert("Tablo bulunamadı.");
         return;
-
     }
 
-
-    if(
-        typeof html2canvas ===
-        "undefined"
-    ){
-
-        alert(
-            "Resim oluşturma özelliği yüklenemedi. İnternet bağlantınızı kontrol edin."
-        );
-
+    if(typeof html2canvas === "undefined"){
+        alert("Resim oluşturma özelliği yüklenemedi. İnternet bağlantınızı kontrol edin.");
         return;
-
     }
 
-
-    const buton =
-        document.querySelector(
-            ".resim-paylas"
-        );
-
-
-    const eskiYazi =
-        buton.textContent;
-
-
-    buton.textContent =
-        "RESİM HAZIRLANIYOR...";
-
-
-    buton.disabled =
-        true;
-
+    const eskiYazi = buton ? buton.textContent : "";
+    if(buton){
+        buton.textContent = "RESİM HAZIRLANIYOR...";
+        buton.disabled = true;
+    }
 
     try{
+        tablo.querySelectorAll(".isim-input").forEach(input => {
+            input.setAttribute("value", input.value);
+        });
 
+        const canvas = await html2canvas(tablo, {
+            backgroundColor: "#ffffff",
+            scale: 3,
+            useCORS: true,
+            logging: false,
+            allowTaint: false,
+            windowWidth: Math.max(document.documentElement.clientWidth, tablo.scrollWidth)
+        });
+
+        const blob = await new Promise((resolve, reject) => {
+            canvas.toBlob(result => {
+                if(result) resolve(result);
+                else reject(new Error("PNG dosyası oluşturulamadı."));
+            }, "image/png");
+        });
+
+        const dosya = new File([blob], "haftalik-calisma-programi.png", {
+            type: "image/png"
+        });
+
+        /* Dosya paylaşımı destekleniyorsa önce yerel paylaşımı dene. */
+        if(
+            navigator.share &&
+            navigator.canShare &&
+            navigator.canShare({ files: [dosya] })
+        ){
+            try{
+                await navigator.share({
+                    title: "Haftalık Çalışma Programı",
+                    files: [dosya]
+                });
+                return;
+            }catch(hata){
+                /* Kullanıcı paylaşım ekranını kapattıysa başka ekran açma. */
+                if(hata && hata.name === "AbortError") return;
+                console.warn("Dosya paylaşımı kullanılamadı; resim önizlemesi açılıyor.", hata);
+            }
+        }
 
         /*
-           Input değerlerini görüntü için
-           value özelliğine aktar
+          Telegram Mini App gibi indirme/paylaşım API'sinin sınırlı olduğu
+          ortamlarda resmi sayfa içinde göster. Kullanıcı resmi büyütüp
+          basılı tutarak kaydedebilir veya cihazının paylaşım seçeneklerini
+          kullanabilir.
         */
+        tabloResimOnizlemeAc(blob);
 
-        const inputlar =
-            tablo.querySelectorAll(
-                ".isim-input"
-            );
+    }catch(hata){
+        console.error("Resim oluşturma hatası:", hata);
+        alert("Tablo resmi oluşturulamadı. Sayfayı yenileyip tekrar deneyin.");
+    }finally{
+        if(buton){
+            buton.textContent = eskiYazi;
+            buton.disabled = false;
+        }
+    }
+}
 
 
-        inputlar.forEach(
-            input => {
+/* =====================================================
+   RESİM ÖNİZLEMESİ — TELEGRAM YEDEK YÖNTEMİ
+===================================================== */
 
-                input.setAttribute(
-                    "value",
-                    input.value
-                );
+function tabloResimOnizlemeAc(blob){
+    const onceki = document.getElementById("tabloResimOnizleme");
+    if(onceki) onceki.remove();
 
+    const url = URL.createObjectURL(blob);
+    const overlay = document.createElement("div");
+    overlay.id = "tabloResimOnizleme";
+
+    Object.assign(overlay.style, {
+        position: "fixed",
+        inset: "0",
+        zIndex: "2147483647",
+        background: "rgba(0,0,0,.92)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "12px",
+        gap: "10px",
+        overflow: "auto"
+    });
+
+    const aciklama = document.createElement("div");
+    aciklama.textContent = "Resmi kaydetmek için resmin üzerine basılı tutun.";
+    Object.assign(aciklama.style, {
+        color: "#fff",
+        font: "bold 14px Arial, sans-serif",
+        textAlign: "center",
+        lineHeight: "1.4"
+    });
+
+    const resim = document.createElement("img");
+    resim.src = url;
+    resim.alt = "Haftalık çalışma programı";
+    Object.assign(resim.style, {
+        display: "block",
+        maxWidth: "100%",
+        maxHeight: "70vh",
+        width: "auto",
+        height: "auto",
+        objectFit: "contain",
+        background: "#fff",
+        borderRadius: "4px"
+    });
+
+    const dugmeler = document.createElement("div");
+    Object.assign(dugmeler.style, {
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        gap: "8px",
+        width: "100%"
+    });
+
+    function dugmeOlustur(yazi){
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = yazi;
+        Object.assign(b.style, {
+            border: "0",
+            borderRadius: "6px",
+            padding: "11px 14px",
+            font: "bold 13px Arial, sans-serif",
+            background: "#fff",
+            color: "#111",
+            cursor: "pointer"
+        });
+        return b;
+    }
+
+    const indir = dugmeOlustur("📥 Resmi indir");
+    indir.onclick = () => pngIndir(blob);
+
+    const paylas = dugmeOlustur("↗ Paylaşmayı dene");
+    paylas.onclick = async () => {
+        try{
+            const dosya = new File([blob], "haftalik-calisma-programi.png", {
+                type: "image/png"
+            });
+            if(navigator.share && navigator.canShare && navigator.canShare({files:[dosya]})){
+                await navigator.share({
+                    title: "Haftalık Çalışma Programı",
+                    files: [dosya]
+                });
+            }else{
+                alert("Bu Telegram ekranı doğrudan dosya paylaşımını desteklemiyor. Resme basılı tutarak kaydedebilir, sonra Telegram sohbetinden gönderebilirsiniz.");
             }
-        );
+        }catch(hata){
+            if(!hata || hata.name !== "AbortError"){
+                alert("Doğrudan paylaşım açılamadı. Resme basılı tutarak kaydetmeyi deneyin.");
+            }
+        }
+    };
 
+    const kapat = dugmeOlustur("Kapat");
+    kapat.onclick = () => {
+        overlay.remove();
+        URL.revokeObjectURL(url);
+    };
 
-        const canvas =
-            await html2canvas(
-                tablo,
-                {
-
-                    backgroundColor:
-                        "#ffffff",
-
-                    scale:3,
-
-                    useCORS:true,
-
-                    logging:false,
-
-                    allowTaint:false
-
-                }
-            );
-
-
-        canvas.toBlob(
-            async function(blob){
-
-                if(!blob){
-
-                    alert(
-                        "Tablo resmi oluşturulamadı."
-                    );
-
-                    buton.textContent =
-                        eskiYazi;
-
-                    buton.disabled =
-                        false;
-
-                    return;
-
-                }
-
-
-                const dosya =
-                    new File(
-                        [
-                            blob
-                        ],
-                        "haftalik-calisma-programi.png",
-                        {
-                            type:
-                                "image/png"
-                        }
-                    );
-
-
-                if(
-                    navigator.share &&
-                    navigator.canShare &&
-                    navigator.canShare(
-                        {
-                            files:[
-                                dosya
-                            ]
-                        }
-                    )
-                ){
-
-                    try{
-
-                        await navigator.share({
-
-                            title:
-                                "Haftalık Çalışma Programı",
-
-                            files:[
-                                dosya
-                            ]
-
-                        });
-
-                    }
-                    catch(hata){
-
-                        if(
-                            hata.name !==
-                            "AbortError"
-                        ){
-
-                            pngIndir(
-                                blob
-                            );
-
-                        }
-
-                    }
-
-                }
-                else{
-
-                    pngIndir(
-                        blob
-                    );
-
-                }
-
-
-                buton.textContent =
-                    eskiYazi;
-
-
-                buton.disabled =
-                    false;
-
-            },
-            "image/png"
-        );
-
-
-    }
-    catch(hata){
-
-        console.error(
-            "Resim oluşturma hatası:",
-            hata
-        );
-
-
-        alert(
-            "Tablo resmi oluşturulamadı."
-        );
-
-
-        buton.textContent =
-            eskiYazi;
-
-
-        buton.disabled =
-            false;
-
-    }
-
+    dugmeler.append(indir, paylas, kapat);
+    overlay.append(aciklama, resim, dugmeler);
+    overlay.addEventListener("click", e => {
+        if(e.target === overlay){
+            overlay.remove();
+            URL.revokeObjectURL(url);
+        }
+    });
+    document.body.appendChild(overlay);
 }
 
 
@@ -3020,54 +2998,18 @@ async function tabloyuResimOlarakPaylas(){
    PNG İNDİR
 ===================================================== */
 
-function pngIndir(
-    blob
-){
-
-    const url =
-        URL.createObjectURL(
-            blob
-        );
-
-
-    const link =
-        document.createElement(
-            "a"
-        );
-
-
-    link.href =
-        url;
-
-
-    link.download =
-        "haftalik-calisma-programi.png";
-
-
-    document.body.appendChild(
-        link
-    );
-
-
+function pngIndir(blob){
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "haftalik-calisma-programi.png";
+    link.style.display = "none";
+    document.body.appendChild(link);
     link.click();
+    link.remove();
 
-
-    document.body.removeChild(
-        link
-    );
-
-
-    setTimeout(
-        function(){
-
-            URL.revokeObjectURL(
-                url
-            );
-
-        },
-        1000
-    );
-
+    /* Telegram WebView indirmeyi engellerse önizleme ekranda kalır. */
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 
