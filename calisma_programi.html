@@ -2835,34 +2835,11 @@ async function tabloyuResimOlarakPaylas(){
             }, "image/png");
         });
 
-        const dosya = new File([blob], "haftalik-calisma-programi.png", {
-            type: "image/png"
-        });
-
-        /* Dosya paylaşımı destekleniyorsa önce yerel paylaşımı dene. */
-        if(
-            navigator.share &&
-            navigator.canShare &&
-            navigator.canShare({ files: [dosya] })
-        ){
-            try{
-                await navigator.share({
-                    title: "Haftalık Çalışma Programı",
-                    files: [dosya]
-                });
-                return;
-            }catch(hata){
-                /* Kullanıcı paylaşım ekranını kapattıysa başka ekran açma. */
-                if(hata && hata.name === "AbortError") return;
-                console.warn("Dosya paylaşımı kullanılamadı; resim önizlemesi açılıyor.", hata);
-            }
-        }
-
         /*
-          Telegram Mini App gibi indirme/paylaşım API'sinin sınırlı olduğu
-          ortamlarda resmi sayfa içinde göster. Kullanıcı resmi büyütüp
-          basılı tutarak kaydedebilir veya cihazının paylaşım seçeneklerini
-          kullanabilir.
+          Telegram Mini App içinde navigator.share bazen mevcut görünüp
+          çağrı başarılı dönmesine rağmen paylaşım penceresini göstermeyebilir.
+          Bu nedenle butona basınca önce PNG önizlemesini kesin olarak açıyoruz.
+          Önizleme içindeki ayrı düğme paylaşımı ayrıca dener.
         */
         tabloResimOnizlemeAc(blob);
 
