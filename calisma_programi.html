@@ -2907,7 +2907,7 @@ function tabloResimOnizlemeAc(dataUrl, canvas, durumMesaji){
     });
 
     const aciklama = document.createElement("div");
-    aciklama.textContent = "Çalışma programı resmi hazır. Resmi kaydetmek için üzerine basılı tutabilirsiniz.";
+    aciklama.textContent = "Çalışma programı hazır. Paylaşmak için ekran görüntüsü alabilirsiniz.";
     Object.assign(aciklama.style, {
         color: "#fff",
         font: "bold 14px Arial,sans-serif",
@@ -2934,83 +2934,30 @@ function tabloResimOnizlemeAc(dataUrl, canvas, durumMesaji){
         WebkitTouchCallout: "default"
     });
 
-    const dugmeler = document.createElement("div");
-    Object.assign(dugmeler.style, {
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        gap: "8px",
-        width: "100%",
-        flex: "0 0 auto",
-        paddingBottom: "env(safe-area-inset-bottom)"
+    const kapat = document.createElement("button");
+    kapat.type = "button";
+    kapat.textContent = "Kapat";
+    Object.assign(kapat.style, {
+        border: "0",
+        borderRadius: "8px",
+        padding: "12px 20px",
+        minHeight: "44px",
+        font: "bold 14px Arial,sans-serif",
+        background: "#fff",
+        color: "#111",
+        cursor: "pointer",
+        touchAction: "manipulation",
+        WebkitTapHighlightColor: "rgba(0,0,0,.15)",
+        flex: "0 0 auto"
     });
-
-    function dugmeOlustur(yazi){
-        const b = document.createElement("button");
-        b.type = "button";
-        b.textContent = yazi;
-        Object.assign(b.style, {
-            border: "0",
-            borderRadius: "8px",
-            padding: "12px 14px",
-            minHeight: "44px",
-            font: "bold 14px Arial,sans-serif",
-            background: "#fff",
-            color: "#111",
-            cursor: "pointer",
-            touchAction: "manipulation",
-            WebkitTapHighlightColor: "rgba(0,0,0,.15)"
-        });
-        return b;
-    }
-
-    const indir = dugmeOlustur("📥 Resmi indir");
-    indir.addEventListener("click", function(){
-        try{
-            const link = document.createElement("a");
-            link.href = dataUrl;
-            link.download = "haftalik-calisma-programi.png";
-            link.target = "_blank";
-            link.rel = "noopener";
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            if(durumMesaji) durumMesaji("İndirme isteği gönderildi. Telegram izin vermezse resme basılı tutarak kaydetmeyi deneyin.");
-        }catch(e){
-            if(durumMesaji) durumMesaji("Bu Telegram sürümü indirmeyi engelliyor. Resmin üzerine basılı tutarak kaydetmeyi deneyin.");
-        }
-    });
-
-    const paylas = dugmeOlustur("↗ Paylaşmayı dene");
-    paylas.addEventListener("click", async function(){
-        try{
-            if(!navigator.share){
-                if(durumMesaji) durumMesaji("Bu Telegram mobil sürümünde doğrudan paylaşım desteklenmiyor. Resme basılı tutup kaydedin, ardından sohbete gönderin.");
-                return;
-            }
-            const blob = await new Promise((resolve, reject) => {
-                canvas.toBlob(b => b ? resolve(b) : reject(new Error("PNG hazırlanamadı")), "image/png");
-            });
-            const dosya = new File([blob], "haftalik-calisma-programi.png", {type:"image/png"});
-            if(navigator.canShare && !navigator.canShare({files:[dosya]})){
-                if(durumMesaji) durumMesaji("Bu cihaz dosya paylaşımını desteklemiyor. Resme basılı tutup kaydedin.");
-                return;
-            }
-            await navigator.share({title:"Haftalık Çalışma Programı", files:[dosya]});
-        }catch(e){
-            if(e && e.name === "AbortError") return;
-            console.error("Paylaşım hatası:", e);
-            if(durumMesaji) durumMesaji("Paylaşım açılamadı. Resme basılı tutup kaydedin, ardından Telegram sohbetinden gönderin.");
-        }
-    });
-
-    const kapat = dugmeOlustur("Kapat");
     kapat.addEventListener("click", function(){
         overlay.remove();
     });
 
-    dugmeler.append(indir, paylas, kapat);
-    overlay.append(aciklama, resim, dugmeler);
+    /* Resmin uzun basma menüsünde GitHub bağlantısı gibi seçenekler çıkmasın. */
+    resim.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+
+    overlay.append(aciklama, resim, kapat);
     document.body.appendChild(overlay);
 }
 
