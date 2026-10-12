@@ -2792,27 +2792,55 @@ document
 ===================================================== */
 
 async function tabloyuResimOlarakPaylas(){
-
-    programKaydet();
-
     const tablo = document.getElementById("programTablosu");
     const buton = document.querySelector(".resim-paylas");
+    const eskiYazi = buton ? buton.textContent : "";
+
+    function durumMesaji(mesaj){
+        let alan = document.getElementById("paylasimDurumMesaji");
+        if(!alan){
+            alan = document.createElement("div");
+            alan.id = "paylasimDurumMesaji";
+            Object.assign(alan.style, {
+                position: "fixed",
+                left: "10px",
+                right: "10px",
+                bottom: "12px",
+                zIndex: "2147483647",
+                padding: "12px",
+                borderRadius: "8px",
+                background: "#222",
+                color: "#fff",
+                font: "14px Arial,sans-serif",
+                textAlign: "center",
+                boxShadow: "0 2px 12px rgba(0,0,0,.35)"
+            });
+            document.body.appendChild(alan);
+        }
+        alan.textContent = mesaj;
+        alan.style.display = "block";
+        clearTimeout(alan._timer);
+        alan._timer = setTimeout(() => {
+            if(alan.isConnected) alan.remove();
+        }, 6000);
+    }
 
     if(!tablo){
-        alert("Tablo bulunamadı.");
+        durumMesaji("HATA: Çalışma tablosu bulunamadı.");
         return;
     }
-
     if(typeof html2canvas === "undefined"){
-        alert("Resim oluşturma özelliği yüklenemedi. İnternet bağlantınızı kontrol edin.");
+        durumMesaji("HATA: Resim kütüphanesi yüklenmemiş. İnternet bağlantısını kontrol edin.");
         return;
     }
 
-    const eskiYazi = buton ? buton.textContent : "";
+    programKaydet();
     if(buton){
-        buton.textContent = "RESİM HAZIRLANIYOR...";
         buton.disabled = true;
+        buton.textContent = "RESİM HAZIRLANIYOR...";
     }
+
+    durumMesaji("Tablo resme dönüştürülüyor…");
 
     try{
         tablo.querySelectorAll(".isim-input").forEach(input => {
@@ -2821,31 +2849,28 @@ async function tabloyuResimOlarakPaylas(){
 
         const canvas = await html2canvas(tablo, {
             backgroundColor: "#ffffff",
-            scale: 3,
+            scale: 2,
             useCORS: true,
             logging: false,
             allowTaint: false,
-            windowWidth: Math.max(document.documentElement.clientWidth, tablo.scrollWidth)
+            scrollX: 0,
+            scrollY: 0
         });
 
-        const blob = await new Promise((resolve, reject) => {
-            canvas.toBlob(result => {
-                if(result) resolve(result);
-                else reject(new Error("PNG dosyası oluşturulamadı."));
-            }, "image/png");
-        });
+        if(!canvas || !canvas.width || !canvas.height){
+            throw new Error("Boş resim oluştu.");
+        }
 
-        /*
-          Telegram Mini App içinde navigator.share bazen mevcut görünüp
-          çağrı başarılı dönmesine rağmen paylaşım penceresini göstermeyebilir.
-          Bu nedenle butona basınca önce PNG önizlemesini kesin olarak açıyoruz.
-          Önizleme içindeki ayrı düğme paylaşımı ayrıca dener.
-        */
-        tabloResimOnizlemeAc(blob);
+        /* Android Telegram WebView'de blob: resim adresleri sorun çıkarabildiği
+           için önizlemede data: URL kullanılır. */
+        const dataUrl = canvas.toDataURL("image/png");
+        tabloResimOnizlemeAc(dataUrl, canvas, durumMesaji);
+        const durum = document.getElementById("paylasimDurumMesaji");
+        if(durum) durum.remove();
 
     }catch(hata){
-        console.error("Resim oluşturma hatası:", hata);
-        alert("Tablo resmi oluşturulamadı. Sayfayı yenileyip tekrar deneyin.");
+        console.error("Tablo resim hatası:", hata);
+        durumMesaji("Resim oluşturulamadı: " + (hata && hata.message ? hata.message : "bilinmeyen hata"));
     }finally{
         if(buton){
             buton.textContent = eskiYazi;
@@ -2856,52 +2881,57 @@ async function tabloyuResimOlarakPaylas(){
 
 
 /* =====================================================
-   RESİM ÖNİZLEMESİ — TELEGRAM YEDEK YÖNTEMİ
+   MOBİL UYUMLU RESİM ÖNİZLEMESİ
 ===================================================== */
 
-function tabloResimOnizlemeAc(blob){
+function tabloResimOnizlemeAc(dataUrl, canvas, durumMesaji){
     const onceki = document.getElementById("tabloResimOnizleme");
     if(onceki) onceki.remove();
 
-    const url = URL.createObjectURL(blob);
     const overlay = document.createElement("div");
     overlay.id = "tabloResimOnizleme";
-
     Object.assign(overlay.style, {
         position: "fixed",
         inset: "0",
         zIndex: "2147483647",
-        background: "rgba(0,0,0,.92)",
+        background: "rgba(0,0,0,.94)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         padding: "12px",
         gap: "10px",
-        overflow: "auto"
+        overflowY: "auto",
+        WebkitOverflowScrolling: "touch",
+        touchAction: "pan-y"
     });
 
     const aciklama = document.createElement("div");
-    aciklama.textContent = "Resmi kaydetmek için resmin üzerine basılı tutun.";
+    aciklama.textContent = "Çalışma programı resmi hazır. Resmi kaydetmek için üzerine basılı tutabilirsiniz.";
     Object.assign(aciklama.style, {
         color: "#fff",
-        font: "bold 14px Arial, sans-serif",
+        font: "bold 14px Arial,sans-serif",
         textAlign: "center",
-        lineHeight: "1.4"
+        lineHeight: "1.4",
+        flex: "0 0 auto"
     });
 
     const resim = document.createElement("img");
-    resim.src = url;
     resim.alt = "Haftalık çalışma programı";
+    resim.src = dataUrl;
     Object.assign(resim.style, {
         display: "block",
-        maxWidth: "100%",
-        maxHeight: "70vh",
-        width: "auto",
+        width: "100%",
+        maxWidth: "900px",
+        maxHeight: "65vh",
         height: "auto",
         objectFit: "contain",
         background: "#fff",
-        borderRadius: "4px"
+        borderRadius: "4px",
+        flex: "0 1 auto",
+        userSelect: "auto",
+        WebkitUserSelect: "auto",
+        WebkitTouchCallout: "default"
     });
 
     const dugmeler = document.createElement("div");
@@ -2910,7 +2940,9 @@ function tabloResimOnizlemeAc(blob){
         flexWrap: "wrap",
         justifyContent: "center",
         gap: "8px",
-        width: "100%"
+        width: "100%",
+        flex: "0 0 auto",
+        paddingBottom: "env(safe-area-inset-bottom)"
     });
 
     function dugmeOlustur(yazi){
@@ -2919,74 +2951,67 @@ function tabloResimOnizlemeAc(blob){
         b.textContent = yazi;
         Object.assign(b.style, {
             border: "0",
-            borderRadius: "6px",
-            padding: "11px 14px",
-            font: "bold 13px Arial, sans-serif",
+            borderRadius: "8px",
+            padding: "12px 14px",
+            minHeight: "44px",
+            font: "bold 14px Arial,sans-serif",
             background: "#fff",
             color: "#111",
-            cursor: "pointer"
+            cursor: "pointer",
+            touchAction: "manipulation",
+            WebkitTapHighlightColor: "rgba(0,0,0,.15)"
         });
         return b;
     }
 
     const indir = dugmeOlustur("📥 Resmi indir");
-    indir.onclick = () => pngIndir(blob);
+    indir.addEventListener("click", function(){
+        try{
+            const link = document.createElement("a");
+            link.href = dataUrl;
+            link.download = "haftalik-calisma-programi.png";
+            link.target = "_blank";
+            link.rel = "noopener";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            if(durumMesaji) durumMesaji("İndirme isteği gönderildi. Telegram izin vermezse resme basılı tutarak kaydetmeyi deneyin.");
+        }catch(e){
+            if(durumMesaji) durumMesaji("Bu Telegram sürümü indirmeyi engelliyor. Resmin üzerine basılı tutarak kaydetmeyi deneyin.");
+        }
+    });
 
     const paylas = dugmeOlustur("↗ Paylaşmayı dene");
-    paylas.onclick = async () => {
+    paylas.addEventListener("click", async function(){
         try{
-            const dosya = new File([blob], "haftalik-calisma-programi.png", {
-                type: "image/png"
+            if(!navigator.share){
+                if(durumMesaji) durumMesaji("Bu Telegram mobil sürümünde doğrudan paylaşım desteklenmiyor. Resme basılı tutup kaydedin, ardından sohbete gönderin.");
+                return;
+            }
+            const blob = await new Promise((resolve, reject) => {
+                canvas.toBlob(b => b ? resolve(b) : reject(new Error("PNG hazırlanamadı")), "image/png");
             });
-            if(navigator.share && navigator.canShare && navigator.canShare({files:[dosya]})){
-                await navigator.share({
-                    title: "Haftalık Çalışma Programı",
-                    files: [dosya]
-                });
-            }else{
-                alert("Bu Telegram ekranı doğrudan dosya paylaşımını desteklemiyor. Resme basılı tutarak kaydedebilir, sonra Telegram sohbetinden gönderebilirsiniz.");
+            const dosya = new File([blob], "haftalik-calisma-programi.png", {type:"image/png"});
+            if(navigator.canShare && !navigator.canShare({files:[dosya]})){
+                if(durumMesaji) durumMesaji("Bu cihaz dosya paylaşımını desteklemiyor. Resme basılı tutup kaydedin.");
+                return;
             }
-        }catch(hata){
-            if(!hata || hata.name !== "AbortError"){
-                alert("Doğrudan paylaşım açılamadı. Resme basılı tutarak kaydetmeyi deneyin.");
-            }
+            await navigator.share({title:"Haftalık Çalışma Programı", files:[dosya]});
+        }catch(e){
+            if(e && e.name === "AbortError") return;
+            console.error("Paylaşım hatası:", e);
+            if(durumMesaji) durumMesaji("Paylaşım açılamadı. Resme basılı tutup kaydedin, ardından Telegram sohbetinden gönderin.");
         }
-    };
+    });
 
     const kapat = dugmeOlustur("Kapat");
-    kapat.onclick = () => {
+    kapat.addEventListener("click", function(){
         overlay.remove();
-        URL.revokeObjectURL(url);
-    };
+    });
 
     dugmeler.append(indir, paylas, kapat);
     overlay.append(aciklama, resim, dugmeler);
-    overlay.addEventListener("click", e => {
-        if(e.target === overlay){
-            overlay.remove();
-            URL.revokeObjectURL(url);
-        }
-    });
     document.body.appendChild(overlay);
-}
-
-
-/* =====================================================
-   PNG İNDİR
-===================================================== */
-
-function pngIndir(blob){
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "haftalik-calisma-programi.png";
-    link.style.display = "none";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    /* Telegram WebView indirmeyi engellerse önizleme ekranda kalır. */
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 
