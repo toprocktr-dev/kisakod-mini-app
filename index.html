@@ -134,6 +134,26 @@ body {
   min-width: 0;
 }
 
+.product-favorite-button {
+   flex: 0 0 34px;
+   width: 34px;
+   height: 38px;
+   padding: 0;
+   border: 0;
+   border-radius: 9px;
+   background: #f5f5f5;
+   color: #777;
+   font-size: 23px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+.product-favorite-button.is-favorite {
+   background: #fff4d6;
+   color: #d49a00;
+}
+
 .product-name {
   font-size: 15px;
   font-weight: bold;
@@ -334,6 +354,29 @@ body {
   overflow-wrap: anywhere;
 }
 
+.detail-favorite-button {
+   width: 100%;
+   margin-top: 15px;
+   min-height: 43px;
+   border: 1px solid #ead9a7;
+   border-radius: 10px;
+   background: #fff8e6;
+   color: #765900;
+   font-size: 15px;
+   font-weight: bold;
+}
+
+.favorites-empty {
+   text-align: center;
+   padding: 28px 15px;
+   color: #777;
+   font-size: 14px;
+   line-height: 1.6;
+   background: #fff;
+   border: 1px solid #e3e3e3;
+   border-radius: 12px;
+}
+
 .close-button {
   width: 100%;
   margin-top: 15px;
@@ -429,6 +472,16 @@ body {
     >
       📷
     </button>
+
+    <button
+      id="favoriteButton"
+      class="favorite-button"
+      type="button"
+      aria-label="Favori ürünler"
+      title="Favori ürünler"
+    >
+      ⭐<span id="favoriteCount" class="favorite-count">0</span>
+    </button>
   </div>
 </div>
 
@@ -481,9 +534,25 @@ body {
       </div>
     </div>
 
+    <button id="detailFavoriteButton" class="detail-favorite-button" type="button">
+      ☆ Favorilere ekle
+    </button>
+
     <button id="closeModal" class="close-button">
       Kapat
     </button>
+  </div>
+</div>
+
+<!-- FAVORİ ÜRÜNLER PENCERESİ -->
+<div id="favoritesModal" class="modal">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;">
+      <div style="font-size:18px;font-weight:800;color:#202938;">⭐ Favori Ürünlerim</div>
+      <button id="closeFavorites" type="button" aria-label="Favorileri kapat" style="width:36px;height:36px;border:0;border-radius:50%;background:#f0f1f3;font-size:22px;">×</button>
+    </div>
+    <div id="favoritesStatus" style="font-size:13px;color:#788397;margin-bottom:12px;"></div>
+    <div id="favoritesResults" class="results" style="padding:0;gap:8px;"></div>
   </div>
 </div>
 
@@ -533,6 +602,142 @@ const searchButton =
 
 const barcodeButton =
   document.getElementById("barcodeButton");
+
+const favoriteButton =
+  document.getElementById("favoriteButton");
+
+const favoriteCount =
+  document.getElementById("favoriteCount");
+
+const favoritesModal =
+  document.getElementById("favoritesModal");
+
+const favoritesResults =
+  document.getElementById("favoritesResults");
+
+const favoritesStatus =
+  document.getElementById("favoritesStatus");
+
+const detailFavoriteButton =
+  document.getElementById("detailFavoriteButton");
+
+let seciliUrun = null;
+const FAVORITES_STORAGE_KEY = "kisakod_plus_favorites_v1";
+let favoriUrunler = favorileriYukle();
+
+function favorileriYukle() {
+  try {
+    const kayit = localStorage.getItem(FAVORITES_STORAGE_KEY);
+    const liste = kayit ? JSON.parse(kayit) : [];
+    return Array.isArray(liste) ? liste : [];
+  } catch (e) {
+    console.warn("Favoriler okunamadı:", e);
+    return [];
+  }
+}
+
+function urunFavoriAnahtari(urun) {
+  if (!urun) return "";
+  return String(urun.urunKodu || urun.barkod || urun.kod || urun.link || "");
+}
+
+function urunFavorideMi(urun) {
+  const anahtar = urunFavoriAnahtari(urun);
+  return !!anahtar && favoriUrunler.some(function(item) {
+    return urunFavoriAnahtari(item) === anahtar;
+  });
+}
+
+function favorileriKaydet() {
+  try {
+    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriUrunler));
+  } catch (e) {
+    console.warn("Favoriler kaydedilemedi:", e);
+    alert("Favoriler bu cihazda kaydedilemedi. Tarayıcı depolama alanını kontrol edin.");
+  }
+  favoriSayisiniGuncelle();
+}
+
+function favoriSayisiniGuncelle() {
+  favoriteCount.textContent = String(favoriUrunler.length);
+  favoriteCount.style.display = "flex";
+}
+
+function favoriDurumunuGuncelle() {
+  if (!seciliUrun) return;
+  const favoride = urunFavorideMi(seciliUrun);
+  detailFavoriteButton.textContent = favoride
+    ? "★ Favorilerden çıkar"
+    : "☆ Favorilere ekle";
+  detailFavoriteButton.style.background = favoride ? "#fff0c2" : "#fff8e6";
+}
+
+function favoriDegistir(urun) {
+  const anahtar = urunFavoriAnahtari(urun);
+  if (!anahtar) {
+    alert("Bu ürün favorilere eklenemedi; ürün kodu bulunamadı.");
+    return;
+  }
+
+  const mevcutIndex = favoriUrunler.findIndex(function(item) {
+    return urunFavoriAnahtari(item) === anahtar;
+  });
+
+  if (mevcutIndex >= 0) {
+    favoriUrunler.splice(mevcutIndex, 1);
+  } else {
+    // Aynı ürünü ikinci kez eklememek için ürün anahtarı kontrol edilir.
+    favoriUrunler.push(urun);
+  }
+
+  favorileriKaydet();
+  favoriDurumunuGuncelle();
+  mevcutKartYildizlariniGuncelle();
+
+  if (favoritesModal.style.display === "flex") {
+    favoriListesiniGoster();
+  }
+}
+
+function mevcutKartYildizlariniGuncelle() {
+  document.querySelectorAll(".product-favorite-button").forEach(function(button) {
+    const anahtar = button.dataset.favoriteKey || "";
+    const favoride = favoriUrunler.some(function(item) {
+      return urunFavoriAnahtari(item) === anahtar;
+    });
+    button.textContent = favoride ? "★" : "☆";
+    button.classList.toggle("is-favorite", favoride);
+    button.setAttribute("aria-label", favoride ? "Favorilerden çıkar" : "Favorilere ekle");
+  });
+}
+
+function favoriListesiniGoster() {
+  favoritesResults.innerHTML = "";
+  favoritesStatus.textContent = favoriUrunler.length
+    ? favoriUrunler.length + " favori ürün"
+    : "Favori listen henüz boş.";
+
+  if (!favoriUrunler.length) {
+    const empty = document.createElement("div");
+    empty.className = "favorites-empty";
+    empty.textContent = "⭐ Henüz favori ürün eklemedin. Ürün kartındaki yıldız simgesine dokunarak ürünleri buraya kaydedebilirsin.";
+    favoritesResults.appendChild(empty);
+    return;
+  }
+
+  favoriUrunler.forEach(function(urun) {
+    favoritesResults.appendChild(urunKartiOlustur(urun, true));
+  });
+}
+
+function favoriPenceresiniAc() {
+  favoriListesiniGoster();
+  favoritesModal.style.display = "flex";
+}
+
+function favoriPenceresiniKapat() {
+  favoritesModal.style.display = "none";
+}
 
 const results =
   document.getElementById("results");
@@ -778,6 +983,67 @@ function renderResults(data) {
   sonrakiUrunleriGoster(ILK_GOSTERIM);
 }
 
+function urunKartiOlustur(urun, favoriPenceresinde) {
+  const card = document.createElement("div");
+  card.className = "product-card";
+
+  const img = document.createElement("img");
+  img.className = "product-image";
+  img.alt = urun.kod || "Ürün";
+  if (urun.link) {
+    img.src = urun.link;
+  } else {
+    img.style.visibility = "hidden";
+  }
+
+  const info = document.createElement("div");
+  info.className = "product-info";
+
+  const name = document.createElement("div");
+  name.className = "product-name";
+  name.textContent = urun.kod || "Ürün";
+
+  const code = document.createElement("div");
+  code.className = "product-code";
+  code.textContent = "🔢 Kod: " + (urun.urunKodu || "");
+
+  const price = document.createElement("div");
+  price.className = "product-price";
+  price.textContent = "💰 Fiyat: " + (urun.fiyat || "");
+
+  const date = document.createElement("div");
+  date.className = "product-date";
+  date.textContent = "📅 Satış Tarihi: " + (urun.tarih || "");
+
+  info.appendChild(name);
+  info.appendChild(code);
+  info.appendChild(price);
+  info.appendChild(date);
+
+  const favorite = document.createElement("button");
+  favorite.type = "button";
+  favorite.className = "product-favorite-button";
+  favorite.dataset.favoriteKey = urunFavoriAnahtari(urun);
+  favorite.textContent = urunFavorideMi(urun) ? "★" : "☆";
+  favorite.classList.toggle("is-favorite", urunFavorideMi(urun));
+  favorite.setAttribute("aria-label", urunFavorideMi(urun) ? "Favorilerden çıkar" : "Favorilere ekle");
+  favorite.addEventListener("click", function(event) {
+    event.stopPropagation();
+    favoriDegistir(urun);
+  });
+
+  card.appendChild(img);
+  card.appendChild(info);
+  card.appendChild(favorite);
+
+  card.addEventListener("click", function() {
+    if (favoriPenceresinde) favoriPenceresiniKapat();
+    showProductDetail(urun);
+  });
+
+  return card;
+}
+
 function sonrakiUrunleriGoster(adet) {
   const baslangic = gosterilenUrunSayisi;
 
@@ -787,53 +1053,7 @@ function sonrakiUrunleriGoster(adet) {
   );
 
   for (let i = baslangic; i < bitis; i++) {
-    const urun = tumUrunler[i];
-
-    const card = document.createElement("div");
-    card.className = "product-card";
-
-    const img = document.createElement("img");
-    img.className = "product-image";
-    img.alt = urun.kod || "Ürün";
-
-    if (urun.link) {
-      img.src = urun.link;
-    } else {
-      img.style.visibility = "hidden";
-    }
-
-    const info = document.createElement("div");
-    info.className = "product-info";
-
-    const name = document.createElement("div");
-    name.className = "product-name";
-    name.textContent = urun.kod || "Ürün";
-
-    const code = document.createElement("div");
-    code.className = "product-code";
-    code.textContent = "🔢 Kod: " + (urun.urunKodu || "");
-
-    const price = document.createElement("div");
-    price.className = "product-price";
-    price.textContent = "💰 Fiyat: " + (urun.fiyat || "");
-
-    const date = document.createElement("div");
-    date.className = "product-date";
-    date.textContent = "📅 Satış Tarihi: " + (urun.tarih || "");
-
-    info.appendChild(name);
-    info.appendChild(code);
-    info.appendChild(price);
-    info.appendChild(date);
-
-    card.appendChild(img);
-    card.appendChild(info);
-
-    card.addEventListener("click", function() {
-      showProductDetail(urun);
-    });
-
-    results.appendChild(card);
+    results.appendChild(urunKartiOlustur(tumUrunler[i], false));
   }
 
   gosterilenUrunSayisi = bitis;
@@ -850,6 +1070,7 @@ function sonrakiUrunleriGoster(adet) {
  *************************************************/
 
 function showProductDetail(urun) {
+  seciliUrun = urun;
   const modal = document.getElementById("productModal");
   const modalImage = document.getElementById("modalImage");
 
@@ -887,6 +1108,7 @@ function showProductDetail(urun) {
     qr.textContent = "QR kod oluşturulamadı.";
   }
 
+  favoriDurumunuGuncelle();
   modal.style.display = "flex";
 }
 
@@ -966,6 +1188,24 @@ if (window.visualViewport) {
     }
   });
 }
+
+/*************************************************
+ * FAVORİ BUTONLARI
+ *************************************************/
+
+favoriteButton.addEventListener("click", favoriPenceresiniAc);
+
+document.getElementById("closeFavorites").addEventListener("click", favoriPenceresiniKapat);
+
+favoritesModal.addEventListener("click", function(e) {
+  if (e.target === favoritesModal) favoriPenceresiniKapat();
+});
+
+detailFavoriteButton.addEventListener("click", function() {
+  if (seciliUrun) favoriDegistir(seciliUrun);
+});
+
+favoriSayisiniGuncelle();
 
 /*************************************************
  * BARKOD TARAYICI
@@ -1057,6 +1297,7 @@ if (telegramWebApp) {
   telegramWebApp.BackButton.onClick(function() {
     const modal = document.getElementById("productModal");
     const scanner = document.getElementById("scanner");
+    const favorites = document.getElementById("favoritesModal");
 
     if (scanner.style.display === "block") {
       stopScanner();
@@ -1065,6 +1306,11 @@ if (telegramWebApp) {
 
     if (modal.style.display === "flex") {
       modal.style.display = "none";
+      return;
+    }
+
+    if (favorites.style.display === "flex") {
+      favorites.style.display = "none";
       return;
     }
 
