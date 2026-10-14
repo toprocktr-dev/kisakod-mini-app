@@ -1,31 +1,21 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
->
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>KısaKod PLUS</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/@zxing/browser@0.2.1"></script>
 
-
 <style>
-
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
 
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -42,7 +32,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #ffffff;
+  background: #fff;
   padding: 12px;
   border-bottom: 1px solid #ddd;
 }
@@ -61,6 +51,7 @@ body {
 
 .search-input {
   flex: 1;
+  min-width: 0;
   height: 45px;
   border: 1px solid #ccc;
   border-radius: 10px;
@@ -132,8 +123,6 @@ body {
   border-radius: 9px;
   object-fit: cover;
   background: #eee;
-
-  /* Resme uzun basınca URL/menü çıkmasını engeller */
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
@@ -183,6 +172,60 @@ body {
   color: #666;
 }
 
+/* ÖZEL YÜKLENME EKRANI */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(244,245,247,.96);
+}
+
+.loading-box {
+  width: 100%;
+  max-width: 320px;
+  padding: 30px 20px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #e5e9f0;
+  border-radius: 22px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.10);
+}
+
+.custom-spinner {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  border: 6px solid #e5edff;
+  border-top-color: #2468df;
+  border-right-color: #2468df;
+  border-radius: 50%;
+  animation: kisakodSpin .8s linear infinite;
+}
+
+@keyframes kisakodSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-title {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1.4;
+  color: #202938;
+}
+
+.loading-description {
+  margin-top: 9px;
+  color: #778196;
+  font-size: 13px;
+}
+
+/* ÜRÜN DETAY PENCERESİ */
 .modal {
   display: none;
   position: fixed;
@@ -195,22 +238,24 @@ body {
 }
 
 .modal-box {
+  position: relative;
   width: 100%;
   max-width: 420px;
   background: white;
-  border-radius: 16px;
-  padding: 15px;
+  border-radius: 20px;
+  padding: 20px;
   max-height: 90vh;
   overflow-y: auto;
 }
 
 .modal-image {
+  display: block;
   width: 100%;
-  max-height: 300px;
+  height: 190px;
   object-fit: contain;
   border-radius: 12px;
-  background: #f2f2f2;
-
+  background: #fff;
+  margin: 0 auto 12px;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
@@ -218,15 +263,75 @@ body {
 }
 
 .modal-title {
-  font-size: 19px;
-  font-weight: bold;
-  margin-top: 12px;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: center;
+  margin: 8px 0 15px;
+  color: #202938;
 }
 
-.modal-text {
-  margin-top: 8px;
-  line-height: 1.5;
-  color: #444;
+.modal-qr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0 17px;
+}
+
+#qrCode {
+  min-width: 148px;
+  min-height: 148px;
+  padding: 8px;
+  background: white;
+  border: 1px solid #e6eaf0;
+  border-radius: 12px;
+}
+
+#qrCode img,
+#qrCode canvas {
+  display: block;
+  width: 132px !important;
+  height: 132px !important;
+}
+
+.modal-price {
+  padding: 12px;
+  margin: 0 0 16px;
+  border-radius: 12px;
+  text-align: center;
+  background: #fff0f0;
+  color: #cf3434;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.modal-details {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.modal-detail-item {
+  min-width: 0;
+}
+
+.modal-detail-item + .modal-detail-item {
+  border-left: 1px solid #e1e5ec;
+  padding-left: 12px;
+}
+
+.modal-detail-label {
+  font-size: 12px;
+  color: #788397;
+  margin-bottom: 6px;
+}
+
+.modal-detail-value {
+  font-size: 15px;
+  font-weight: 800;
+  color: #202938;
+  overflow-wrap: anywhere;
 }
 
 .close-button {
@@ -240,6 +345,21 @@ body {
   font-size: 15px;
 }
 
+@media (max-width: 360px) {
+  .modal-box {
+    padding: 16px;
+  }
+
+  .modal-price {
+    font-size: 25px;
+  }
+
+  .modal-detail-value {
+    font-size: 13px;
+  }
+}
+
+/* BARKOD TARAYICI */
 .scanner {
   display: none;
   position: fixed;
@@ -275,23 +395,17 @@ body {
   height: 2px;
   background: red;
 }
-
 </style>
-
 </head>
-
 
 <body>
 
-
 <div class="header">
-
   <div class="title">
     🔎 KısaKod PLUS
   </div>
 
   <div class="search-row">
-
     <input
       id="searchInput"
       class="search-input"
@@ -315,93 +429,76 @@ body {
     >
       📷
     </button>
-
   </div>
-
 </div>
 
-
-<div
-  id="status"
-  class="status"
->
+<div id="status" class="status">
   Hazırlanıyor...
 </div>
 
+<div id="results" class="results"></div>
 
-<div
-  id="results"
-  class="results"
-></div>
-
+<!-- ÖZEL YÜKLENME EKRANI -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="loading-box">
+    <div class="custom-spinner"></div>
+    <div id="loadingTitle" class="loading-title">
+      Telegram doğrulanıyor...
+    </div>
+    <div id="loadingDescription" class="loading-description">
+      Lütfen bekleyin.
+    </div>
+  </div>
+</div>
 
 <!-- ÜRÜN DETAY -->
-
-<div
-  id="productModal"
-  class="modal"
->
-
+<div id="productModal" class="modal">
   <div class="modal-box">
-
     <img
       id="modalImage"
       class="modal-image"
       src=""
-      alt=""
+      alt="Ürün görseli"
     >
 
-    <div
-      id="modalTitle"
-      class="modal-title"
-    ></div>
+    <div id="modalTitle" class="modal-title"></div>
 
-    <div
-      id="modalText"
-      class="modal-text"
-    ></div>
+    <div class="modal-qr">
+      <div id="qrCode"></div>
+    </div>
 
-    <button
-      id="closeModal"
-      class="close-button"
-    >
+    <div id="modalPrice" class="modal-price"></div>
+
+    <div class="modal-details">
+      <div class="modal-detail-item">
+        <div class="modal-detail-label">Ürün Kodu</div>
+        <div id="modalCode" class="modal-detail-value"></div>
+      </div>
+
+      <div class="modal-detail-item">
+        <div class="modal-detail-label">Satış Tarihi</div>
+        <div id="modalDate" class="modal-detail-value"></div>
+      </div>
+    </div>
+
+    <button id="closeModal" class="close-button">
       Kapat
     </button>
-
   </div>
-
 </div>
-
 
 <!-- BARKOD -->
+<div id="scanner" class="scanner">
+  <video id="scannerVideo" playsinline></video>
 
-<div
-  id="scanner"
-  class="scanner"
->
+  <div class="scanner-line"></div>
 
-  <video
-    id="scannerVideo"
-    playsinline
-  ></video>
-
-  <div
-    class="scanner-line"
-  ></div>
-
-  <button
-    id="scannerClose"
-    class="scanner-close"
-  >
+  <button id="scannerClose" class="scanner-close">
     ✕
   </button>
-
 </div>
 
-
 <script>
-
-
 /*************************************************
  * TELEGRAM
  *************************************************/
@@ -412,15 +509,10 @@ const telegramWebApp =
     ? window.Telegram.WebApp
     : null;
 
-
 if (telegramWebApp) {
-
   telegramWebApp.ready();
-
   telegramWebApp.expand();
-
 }
-
 
 /*************************************************
  * API
@@ -429,68 +521,67 @@ if (telegramWebApp) {
 const API_URL =
   "https://script.google.com/macros/s/AKfycbyX6_Tkt8Jv9rrEw-uyqJe3O40ni5vWpMGiFfm_QcllxdyfPuwAs7Y2PwGRQX4h_7-fjQ/exec";
 
-
 /*************************************************
  * ELEMENTLER
  *************************************************/
 
 const searchInput =
-  document.getElementById(
-    "searchInput"
-  );
+  document.getElementById("searchInput");
 
 const searchButton =
-  document.getElementById(
-    "searchButton"
-  );
+  document.getElementById("searchButton");
 
 const barcodeButton =
-  document.getElementById(
-    "barcodeButton"
-  );
+  document.getElementById("barcodeButton");
 
 const results =
-  document.getElementById(
-    "results"
-  );
+  document.getElementById("results");
 
 const status =
-  document.getElementById(
-    "status"
-  );
+  document.getElementById("status");
 
+const loadingScreen =
+  document.getElementById("loadingScreen");
+
+const loadingTitle =
+  document.getElementById("loadingTitle");
+
+const loadingDescription =
+  document.getElementById("loadingDescription");
 
 /*************************************************
- * INIT DATA
+ * YÜKLENME EKRANI
  *************************************************/
+
+function progressGoster(baslik, aciklama) {
+  results.innerHTML = "";
+
+  loadingTitle.textContent = baslik;
+  loadingDescription.textContent =
+    aciklama || "Lütfen bekleyin.";
+
+  loadingScreen.style.display = "flex";
+}
+
+function progressGizle() {
+  loadingScreen.style.display = "none";
+}
 
 /*************************************************
  * TELEGRAM INIT DATA
  *************************************************/
 
 function getInitData() {
-
   if (!telegramWebApp) {
     return "";
   }
 
-  return (
-    telegramWebApp.initData ||
-    ""
-  );
+  return telegramWebApp.initData || "";
 }
 
-
-/*************************************************
- * TELEGRAM INIT DATA BEKLE
- *************************************************/
-
 async function getTelegramInitData() {
-
   for (let i = 0; i < 20; i++) {
-
-    const initData =
-      getInitData();
+    const initData = getInitData();
 
     if (initData) {
       return initData;
@@ -509,174 +600,113 @@ async function getTelegramInitData() {
  *************************************************/
 
 async function miniAppYetkiKontrol() {
-
-  status.textContent =
-    "🔐 Telegram doğrulanıyor...";
-
-  const initData =
-    await getTelegramInitData();
-
-
-  if (!initData) {
-
-    status.textContent =
-      "❌ Telegram doğrulaması alınamadı.";
-
-    results.innerHTML = "";
-
-    return false;
-  }
-
+  progressGoster(
+    "Telegram doğrulanıyor...",
+    "Kullanıcı bilgileriniz kontrol ediliyor."
+  );
 
   try {
+    const initData = await getTelegramInitData();
+
+    if (!initData) {
+      status.textContent =
+        "❌ Telegram doğrulaması alınamadı.";
+
+      results.innerHTML = "";
+      return false;
+    }
 
     const url =
       API_URL +
       "?func=URUN_ARA" +
       "&initData=" +
-      encodeURIComponent(
-        initData
-      ) +
+      encodeURIComponent(initData) +
       "&query=";
 
-
-    const response =
-      await fetch(url);
-
-
-    const data =
-      await response.json();
-
+    const response = await fetch(url);
+    const data = await response.json();
 
     if (
       !data ||
       data.success !== true ||
       data.authorized !== true
     ) {
-
       status.textContent =
         data && data.message
           ? "❌ " + data.message
           : "❌ Kullanım yetkiniz yok.";
 
       results.innerHTML = "";
-
       return false;
     }
 
-
-    status.textContent =
-      "Ürün aramaya hazır.";
-
+    status.textContent = "Ürün aramaya hazır.";
     return true;
 
-
   } catch (err) {
-
-    console.error(
-      "Telegram yetki hatası:",
-      err
-    );
+    console.error("Telegram yetki hatası:", err);
 
     status.textContent =
       "❌ Sunucu bağlantısı kurulamadı.";
 
     return false;
+
+  } finally {
+    progressGizle();
   }
 }
 
 /*************************************************
- * ÜRÜN ARA
+ * ÜRÜN ARAMA
  *************************************************/
 
 let sonArama = "";
 
-
-async function searchProducts(
-  force = false
-) {
-
+async function searchProducts(force = false) {
   const query =
-    String(
-      searchInput.value ||
-      ""
-    ).trim();
-
+    String(searchInput.value || "").trim();
 
   if (!query) {
-
     return;
   }
 
-
-  if (
-    !force &&
-    query === sonArama
-  ) {
-
+  if (!force && query === sonArama) {
     return;
   }
 
+  sonArama = query;
+  searchButton.disabled = true;
 
-  sonArama =
-    query;
+  progressGoster(
+    "Ürünler aranıyor...",
+    "Aradığınız ürünler getiriliyor."
+  );
 
-
-  const initData =
-  await getTelegramInitData();
-
-
-if (!initData) {
-
-  status.textContent =
-    "❌ Telegram doğrulaması alınamadı.";
-
-  return;
-}
-
-
-  searchButton.disabled =
-    true;
-
-  status.textContent =
-    "🔎 Aranıyor...";
-
-  results.innerHTML =
-    '<div class="loading">Ürünler aranıyor...</div>';
-
+  status.textContent = "";
 
   try {
+    const initData = await getTelegramInitData();
+
+    if (!initData) {
+      status.textContent =
+        "❌ Telegram doğrulaması alınamadı.";
+
+      results.innerHTML = "";
+      return;
+    }
 
     const url =
       API_URL +
       "?func=URUN_ARA" +
       "&initData=" +
-      encodeURIComponent(
-        initData
-      ) +
+      encodeURIComponent(initData) +
       "&query=" +
-      encodeURIComponent(
-        query
-      );
+      encodeURIComponent(query);
 
+    const response = await fetch(url);
+    const data = await response.json();
 
-    const response =
-      await fetch(
-        url
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if (
-      !data ||
-      data.success !== true
-    ) {
-
-      results.innerHTML = "";
-
+    if (!data || data.success !== true) {
       status.textContent =
         data && data.message
           ? "❌ " + data.message
@@ -685,13 +715,7 @@ if (!initData) {
       return;
     }
 
-
-    if (
-      data.authorized !== true
-    ) {
-
-      results.innerHTML = "";
-
+    if (data.authorized !== true) {
       status.textContent =
         data.message
           ? "❌ " + data.message
@@ -700,34 +724,25 @@ if (!initData) {
       return;
     }
 
-
-    const urunler =
-  Array.isArray(data.products)
-    ? data.products
-    : [];
-
-renderResults(urunler);
-
+    renderResults(
+      Array.isArray(data.products)
+        ? data.products
+        : []
+    );
 
   } catch (err) {
-
-    console.error(
-      err
-    );
+    console.error("Ürün arama hatası:", err);
 
     results.innerHTML =
       '<div class="empty">❌ Bağlantı hatası oluştu.</div>';
 
-    status.textContent =
-      "Bağlantı hatası.";
+    status.textContent = "Bağlantı hatası.";
 
   } finally {
-
-    searchButton.disabled =
-      false;
+    progressGizle();
+    searchButton.disabled = false;
   }
 }
-
 
 /*************************************************
  * SONUÇLARI GÖSTER
@@ -740,7 +755,6 @@ const ILK_GOSTERIM = 20;
 const SONRAKI_GOSTERIM = 10;
 
 function renderResults(data) {
-
   results.innerHTML = "";
 
   tumUrunler = Array.isArray(data)
@@ -749,12 +763,8 @@ function renderResults(data) {
 
   gosterilenUrunSayisi = 0;
 
-  if (
-    tumUrunler.length === 0
-  ) {
-
-    status.textContent =
-      "❌ Ürün bulunamadı.";
+  if (tumUrunler.length === 0) {
+    status.textContent = "❌ Ürün bulunamadı.";
 
     results.innerHTML =
       '<div class="empty">Ürün bulunamadı.</div>';
@@ -763,173 +773,70 @@ function renderResults(data) {
   }
 
   status.textContent =
-    tumUrunler.length +
-    " ürün bulundu.";
+    tumUrunler.length + " ürün bulundu.";
 
-  sonrakiUrunleriGoster(
-    ILK_GOSTERIM
-  );
+  sonrakiUrunleriGoster(ILK_GOSTERIM);
 }
-  function sonrakiUrunleriGoster(adet) {
 
-  const baslangic =
-    gosterilenUrunSayisi;
+function sonrakiUrunleriGoster(adet) {
+  const baslangic = gosterilenUrunSayisi;
 
-  const bitis =
-    Math.min(
-      gosterilenUrunSayisi + adet,
-      tumUrunler.length
-    );
+  const bitis = Math.min(
+    gosterilenUrunSayisi + adet,
+    tumUrunler.length
+  );
 
-  for (
-    let i = baslangic;
-    i < bitis;
-    i++
-  ) {
+  for (let i = baslangic; i < bitis; i++) {
+    const urun = tumUrunler[i];
 
-    const urun =
-      tumUrunler[i];
+    const card = document.createElement("div");
+    card.className = "product-card";
 
-    const card =
-      document.createElement(
-        "div"
-      );
+    const img = document.createElement("img");
+    img.className = "product-image";
+    img.alt = urun.kod || "Ürün";
 
-    card.className =
-      "product-card";
-
-    const img =
-      document.createElement(
-        "img"
-      );
-
-    img.className =
-      "product-image";
-
-    img.alt =
-      urun.kod ||
-      "Ürün";
-
-    if (
-      urun.link
-    ) {
-
-      img.src =
-        urun.link;
-
+    if (urun.link) {
+      img.src = urun.link;
     } else {
-
-      img.style.visibility =
-        "hidden";
+      img.style.visibility = "hidden";
     }
 
-    const info =
-      document.createElement(
-        "div"
-      );
+    const info = document.createElement("div");
+    info.className = "product-info";
 
-    info.className =
-      "product-info";
+    const name = document.createElement("div");
+    name.className = "product-name";
+    name.textContent = urun.kod || "Ürün";
 
-    const name =
-      document.createElement(
-        "div"
-      );
+    const code = document.createElement("div");
+    code.className = "product-code";
+    code.textContent = "🔢 Kod: " + (urun.urunKodu || "");
 
-    name.className =
-      "product-name";
+    const price = document.createElement("div");
+    price.className = "product-price";
+    price.textContent = "💰 Fiyat: " + (urun.fiyat || "");
 
-    name.textContent =
-      urun.kod ||
-      "Ürün";
+    const date = document.createElement("div");
+    date.className = "product-date";
+    date.textContent = "📅 Satış Tarihi: " + (urun.tarih || "");
 
-    const code =
-      document.createElement(
-        "div"
-      );
+    info.appendChild(name);
+    info.appendChild(code);
+    info.appendChild(price);
+    info.appendChild(date);
 
-    code.className =
-      "product-code";
+    card.appendChild(img);
+    card.appendChild(info);
 
-    code.textContent =
-      "🔢 Kod: " +
-      (
-        urun.urunKodu ||
-        ""
-      );
+    card.addEventListener("click", function() {
+      showProductDetail(urun);
+    });
 
-    const price =
-      document.createElement(
-        "div"
-      );
-
-    price.className =
-      "product-price";
-
-    price.textContent =
-      "💰 Fiyat: " +
-      (
-        urun.fiyat ||
-        ""
-      );
-
-    const date =
-      document.createElement(
-        "div"
-      );
-
-    date.className =
-      "product-date";
-
-    date.textContent =
-      "📅 Satış Tarihi: " +
-      (
-        urun.tarih ||
-        ""
-      );
-
-    info.appendChild(
-      name
-    );
-
-    info.appendChild(
-      code
-    );
-
-    info.appendChild(
-      price
-    );
-
-    info.appendChild(
-      date
-    );
-
-    card.appendChild(
-      img
-    );
-
-    card.appendChild(
-      info
-    );
-
-    card.addEventListener(
-      "click",
-      function() {
-
-        showProductDetail(
-          urun
-        );
-
-      }
-    );
-
-    results.appendChild(
-      card
-    );
+    results.appendChild(card);
   }
 
-  gosterilenUrunSayisi =
-    bitis;
+  gosterilenUrunSayisi = bitis;
 
   status.textContent =
     gosterilenUrunSayisi +
@@ -939,568 +846,268 @@ function renderResults(data) {
 }
 
 /*************************************************
- * ÜRÜN DETAY
+ * ÜRÜN DETAY PENCERESİ
  *************************************************/
 
-function showProductDetail(
-  urun
-) {
+function showProductDetail(urun) {
+  const modal = document.getElementById("productModal");
+  const modalImage = document.getElementById("modalImage");
 
-  const modal =
-    document.getElementById(
-      "productModal"
-    );
+  document.getElementById("modalTitle").textContent =
+    urun.kod || "Ürün";
 
-  const modalImage =
-    document.getElementById(
-      "modalImage"
-    );
+  document.getElementById("modalPrice").textContent =
+    urun.fiyat || "";
 
-  const modalTitle =
-    document.getElementById(
-      "modalTitle"
-    );
+  document.getElementById("modalCode").textContent =
+    urun.urunKodu || "";
 
-  const modalText =
-    document.getElementById(
-      "modalText"
-    );
+  document.getElementById("modalDate").textContent =
+    urun.tarih || "";
 
-
-  if (
-    urun.link
-  ) {
-
-    modalImage.src =
-      urun.link;
-
-    modalImage.style.display =
-      "block";
-
+  if (urun.link) {
+    modalImage.src = urun.link;
+    modalImage.style.display = "block";
   } else {
-
-    modalImage.style.display =
-      "none";
+    modalImage.removeAttribute("src");
+    modalImage.style.display = "none";
   }
 
+  const qr = document.getElementById("qrCode");
+  qr.innerHTML = "";
 
-  modalTitle.textContent =
-    urun.kod ||
-    "Ürün";
+  if (typeof QRCode !== "undefined" && urun.urunKodu) {
+    new QRCode(qr, {
+      text: String(urun.urunKodu),
+      width: 132,
+      height: 132,
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } else {
+    qr.textContent = "QR kod oluşturulamadı.";
+  }
 
-
-  modalText.innerHTML =
-    "🔢 Kod: " +
-    escapeHtml(
-      urun.urunKodu || ""
-    ) +
-
-    "<br><br>💰 Fiyat: " +
-    escapeHtml(
-      urun.fiyat || ""
-    ) +
-
-    "<br><br>📅 Satış Tarihi: " +
-    escapeHtml(
-      urun.tarih || ""
-    );
-
-
-  modal.style.display =
-    "flex";
+  modal.style.display = "flex";
 }
-
 
 /*************************************************
  * HTML GÜVENLİ
  *************************************************/
 
-function escapeHtml(
-  value
-) {
-
-  return String(
-    value || ""
-  )
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
-
 
 /*************************************************
  * MODAL KAPAT
  *************************************************/
 
 document
-  .getElementById(
-    "closeModal"
-  )
-  .addEventListener(
-    "click",
-    function() {
-
-      document
-        .getElementById(
-          "productModal"
-        )
-        .style.display =
-        "none";
-
-    }
-  );
-
+  .getElementById("closeModal")
+  .addEventListener("click", function() {
+    document.getElementById("productModal").style.display = "none";
+  });
 
 document
-  .getElementById(
-    "productModal"
-  )
-  .addEventListener(
-    "click",
-    function(e) {
-
-      if (
-        e.target === this
-      ) {
-
-        this.style.display =
-          "none";
-      }
-
+  .getElementById("productModal")
+  .addEventListener("click", function(e) {
+    if (e.target === this) {
+      this.style.display = "none";
     }
-  );
-
+  });
 
 /*************************************************
  * ARAMA BUTONU
  *************************************************/
 
-searchButton.addEventListener(
-  "click",
-  function() {
-
-    searchProducts(
-      true
-    );
-
-  }
-);
-
+searchButton.addEventListener("click", function() {
+  searchProducts(true);
+});
 
 /*************************************************
- * ENTER
+ * ENTER TUŞU
  *************************************************/
 
-searchInput.addEventListener(
-  "keydown",
-  function(e) {
-
-    if (
-      e.key === "Enter"
-    ) {
-
-      e.preventDefault();
-
-      searchProducts(
-        true
-      );
-    }
-
+searchInput.addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    searchProducts(true);
   }
-);
-
+});
 
 /*************************************************
  * KLAVYE KAPANINCA ARA
  *************************************************/
 
-let keyboardWasOpen =
-  false;
+let keyboardWasOpen = false;
 
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", function() {
+    const height = window.visualViewport.height;
+    const windowHeight = window.innerHeight;
 
-if (
-  window.visualViewport
-) {
+    const keyboardOpen =
+      windowHeight - height > 150;
 
-  window.visualViewport.addEventListener(
-    "resize",
-    function() {
+    if (keyboardOpen) {
+      keyboardWasOpen = true;
 
-      const height =
-        window.visualViewport.height;
+    } else if (keyboardWasOpen) {
+      keyboardWasOpen = false;
 
-      const windowHeight =
-        window.innerHeight;
-
-
-      const keyboardOpen =
-        windowHeight -
-        height >
-        150;
-
-
-      if (
-        keyboardOpen
-      ) {
-
-        keyboardWasOpen =
-          true;
-
-      } else if (
-        keyboardWasOpen
-      ) {
-
-        keyboardWasOpen =
-          false;
-
-        if (
-          searchInput.value.trim()
-        ) {
-
-          searchProducts(
-            true
-          );
-        }
+      if (searchInput.value.trim()) {
+        searchProducts(true);
       }
-
     }
-  );
+  });
 }
-
 
 /*************************************************
  * BARKOD TARAYICI
  *************************************************/
 
-let codeReader =
-  null;
-
-let scannerControls =
-  null;
-
+let codeReader = null;
+let scannerControls = null;
 
 async function startScanner() {
+  const scanner = document.getElementById("scanner");
+  const video = document.getElementById("scannerVideo");
 
-  const scanner =
-    document.getElementById(
-      "scanner"
-    );
-
-  const video =
-    document.getElementById(
-      "scannerVideo"
-    );
-
-
-  scanner.style.display =
-    "block";
-
+  scanner.style.display = "block";
 
   try {
-
     codeReader =
       new ZXingBrowser.BrowserMultiFormatReader();
-
 
     scannerControls =
       await codeReader.decodeFromVideoDevice(
         undefined,
         video,
         function(result, error) {
-
-          if (
-            result
-          ) {
-
-            const barkod =
-              result.getText();
-
+          if (result) {
+            const barkod = result.getText();
 
             stopScanner();
 
-
-            searchInput.value =
-              barkod;
-
-
-            searchProducts(
-              true
-            );
+            searchInput.value = barkod;
+            searchProducts(true);
           }
-
         }
       );
 
-
   } catch (err) {
-
-    console.error(
-      err
-    );
-
-    alert(
-      "Kamera açılamadı."
-    );
-
+    console.error(err);
+    alert("Kamera açılamadı.");
     stopScanner();
   }
 }
-
 
 /*************************************************
  * SCANNER DURDUR
  *************************************************/
 
 function stopScanner() {
-
-  if (
-    scannerControls
-  ) {
-
+  if (scannerControls) {
     try {
-
       scannerControls.stop();
-
     } catch (e) {}
 
-    scannerControls =
-      null;
+    scannerControls = null;
   }
 
-
-  if (
-    codeReader
-  ) {
-
+  if (codeReader) {
     try {
-
       codeReader.reset();
-
     } catch (e) {}
 
-    codeReader =
-      null;
+    codeReader = null;
   }
 
-
-  const scanner =
-    document.getElementById(
-      "scanner"
-    );
-
-
-  scanner.style.display =
-    "none";
+  document.getElementById("scanner").style.display = "none";
 }
-
 
 /*************************************************
  * BARKOD BUTONU
  *************************************************/
 
-barcodeButton.addEventListener(
-  "click",
-  function() {
-
-    startScanner();
-
-  }
-);
-
+barcodeButton.addEventListener("click", function() {
+  startScanner();
+});
 
 /*************************************************
  * SCANNER KAPAT
  *************************************************/
 
 document
-  .getElementById(
-    "scannerClose"
-  )
-  .addEventListener(
-    "click",
-    function() {
-
-      stopScanner();
-
-    }
-  );
-
+  .getElementById("scannerClose")
+  .addEventListener("click", function() {
+    stopScanner();
+  });
 
 /*************************************************
- * TELEGRAM BACK BUTTON
+ * TELEGRAM GERİ BUTONU
  *************************************************/
 
-if (
-  telegramWebApp
-) {
+if (telegramWebApp) {
+  telegramWebApp.BackButton.onClick(function() {
+    const modal = document.getElementById("productModal");
+    const scanner = document.getElementById("scanner");
 
-  telegramWebApp.BackButton.onClick(
-    function() {
-
-      const modal =
-        document.getElementById(
-          "productModal"
-        );
-
-      const scanner =
-        document.getElementById(
-          "scanner"
-        );
-
-
-      if (
-        scanner.style.display ===
-        "block"
-      ) {
-
-        stopScanner();
-
-        return;
-      }
-
-
-      if (
-        modal.style.display ===
-        "flex"
-      ) {
-
-        modal.style.display =
-          "none";
-
-        return;
-      }
-
-
-      telegramWebApp.close();
-
+    if (scanner.style.display === "block") {
+      stopScanner();
+      return;
     }
-  );
 
+    if (modal.style.display === "flex") {
+      modal.style.display = "none";
+      return;
+    }
+
+    telegramWebApp.close();
+  });
 }
-
 
 /*************************************************
  * BAŞLANGIÇ
  *************************************************/
 
-document.addEventListener(
-  "DOMContentLoaded",
-  async function() {
+document.addEventListener("DOMContentLoaded", async function() {
+  if (!telegramWebApp) {
+    status.textContent =
+      "❌ Bu uygulama Telegram içinden açılmalıdır.";
 
-    if (!telegramWebApp) {
-
-      status.innerHTML =
-        "❌ Telegram WebApp bulunamadı.";
-
-      return;
-    }
-
-    telegramWebApp.ready();
-    telegramWebApp.expand();
-
-
-    status.innerHTML =
-      "🔐 Telegram bilgisi kontrol ediliyor...";
-
-
-    let initData = "";
-
-
-    for (
-      let i = 0;
-      i < 20;
-      i++
-    ) {
-
-      initData =
-        telegramWebApp.initData || "";
-
-
-      if (initData) {
-        break;
-      }
-
-
-      await new Promise(
-        function(resolve) {
-
-          setTimeout(
-            resolve,
-            500
-          );
-
-        }
-      );
-
-    }
-
-
-    if (!initData) {
-
-      status.innerHTML =
-        "❌ <b>Telegram initData BOŞ</b><br><br>" +
-        "Telegram kullanıcı bilgisi bu cihazda alınamadı.";
-
-      return;
-    }
-
-
-    status.innerHTML =
-      "✅ Telegram initData alındı.<br><br>" +
-      "Sunucu doğrulaması yapılıyor...";
-
-
-    await miniAppYetkiKontrol();
-
+    return;
   }
-);
-window.addEventListener(
-  "scroll",
-  function() {
 
-    const scrollPosition =
-      window.innerHeight +
-      window.scrollY;
+  telegramWebApp.ready();
+  telegramWebApp.expand();
 
-    const documentHeight =
-      document.documentElement.scrollHeight;
+  await miniAppYetkiKontrol();
+});
 
-    if (
-      scrollPosition >=
-      documentHeight - 300
-    ) {
+/*************************************************
+ * SAYFA SONUNA GELİNCE DAHA FAZLA ÜRÜN GÖSTER
+ *************************************************/
 
-      if (
-        gosterilenUrunSayisi <
-        tumUrunler.length
-      ) {
+window.addEventListener("scroll", function() {
+  const scrollPosition =
+    window.innerHeight + window.scrollY;
 
-        sonrakiUrunleriGoster(
-          SONRAKI_GOSTERIM
-        );
-      }
+  const documentHeight =
+    document.documentElement.scrollHeight;
+
+  if (scrollPosition >= documentHeight - 300) {
+    if (gosterilenUrunSayisi < tumUrunler.length) {
+      sonrakiUrunleriGoster(SONRAKI_GOSTERIM);
     }
   }
-);
+});
 </script>
 
 </body>
-
 </html>
