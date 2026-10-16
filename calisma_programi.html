@@ -14,6 +14,7 @@
      TABLOYU RESME ÇEVİRME
 ===================================================== -->
 
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 
@@ -1313,6 +1314,9 @@ const HAFIZA_ANAHTARI =
 const SON_DUZENLENEN_HAFTA_ANAHTARI =
     "haftalik_calisma_programi_son_duzenlenen_hafta_v1";
 
+const TELEGRAM_SON_HAFTA_ANAHTARI =
+    "kisakod_son_duzenlenen_hafta_v1";
+
 const ISIM_HAFIZA_ANAHTARI =
     "haftalik_calisma_programi_isimleri_v1";
 
@@ -2508,6 +2512,24 @@ function programKaydet(){
             aktifHafta
         );
 
+        // Telegram Mini App'te son düzenlenen haftayı Telegram hesabına da kaydet.
+        try {
+            const bulutHafiza = window.Telegram &&
+                window.Telegram.WebApp &&
+                window.Telegram.WebApp.CloudStorage;
+            if (bulutHafiza && typeof bulutHafiza.setItem === "function") {
+                bulutHafiza.setItem(
+                    TELEGRAM_SON_HAFTA_ANAHTARI,
+                    aktifHafta,
+                    function(hata) {
+                        if (hata) console.warn("Telegram son hafta kaydedilemedi:", hata);
+                    }
+                );
+            }
+        } catch(bulutHata) {
+            console.warn("Telegram bulut hafızasına erişilemedi:", bulutHata);
+        }
+
     }
     catch(hata){
 
@@ -2977,53 +2999,65 @@ function tabloResimOnizlemeAc(dataUrl, canvas, durumMesaji){
 
 tabloOlustur();
 
-
-/*
-   İsimleri tarihten bağımsız hafızadan yükle
-*/
-
+/* İsimleri tarihten bağımsız hafızadan yükle. */
 isimleriYukle();
 
+function programBaslangiciniTamamla(telegramSonHafta) {
+    const baslangicTarihiInput = document.getElementById("baslangicTarihi");
 
-/*
-   Son kaydedilen haftayı aç.
-   Kayıt yoksa mevcut varsayılan tarih korunur.
-*/
+    try {
+        const yerelSonHafta = localStorage.getItem(
+            SON_DUZENLENEN_HAFTA_ANAHTARI
+        );
+        const kayitliProgramlar = JSON.parse(
+            localStorage.getItem(HAFIZA_ANAHTARI) || "{}"
+        );
 
-const baslangicTarihiInput =
-    document.getElementById("baslangicTarihi");
+        // Telegram'dan gelen son hafta önceliklidir; yalnızca cihazda kayıtlıysa açılır.
+        const adaylar = [telegramSonHafta, yerelSonHafta];
+        let acilacakHafta = null;
+        for (const aday of adaylar) {
+            if (aday && kayitliProgramlar[aday]) {
+                acilacakHafta = aday;
+                break;
+            }
+        }
 
-try {
-    const sonHafta = localStorage.getItem(
-        SON_DUZENLENEN_HAFTA_ANAHTARI
-    );
-    const kayitliProgramlar = JSON.parse(
-        localStorage.getItem(HAFIZA_ANAHTARI) || "{}"
-    );
-
-    if (sonHafta && kayitliProgramlar[sonHafta]) {
-        baslangicTarihiInput.value = sonHafta;
+        if (acilacakHafta) {
+            baslangicTarihiInput.value = acilacakHafta;
+        }
+        tarihleriOlustur();
+    } catch (hata) {
+        console.error("Son kayıtlı hafta okunamadı:", hata);
         tarihleriOlustur();
     }
-} catch (hata) {
-    console.error("Son kayıtlı hafta okunamadı:", hata);
+
+    aktifHafta = baslangicTarihiInput.value;
+    programYukle();
+    toplamHesapla();
 }
 
-aktifHafta = baslangicTarihiInput.value;
+/* Telegram Mini App'te son düzenlenen haftayı CloudStorage'dan oku.
+   Normal web tarayıcısında mevcut localStorage davranışı aynen devam eder. */
+try {
+    const bulutHafiza = window.Telegram &&
+        window.Telegram.WebApp &&
+        window.Telegram.WebApp.CloudStorage;
 
-
-/*
-   Kayıtlı programı yükle
-*/
-
-programYukle();
-
-
-/*
-   Toplamları hesapla
-*/
-
-toplamHesapla();
+    if (bulutHafiza && typeof bulutHafiza.getItem === "function") {
+        bulutHafiza.getItem(
+            TELEGRAM_SON_HAFTA_ANAHTARI,
+            function(hata, deger) {
+                programBaslangiciniTamamla(hata ? null : deger);
+            }
+        );
+    } else {
+        programBaslangiciniTamamla(null);
+    }
+} catch (hata) {
+    console.warn("Telegram CloudStorage okunamadı; yerel hafıza kullanılacak:", hata);
+    programBaslangiciniTamamla(null);
+}
 
 </script>
 
