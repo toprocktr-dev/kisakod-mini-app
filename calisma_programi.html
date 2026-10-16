@@ -827,6 +827,10 @@ thead tr:nth-child(2) th{
     height:auto;
     margin:auto;
     object-fit:contain;
+    -webkit-touch-callout:none;
+    -webkit-user-select:none;
+    user-select:none;
+    pointer-events:none;
 }
 .resim-onizleme-butonlar{
     display:flex;
@@ -1118,14 +1122,13 @@ thead tr:nth-child(2) th{
     <div class="resim-onizleme-kutu">
         <div class="resim-onizleme-baslik">TABLO RESMİ HAZIR</div>
         <div class="resim-onizleme-goruntu-alani">
-            <img id="olusturulanTabloResmi" alt="Haftalık çalışma programı resmi">
+            <img id="olusturulanTabloResmi" alt="Haftalık çalışma programı resmi" draggable="false" oncontextmenu="return false;">
         </div>
         <div class="resim-onizleme-butonlar">
             <button type="button" class="resim-indir-buton" onclick="tabloResminiIndir()">RESMİ İNDİR</button>
             <button type="button" onclick="tabloResminiPaylasmayiDene()">PAYLAŞMAYI DENE</button>
             <button type="button" onclick="resimOnizlemeKapat()">KAPAT</button>
         </div>
-        <div class="resim-onizleme-aciklama">İndirme çalışmazsa resmin üzerine uzun basarak cihazınızın resim kaydetme seçeneklerini deneyebilirsiniz.</div>
     </div>
 </div>
 
@@ -2853,7 +2856,7 @@ async function tabloResminiPaylasmayiDene(){
         if(navigator.share && (!navigator.canShare || navigator.canShare({files:[dosya]}))){
             await navigator.share({title:"Haftalık Çalışma Programı", files:[dosya]});
         }else{
-            alert("Bu Telegram/WebView ekranında doğrudan paylaşım desteklenmiyor. Resmi indirmeyi veya resmin üzerine uzun basarak kaydetmeyi deneyin.");
+            alert("Bu Telegram/WebView ekranında doğrudan paylaşım desteklenmiyor.");
         }
     }
     catch(hata){
