@@ -14,7 +14,7 @@
      TABLOYU RESME ÇEVİRME
 ===================================================== -->
 
-<!-- html2canvas açılışta yüklenmez; yalnızca paylaşım sırasında yüklenir. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 
 <style>
@@ -60,6 +60,7 @@ body{
 .tarih-alani{
     display:flex;
     align-items:center;
+    justify-content:center;
     gap:6px;
     margin-bottom:6px;
     font-size:12px;
@@ -335,6 +336,12 @@ thead tr:nth-child(2) th{
 
 .uyari-overlay.acik{
     display:flex;
+}
+
+@media(min-width:701px){
+    .uyari-overlay{
+        align-items:flex-start;
+    }
 }
 
 .uyari{
@@ -739,6 +746,11 @@ thead tr:nth-child(2) th{
         font-size:9px;
     }
 
+    .saat-yazi.diger-uzun-secili{
+        font-size:8px;
+        line-height:10px;
+    }
+
     .uyari{
         width:310px;
         max-width:94%;
@@ -778,82 +790,6 @@ thead tr:nth-child(2) th{
         font-size:8px;
     }
 
-}
-
-
-
-/* =====================================================
-   TABLO RESMİ ÖNİZLEME PENCERESİ
-===================================================== */
-.resim-onizleme-overlay{
-    position:fixed;
-    inset:0;
-    z-index:10000;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:12px;
-    background:rgba(0,0,0,.72);
-}
-.resim-onizleme-overlay.acik{display:flex;}
-.resim-onizleme-kutu{
-    width:min(96vw,900px);
-    max-height:94vh;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    padding:12px;
-    border-radius:10px;
-    background:#fff;
-    box-shadow:0 8px 30px rgba(0,0,0,.35);
-}
-.resim-onizleme-baslik{
-    text-align:center;
-    font-size:14px;
-    font-weight:bold;
-}
-.resim-onizleme-goruntu-alani{
-    overflow:auto;
-    min-height:0;
-    text-align:center;
-    background:#f2f2f2;
-    border:1px solid #ddd;
-    border-radius:5px;
-    padding:5px;
-}
-#olusturulanTabloResmi{
-    display:block;
-    width:100%;
-    height:auto;
-    margin:auto;
-    object-fit:contain;
-    -webkit-touch-callout:none;
-    -webkit-user-select:none;
-    user-select:none;
-    pointer-events:none;
-}
-.resim-onizleme-butonlar{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:8px;
-}
-.resim-onizleme-butonlar button{
-    min-height:38px;
-    padding:8px 14px;
-    border:1px solid #aaa;
-    border-radius:6px;
-    background:#eee;
-    font-size:12px;
-    font-weight:bold;
-    cursor:pointer;
-}
-.resim-onizleme-butonlar .resim-indir-buton{background:#d9ead3;}
-.resim-onizleme-aciklama{
-    text-align:center;
-    font-size:11px;
-    line-height:1.4;
-    color:#555;
 }
 
 </style>
@@ -1113,24 +1049,6 @@ thead tr:nth-child(2) th{
 </div>
 
 
-
-
-<!-- =====================================================
-     TABLO RESMİ ÖNİZLEME
-===================================================== -->
-<div class="resim-onizleme-overlay" id="resimOnizlemeOverlay" role="dialog" aria-modal="true" aria-label="Tablo resmi önizleme">
-    <div class="resim-onizleme-kutu">
-        <div class="resim-onizleme-baslik">TABLO RESMİ HAZIR</div>
-        <div class="resim-onizleme-goruntu-alani">
-            <img id="olusturulanTabloResmi" alt="Haftalık çalışma programı resmi" draggable="false" oncontextmenu="return false;">
-        </div>
-        <div class="resim-onizleme-butonlar">
-            <button type="button" class="resim-indir-buton" onclick="tabloResminiIndir()">RESMİ İNDİR</button>
-            <button type="button" onclick="tabloResminiPaylasmayiDene()">PAYLAŞMAYI DENE</button>
-            <button type="button" onclick="resimOnizlemeKapat()">KAPAT</button>
-        </div>
-    </div>
-</div>
 
 <script>
 
@@ -1392,8 +1310,8 @@ let aktifHafta = null;
 const HAFIZA_ANAHTARI =
     "haftalik_calisma_programi_v2";
 
-const SON_DUZENLENEN_HAFTA_ANAHTARI =
-    "haftalik_calisma_programi_son_hafta_v1";
+const ISIM_HAFIZA_ANAHTARI =
+    "haftalik_calisma_programi_isimleri_v1";
 
 
 /* =====================================================
@@ -1469,6 +1387,7 @@ function tabloOlustur(){
                     personel.isim =
                         this.value;
 
+                    isimleriKaydet();
                     programKaydet();
 
                 }
@@ -1792,6 +1711,45 @@ function digerUzunButonuOlustur(
    VARDİYA PENCERESİ
 ===================================================== */
 
+function masaustuUyariKonumu(){
+
+    const overlay =
+        document.getElementById("uyariOverlay");
+
+    const uyari =
+        overlay.querySelector(".uyari");
+
+    if(window.innerWidth <= 700){
+        uyari.style.marginTop = "0px";
+        return;
+    }
+
+    const buton =
+        document.querySelector(".resim-paylas");
+
+    if(!buton){
+        return;
+    }
+
+    const rect = buton.getBoundingClientRect();
+
+    let ust = rect.top;
+
+    const yukseklik = uyari.offsetHeight;
+
+    if(ust + yukseklik > window.innerHeight - 8){
+        ust = window.innerHeight - yukseklik - 8;
+    }
+
+    if(ust < 8){
+        ust = 8;
+    }
+
+    uyari.style.marginTop = ust + "px";
+
+}
+
+
 function pencereAc(
     hucre,
     personel,
@@ -2090,6 +2048,10 @@ function pencereAc(
         "acik"
     );
 
+    requestAnimationFrame(function(){
+        masaustuUyariKonumu();
+    });
+
 }
 
 
@@ -2129,7 +2091,9 @@ function vardiyaSec(
 
     seciliHucre.innerHTML =
 
-        '<span class="saat-yazi">' +
+        '<span class="saat-yazi' +
+        (vardiya.digerUzun ? ' diger-uzun-secili' : '') +
+        '">' +
 
         vardiya.baslangic +
 
@@ -2391,6 +2355,70 @@ document
    PROGRAM VERİSİNİ HAFIZAYA KAYDET
 ===================================================== */
 
+function isimleriKaydet(){
+
+    try{
+
+        localStorage.setItem(
+            ISIM_HAFIZA_ANAHTARI,
+            JSON.stringify(
+                personeller.map(
+                    personel => personel.isim || ""
+                )
+            )
+        );
+
+    }
+    catch(hata){
+        console.error("İsim hafıza kayıt hatası:", hata);
+    }
+
+}
+
+
+function isimleriYukle(){
+
+    try{
+
+        const kayit =
+            localStorage.getItem(ISIM_HAFIZA_ANAHTARI);
+
+        if(!kayit){
+            return;
+        }
+
+        const isimler = JSON.parse(kayit);
+
+        if(!Array.isArray(isimler)){
+            return;
+        }
+
+        isimler.forEach((isim,index) => {
+
+            if(personeller[index]){
+                personeller[index].isim = isim || "";
+            }
+
+        });
+
+        document
+            .querySelectorAll(".isim-input")
+            .forEach((input,index) => {
+
+                if(personeller[index]){
+                    input.value = personeller[index].isim;
+                }
+
+            });
+
+    }
+    catch(hata){
+        console.error("İsim hafıza yükleme hatası:", hata);
+    }
+
+}
+
+
 function programKaydet(){
 
     if(!aktifHafta){
@@ -2471,11 +2499,6 @@ function programKaydet(){
             )
         );
 
-        localStorage.setItem(
-            SON_DUZENLENEN_HAFTA_ANAHTARI,
-            aktifHafta
-        );
-
     }
     catch(hata){
 
@@ -2518,6 +2541,9 @@ function programYukle(){
             toplamHesapla();
             return;
         }
+
+
+        /* İsimler haftadan bağımsız hafızadan yüklenir. */
 
 
         /*
@@ -2609,8 +2635,16 @@ function programYukle(){
                             "vardiya-secili"
                         );
 
+                        const uzunSinif =
+                            kayit.text &&
+                            kayit.text.includes("-")
+                                ? " diger-uzun-secili"
+                                : "";
+
                         hucre.innerHTML =
-                            '<span class="saat-yazi">' +
+                            '<span class="saat-yazi' +
+                            uzunSinif +
+                            '">' +
                             kayit.text.replace(
                                 /\n/g,
                                 "<br>"
@@ -2648,6 +2682,18 @@ function programYukle(){
     }
 
 }
+
+
+window.addEventListener("resize", function(){
+
+    const overlay =
+        document.getElementById("uyariOverlay");
+
+    if(overlay.classList.contains("acik")){
+        masaustuUyariKonumu();
+    }
+
+});
 
 
 /* =====================================================
@@ -2717,6 +2763,13 @@ document
 
 
             /*
+               İsimler tarih değişiminde silinmez.
+            */
+
+            isimleriYukle();
+
+
+            /*
                Yeni haftanın kayıtlarını yükle
             */
 
@@ -2735,203 +2788,216 @@ document
 
 /* =====================================================
    TABLOYU RESİM OLARAK PAYLAŞ
+   Telegram Mini App + normal tarayıcı uyumlu
 ===================================================== */
 
-let html2canvasYukleniyor = null;
-
-function html2canvasYukle(){
-
-    if(typeof html2canvas === "function"){
-        return Promise.resolve();
-    }
-
-    if(html2canvasYukleniyor){
-        return html2canvasYukleniyor;
-    }
-
-    html2canvasYukleniyor = new Promise(function(resolve,reject){
-
-        const script = document.createElement("script");
-        script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-        script.async = true;
-
-        script.onload = function(){ resolve(); };
-        script.onerror = function(){
-            html2canvasYukleniyor = null;
-            reject(new Error("html2canvas yüklenemedi"));
-        };
-
-        document.head.appendChild(script);
-    });
-
-    return html2canvasYukleniyor;
-}
-
-
-let tabloResimBlob = null;
-let tabloResimUrl = null;
-
 async function tabloyuResimOlarakPaylas(){
-
-    programKaydet();
-
     const tablo = document.getElementById("programTablosu");
     const buton = document.querySelector(".resim-paylas");
+    const eskiYazi = buton ? buton.textContent : "";
+
+    function durumMesaji(mesaj){
+        let alan = document.getElementById("paylasimDurumMesaji");
+        if(!alan){
+            alan = document.createElement("div");
+            alan.id = "paylasimDurumMesaji";
+            Object.assign(alan.style, {
+                position: "fixed",
+                left: "10px",
+                right: "10px",
+                bottom: "12px",
+                zIndex: "2147483647",
+                padding: "12px",
+                borderRadius: "8px",
+                background: "#222",
+                color: "#fff",
+                font: "14px Arial,sans-serif",
+                textAlign: "center",
+                boxShadow: "0 2px 12px rgba(0,0,0,.35)"
+            });
+            document.body.appendChild(alan);
+        }
+        alan.textContent = mesaj;
+        alan.style.display = "block";
+        clearTimeout(alan._timer);
+        alan._timer = setTimeout(() => {
+            if(alan.isConnected) alan.remove();
+        }, 6000);
+    }
 
     if(!tablo){
-        alert("Tablo bulunamadı.");
+        durumMesaji("HATA: Çalışma tablosu bulunamadı.");
+        return;
+    }
+    if(typeof html2canvas === "undefined"){
+        durumMesaji("HATA: Resim kütüphanesi yüklenmemiş. İnternet bağlantısını kontrol edin.");
         return;
     }
 
-    const eskiYazi = buton.textContent;
-    buton.textContent = "RESİM HAZIRLANIYOR...";
-    buton.disabled = true;
+    programKaydet();
+    if(buton){
+        buton.disabled = true;
+        buton.textContent = "RESİM HAZIRLANIYOR...";
+    }
+
+    durumMesaji("Tablo resme dönüştürülüyor…");
 
     try{
-        // Kütüphane yalnızca kullanıcı paylaşım düğmesine bastığında yüklenir.
-        await html2canvasYukle();
-
-        // Form alanlarının güncel değerlerini resme doğru aktar.
         tablo.querySelectorAll(".isim-input").forEach(input => {
             input.setAttribute("value", input.value);
         });
 
         const canvas = await html2canvas(tablo, {
             backgroundColor: "#ffffff",
-            scale: 3,
+            scale: 2,
             useCORS: true,
             logging: false,
-            allowTaint: false
+            allowTaint: false,
+            scrollX: 0,
+            scrollY: 0
         });
 
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
-        if(!blob){
-            throw new Error("Tablo resmi oluşturulamadı.");
+        if(!canvas || !canvas.width || !canvas.height){
+            throw new Error("Boş resim oluştu.");
         }
 
-        // Önceki önizleme varsa eski URL'yi serbest bırak.
-        if(tabloResimUrl){
-            URL.revokeObjectURL(tabloResimUrl);
-        }
-        tabloResimBlob = blob;
-        tabloResimUrl = URL.createObjectURL(blob);
+        /* Android Telegram WebView'de blob: resim adresleri sorun çıkarabildiği
+           için önizlemede data: URL kullanılır. */
+        const dataUrl = canvas.toDataURL("image/png");
+        tabloResimOnizlemeAc(dataUrl, canvas, durumMesaji);
+        const durum = document.getElementById("paylasimDurumMesaji");
+        if(durum) durum.remove();
 
-        document.getElementById("olusturulanTabloResmi").src = tabloResimUrl;
-        document.getElementById("resimOnizlemeOverlay").classList.add("acik");
-
-    }
-    catch(hata){
-        console.error("Tablo resmi oluşturma hatası:", hata);
-        alert("Tablo resmi oluşturulamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.");
-    }
-    finally{
-        buton.textContent = eskiYazi;
-        buton.disabled = false;
-    }
-}
-
-function tabloResminiIndir(){
-    if(!tabloResimBlob || !tabloResimUrl){
-        alert("İndirilecek resim bulunamadı.");
-        return;
-    }
-
-    const link = document.createElement("a");
-    link.href = tabloResimUrl;
-    link.download = "haftalik-calisma-programi.png";
-    link.style.display = "none";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-}
-
-async function tabloResminiPaylasmayiDene(){
-    if(!tabloResimBlob){
-        alert("Paylaşılacak resim bulunamadı.");
-        return;
-    }
-
-    try{
-        const dosya = new File([tabloResimBlob], "haftalik-calisma-programi.png", {type:"image/png"});
-        if(navigator.share && (!navigator.canShare || navigator.canShare({files:[dosya]}))){
-            await navigator.share({title:"Haftalık Çalışma Programı", files:[dosya]});
-        }else{
-            alert("Bu Telegram/WebView ekranında doğrudan paylaşım desteklenmiyor.");
-        }
-    }
-    catch(hata){
-        if(hata.name !== "AbortError"){
-            console.error("Resim paylaşma hatası:", hata);
-            alert("Paylaşım açılamadı. Resmi indirme seçeneğini deneyebilirsiniz.");
+    }catch(hata){
+        console.error("Tablo resim hatası:", hata);
+        durumMesaji("Resim oluşturulamadı: " + (hata && hata.message ? hata.message : "bilinmeyen hata"));
+    }finally{
+        if(buton){
+            buton.textContent = eskiYazi;
+            buton.disabled = false;
         }
     }
 }
 
-function resimOnizlemeKapat(){
-    document.getElementById("resimOnizlemeOverlay").classList.remove("acik");
+
+/* =====================================================
+   MOBİL UYUMLU RESİM ÖNİZLEMESİ
+===================================================== */
+
+function tabloResimOnizlemeAc(dataUrl, canvas, durumMesaji){
+    const onceki = document.getElementById("tabloResimOnizleme");
+    if(onceki) onceki.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "tabloResimOnizleme";
+    Object.assign(overlay.style, {
+        position: "fixed",
+        inset: "0",
+        zIndex: "2147483647",
+        background: "rgba(0,0,0,.94)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "12px",
+        gap: "10px",
+        overflowY: "auto",
+        WebkitOverflowScrolling: "touch",
+        touchAction: "pan-y"
+    });
+
+    const aciklama = document.createElement("div");
+    aciklama.textContent = "Çalışma programı hazır. Paylaşmak için ekran görüntüsü alabilirsiniz.";
+    Object.assign(aciklama.style, {
+        color: "#fff",
+        font: "bold 14px Arial,sans-serif",
+        textAlign: "center",
+        lineHeight: "1.4",
+        flex: "0 0 auto"
+    });
+
+    const resim = document.createElement("img");
+    resim.alt = "Haftalık çalışma programı";
+    resim.src = dataUrl;
+    Object.assign(resim.style, {
+        display: "block",
+        width: "100%",
+        maxWidth: "900px",
+        maxHeight: "65vh",
+        height: "auto",
+        objectFit: "contain",
+        background: "#fff",
+        borderRadius: "4px",
+        flex: "0 1 auto",
+        userSelect: "auto",
+        WebkitUserSelect: "auto",
+        WebkitTouchCallout: "default"
+    });
+
+    const kapat = document.createElement("button");
+    kapat.type = "button";
+    kapat.textContent = "Kapat";
+    Object.assign(kapat.style, {
+        border: "0",
+        borderRadius: "8px",
+        padding: "12px 20px",
+        minHeight: "44px",
+        font: "bold 14px Arial,sans-serif",
+        background: "#fff",
+        color: "#111",
+        cursor: "pointer",
+        touchAction: "manipulation",
+        WebkitTapHighlightColor: "rgba(0,0,0,.15)",
+        flex: "0 0 auto"
+    });
+    kapat.addEventListener("click", function(){
+        overlay.remove();
+    });
+
+    /* Resmin uzun basma menüsünde GitHub bağlantısı gibi seçenekler çıkmasın. */
+    resim.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+
+    overlay.append(aciklama, resim, kapat);
+    document.body.appendChild(overlay);
 }
 
-document.getElementById("resimOnizlemeOverlay").addEventListener("click", function(e){
-    if(e.target === this){
-        resimOnizlemeKapat();
-    }
-});
 
 /* =====================================================
    BAŞLAT
 ===================================================== */
 
+tabloOlustur();
+
+
 /*
-   İlk ekranın çizilmesine izin ver.
-   Android/WebView tarafında tüm tablo oluşturma ve
-   hafıza işlemlerini HTML parse işleminin önüne koyma.
+   İsimleri tarihten bağımsız hafızadan yükle
 */
-function programiBaslat(){
 
-    tabloOlustur();
+isimleriYukle();
 
-    const tarihInput =
-        document.getElementById("baslangicTarihi");
 
-    let sonHafta = "";
+/*
+   Başlangıç haftasını belirle
+*/
 
-    try{
-        sonHafta =
-            localStorage.getItem(
-                SON_DUZENLENEN_HAFTA_ANAHTARI
-            ) || "";
-    }
-    catch(hata){
-        console.error("Son hafta okunamadı:", hata);
-    }
+aktifHafta =
+    document.getElementById(
+        "baslangicTarihi"
+    ).value;
 
-    if(sonHafta){
-        tarihInput.value = sonHafta;
-    }
-    else if(!tarihInput.value){
-        const bugun = new Date();
-        tarihInput.value =
-            bugun.getFullYear() + "-" +
-            String(bugun.getMonth() + 1).padStart(2, "0") + "-" +
-            String(bugun.getDate()).padStart(2, "0");
-    }
 
-    aktifHafta = tarihInput.value;
+/*
+   Kayıtlı programı yükle
+*/
 
-    programYukle();
+programYukle();
 
-    tarihleriOlustur();
-    toplamHesapla();
-}
 
-if("requestAnimationFrame" in window){
-    requestAnimationFrame(function(){
-        setTimeout(programiBaslat, 0);
-    });
-}
-else{
-    setTimeout(programiBaslat, 0);
-}
+/*
+   Toplamları hesapla
+*/
+
+toplamHesapla();
 
 </script>
 
