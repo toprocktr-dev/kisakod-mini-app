@@ -1,1354 +1,703 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>AYLIK BİLANÇO</title>
 
 <style>
-
-*{
-    box-sizing:border-box;
-}
-
-body{
-    margin:0;
-    padding:10px;
-    font-family:Arial,Helvetica,sans-serif;
-    background:#eeeeee;
-    color:#000;
-}
-
-.container{
-    max-width:1500px;
-    margin:auto;
-    background:#fff;
-    padding:10px;
-    border-radius:8px;
-    box-shadow:0 2px 10px rgba(0,0,0,.15);
-}
-
-.baslik{
-    text-align:center;
-    font-size:20px;
-    font-weight:bold;
-    margin-bottom:8px;
-}
-
-
-/* =====================================================
-   ÜST BİLGİLER
-===================================================== */
-
-.ust-bilgi{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    flex-wrap:nowrap;
-    margin-bottom:10px;
-    overflow-x:auto;
-}
-
-.kutu{
-    display:flex;
-    align-items:center;
-    gap:4px;
-    height:32px;
-    padding:3px 7px;
-    border:1px solid #888;
-    background:#f7f7f7;
-    border-radius:4px;
-    white-space:nowrap;
-    font-size:12px;
-    font-weight:bold;
-}
-
-.kutu input,
-.kutu select{
-    height:24px;
-    border:1px solid #aaa;
-    background:#fff;
-    padding:2px 4px;
-    font-size:12px;
-    font-weight:normal;
-    outline:none;
-}
-
-#ay{
-    width:95px;
-}
-
-#yil{
-    width:60px;
-}
-
-#calismaGunu{
-    width:55px;
-    text-align:center;
-}
-
-#butce,
-#hedef{
-    width:90px;
-}
-
-
-/* =====================================================
-   TABLO
-===================================================== */
-
-.tablo-alan{
-    width:100%;
-    overflow-x:auto;
-}
-
-table{
-    border-collapse:collapse;
-    width:100%;
-    min-width:1100px;
-    table-layout:fixed;
-}
-
-th,
-td{
-    border:1px solid #777;
-    padding:4px;
-    text-align:center;
-    height:27px;
-    font-size:12px;
-}
-
-thead tr:nth-child(1) th{
-    background:#d9e2f3;
-    font-weight:bold;
-}
-
-thead tr:nth-child(2) th{
-    background:#e2efda;
-    font-weight:bold;
-}
-
-thead th{
-    vertical-align:middle;
-}
-
-
-/* =====================================================
-   PLAN GİRİŞLERİ
-===================================================== */
-
-.plan-giris{
-    background:#fffde8;
-}
-
-.plan-giris input{
-    width:100%;
-    height:22px;
-    border:0;
-    outline:none;
-    background:#fffde8;
-    text-align:center;
-    font-size:12px;
-}
-
-
-/* =====================================================
-   DİĞER GİRİŞLER
-===================================================== */
-
-.giris{
-    background:#fffde8;
-}
-
-.giris input{
-    width:100%;
-    height:22px;
-    border:0;
-    outline:none;
-    background:#fffde8;
-    text-align:center;
-    font-size:12px;
-}
-
-
-/* =====================================================
-   NORMAL HÜCRELER
-===================================================== */
-
-.tarih{
-    background:#f2f2f2;
-    font-weight:bold;
-}
-
-.gun{
-    background:#f2f2f2;
-    font-weight:bold;
-}
-
-.kumulatif{
-    background:#f2f2f2;
-}
-
-.performans{
-    background:#e2f0d9;
-    font-weight:bold;
-}
-
-
-/* =====================================================
-   TOPLAM
-===================================================== */
-
-.toplam td{
-    background:#d9ead3;
-    font-weight:bold;
-    font-size:12px;
-}
-
-
-/* =====================================================
-   HEDEF TOPLAM
-===================================================== */
-
-.hedef-toplam td{
-    background:#cfe2f3;
-    font-weight:bold;
-    font-size:13px;
-}
-
-
-/* =====================================================
-   HAFTA SONU
-===================================================== */
-
-.hafta-sonu{
-    background:#fce4d6 !important;
-}
-
-
-/* =====================================================
-   DURUM
-===================================================== */
-
-#durum{
-    margin-top:8px;
-    font-weight:bold;
-    font-size:12px;
-}
-
-
-/* =====================================================
-   MOBİL
-===================================================== */
+*{box-sizing:border-box}
+body{margin:0;padding:10px;font-family:Arial,Helvetica,sans-serif;background:#eeeeee;color:#000}
+.container{max-width:1500px;margin:auto;background:#fff;padding:10px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.baslik{text-align:center;font-size:20px;font-weight:bold;margin-bottom:8px}
+.ust-bilgi{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:nowrap;margin-bottom:10px;overflow-x:auto}
+.kutu{display:flex;align-items:center;gap:4px;height:32px;padding:3px 7px;border:1px solid #888;background:#f7f7f7;border-radius:4px;white-space:nowrap;font-size:12px;font-weight:bold}
+.kutu input,.kutu select{height:24px;border:1px solid #aaa;background:#fff;padding:2px 4px;font-size:12px;font-weight:normal;outline:none}
+#ay{width:95px}
+#yil{width:60px}
+#calismaGunu{width:55px;text-align:center}
+#butce,#hedef{width:90px}
+.tablo-alan{width:100%;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:1100px;table-layout:fixed}
+th,td{border:1px solid #777;padding:4px;text-align:center;height:27px;font-size:12px}
+thead tr:nth-child(1) th{background:#d9e2f3;font-weight:bold}
+thead tr:nth-child(2) th{background:#e2efda;font-weight:bold}
+thead th{vertical-align:middle}
+.plan-giris{background:#fffde8}
+.plan-giris input,.giris input{width:100%;height:22px;border:0;outline:none;background:#fffde8;text-align:center;font-size:12px}
+.giris{background:#fffde8}
+.tarih,.gun{background:#f2f2f2;font-weight:bold}
+.kumulatif{background:#f2f2f2}
+.performans{background:#e2f0d9;font-weight:bold}
+.toplam td{background:#d9ead3;font-weight:bold;font-size:12px}
+.hedef-toplam td{background:#cfe2f3;font-weight:bold;font-size:13px}
+.hafta-sonu{background:#fce4d6!important}
+#durum{margin-top:8px;font-weight:bold;font-size:12px;min-height:15px}
+.hafiza-bilgi{font-size:10px;color:#487448;margin-top:4px;text-align:right}
+.hedef-buton{height:30px;padding:4px 10px;border:1px solid #4472c4;border-radius:4px;background:#4472c4;color:white;font-weight:bold;font-size:12px;cursor:pointer;white-space:nowrap}
+.hedef-buton:hover{background:#315a9e}
+.hedef-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:12px}
+.hedef-modal.aktif{display:flex}
+.hedef-modal-icerik{width:100%;max-width:520px;max-height:90vh;overflow-y:auto;background:#fff;border-radius:8px;padding:16px;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+.hedef-modal-baslik{font-size:17px;font-weight:bold;text-align:center;margin-bottom:12px}
+.hedef-aciklama{font-size:12px;color:#555;margin-bottom:12px;line-height:1.5}
+.hedef-tarih-listesi{display:flex;flex-direction:column;gap:8px}
+.hedef-tarih-satiri{display:flex;align-items:center;gap:6px}
+.hedef-tarih-satiri input,.hedef-tarih-satiri select{min-width:0;height:35px;border:1px solid #aaa;border-radius:4px;padding:4px;background:white;font-size:12px}
+.hedef-tarih-satiri input{flex:1;width:45%}
+.hedef-tarih-satiri select{flex:1;width:45%}
+.hedef-sil{height:32px;width:32px;flex-shrink:0;border:0;border-radius:4px;background:#fce4d6;color:#a00;font-weight:bold;cursor:pointer}
+.hedef-modal-alt{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.hedef-modal-alt button{flex:1;min-height:36px;padding:7px;border:1px solid #aaa;border-radius:4px;font-weight:bold;cursor:pointer}
+.hedef-ekle{background:#e2efda}
+.hedef-uygula{background:#4472c4;color:white;border-color:#4472c4!important}
+.hedef-kapat{background:#eee}
 
 @media(max-width:700px){
-
-    body{
-        padding:4px;
-    }
-
-    .container{
-        padding:5px;
-    }
-
-    .baslik{
-        font-size:17px;
-    }
-
-    .ust-bilgi{
-        justify-content:flex-start;
-    }
-
-    .kutu{
-        font-size:11px;
-        height:30px;
-    }
-
-    table{
-        min-width:1100px;
-    }
-
-    th,
-    td{
-        font-size:10px;
-        padding:3px;
-    }
-
+ body{padding:4px}
+ .container{padding:5px}
+ .baslik{font-size:17px}
+ .ust-bilgi{justify-content:flex-start}
+ .kutu{font-size:11px;height:30px}
+ table{min-width:1100px}
+ th,td{font-size:10px;padding:3px}
+ .hedef-modal-icerik{padding:12px}
+ .hedef-tarih-satiri{gap:4px}
+ .hedef-tarih-satiri input,.hedef-tarih-satiri select{font-size:11px}
 }
-
 </style>
 </head>
 
-
 <body>
-
 <div class="container">
 
-
-<div class="baslik">
-    AYLIK BİLANÇO
-</div>
-
-
-<!-- =====================================================
-     ÜST BİLGİLER
-===================================================== -->
+<div class="baslik">AYLIK BİLANÇO</div>
 
 <div class="ust-bilgi">
+ <div class="kutu">
+  <span>AY:</span>
+  <select id="ay">
+   <option value="1">OCAK</option>
+   <option value="2">ŞUBAT</option>
+   <option value="3" selected>MART</option>
+   <option value="4">NİSAN</option>
+   <option value="5">MAYIS</option>
+   <option value="6">HAZİRAN</option>
+   <option value="7">TEMMUZ</option>
+   <option value="8">AĞUSTOS</option>
+   <option value="9">EYLÜL</option>
+   <option value="10">EKİM</option>
+   <option value="11">KASIM</option>
+   <option value="12">ARALIK</option>
+  </select>
+ </div>
 
+ <div class="kutu">
+  <span>YIL:</span>
+  <input id="yil" type="number" value="2026">
+ </div>
 
-    <!-- AY -->
+ <div class="kutu">
+  <span>ÇALIŞMA GÜNÜ:</span>
+  <input id="calismaGunu" type="number" min="0" value="31">
+ </div>
 
-    <div class="kutu">
+ <div class="kutu">
+  <span>BÜTÇE:</span>
+  <input id="butce" type="number">
+ </div>
 
-        <span>AY:</span>
+ <div class="kutu">
+  <span>HEDEF:</span>
+  <input id="hedef" type="number">
+ </div>
 
-        <select id="ay">
-
-            <option value="1">OCAK</option>
-            <option value="2">ŞUBAT</option>
-            <option value="3" selected>MART</option>
-            <option value="4">NİSAN</option>
-            <option value="5">MAYIS</option>
-            <option value="6">HAZİRAN</option>
-            <option value="7">TEMMUZ</option>
-            <option value="8">AĞUSTOS</option>
-            <option value="9">EYLÜL</option>
-            <option value="10">EKİM</option>
-            <option value="11">KASIM</option>
-            <option value="12">ARALIK</option>
-
-        </select>
-
-    </div>
-
-
-    <!-- YIL -->
-
-    <div class="kutu">
-
-        <span>YIL:</span>
-
-        <input
-            id="yil"
-            type="number"
-            value="2026"
-        >
-
-    </div>
-
-
-    <!-- ÇALIŞMA GÜNÜ -->
-
-    <div class="kutu">
-
-        <span>ÇALIŞMA GÜNÜ:</span>
-
-        <input
-            id="calismaGunu"
-            type="number"
-            min="1"
-            value="31"
-        >
-
-    </div>
-
-
-    <!-- BÜTÇE -->
-
-    <div class="kutu">
-
-        <span>BÜTÇE:</span>
-
-        <input
-            id="butce"
-            type="number"
-        >
-
-    </div>
-
-
-    <!-- HEDEF -->
-
-    <div class="kutu">
-
-        <span>HEDEF:</span>
-
-        <input
-            id="hedef"
-            type="number"
-        >
-
-    </div>
-
-
+ <button type="button" class="hedef-buton" onclick="hedefPenceresiAc()">HESAPLA</button>
 </div>
-
-
-<!-- =====================================================
-     TABLO
-===================================================== -->
 
 <div class="tablo-alan">
-
 <table>
-
-
 <thead>
-
 <tr>
-
-    <th rowspan="2">TARİH</th>
-
-    <th rowspan="2">GÜN</th>
-
-    <th colspan="2">CİRO</th>
-
-    <th colspan="3">KÜMÜLATİF CİRO</th>
-
-    <th colspan="2">ÇALIŞMA SAATİ</th>
-
-    <th colspan="2">KÜMÜLATİF SAAT</th>
-
-    <th colspan="2">KÜMÜLATİF PERFORMANS</th>
-
-    <th colspan="2">MÜŞTERİ</th>
-
+ <th rowspan="2">TARİH</th>
+ <th rowspan="2">GÜN</th>
+ <th colspan="2">CİRO</th>
+ <th colspan="3">KÜMÜLATİF CİRO</th>
+ <th colspan="2">ÇALIŞMA SAATİ</th>
+ <th colspan="2">KÜMÜLATİF SAAT</th>
+ <th colspan="2">KÜMÜLATİF PERFORMANS</th>
+ <th colspan="2">MÜŞTERİ</th>
 </tr>
-
-
 <tr>
-
-    <th>PLANLANAN</th>
-    <th>OLAN</th>
-
-    <th>PLANLANAN</th>
-    <th>OLAN</th>
-    <th>ORTALAMA</th>
-
-    <th>PLAN</th>
-    <th>OLAN</th>
-
-    <th>PLAN</th>
-    <th>OLAN</th>
-
-    <th>PLAN</th>
-    <th>OLAN</th>
-
-    <th>GÜN</th>
-    <th>KÜMÜLATİF</th>
-
+ <th>PLANLANAN</th>
+ <th>OLAN</th>
+ <th>PLANLANAN</th>
+ <th>OLAN</th>
+ <th>ORTALAMA</th>
+ <th>PLAN</th>
+ <th>OLAN</th>
+ <th>PLAN</th>
+ <th>OLAN</th>
+ <th>PLAN</th>
+ <th>OLAN</th>
+ <th>GÜN</th>
+ <th>KÜMÜLATİF</th>
 </tr>
-
 </thead>
-
-
 <tbody id="tablo"></tbody>
-
-
 <tfoot>
-
-
-<!-- =====================================================
-     TOPLAM
-===================================================== -->
-
 <tr class="toplam">
-
-    <td colspan="2">
-        TOPLAM
-    </td>
-
-    <td id="toplamCiroPlan">
-        0
-    </td>
-
-    <td id="toplamCiroOlan">
-        0
-    </td>
-
-    <td id="toplamKumPlan">
-        0
-    </td>
-
-    <td id="toplamKumOlan">
-        0
-    </td>
-
-    <td>
-        0
-    </td>
-
-    <td id="toplamSaatPlan">
-        0
-    </td>
-
-    <td id="toplamSaatOlan">
-        0
-    </td>
-
-    <td id="toplamKumSaatPlan">
-        0
-    </td>
-
-    <td id="toplamKumSaatOlan">
-        0
-    </td>
-
-    <td>
-        0
-    </td>
-
-    <td>
-        0
-    </td>
-
-    <td>
-        0
-    </td>
-
-    <td>
-        0
-    </td>
-
+ <td colspan="2">TOPLAM</td>
+ <td id="toplamCiroPlan">0</td>
+ <td id="toplamCiroOlan">0</td>
+ <td id="toplamKumPlan">0</td>
+ <td id="toplamKumOlan">0</td>
+ <td>0</td>
+ <td id="toplamSaatPlan">0</td>
+ <td id="toplamSaatOlan">0</td>
+ <td id="toplamKumSaatPlan">0</td>
+ <td id="toplamKumSaatOlan">0</td>
+ <td>0</td><td>0</td><td>0</td><td>0</td>
 </tr>
-
-
-<!-- =====================================================
-     HEDEF TOPLAM
-===================================================== -->
-
 <tr class="hedef-toplam">
-
-    <td colspan="2">
-        HEDEF TOPLAM
-    </td>
-
-    <td id="hedefToplam">
-        0
-    </td>
-
-    <td colspan="12">
-        ÇALIŞMA GÜNÜ × HEDEF
-    </td>
-
+ <td colspan="2">HEDEF TOPLAM</td>
+ <td id="hedefToplam">0</td>
+ <td colspan="12">ÇALIŞMA GÜNÜ × HEDEF</td>
 </tr>
-
-
 </tfoot>
-
 </table>
-
 </div>
-
 
 <div id="durum"></div>
-
-
+<div id="hafizaBilgi" class="hafiza-bilgi">Hafıza hazır.</div>
 </div>
 
+<div id="hedefModal" class="hedef-modal">
+ <div class="hedef-modal-icerik">
+  <div class="hedef-modal-baslik">GÜNLÜK CİRO HEDEFİ PLANLAMA</div>
+  <div class="hedef-aciklama">
+   Önemli günleri veya mağazanın kapalı olacağı tarihleri seçin.
+   Özel gün artışları diğer açık günlere eşit şekilde dağıtılarak
+   aylık hedef toplamı korunur.
+  </div>
+  <div id="hedefTarihListesi" class="hedef-tarih-listesi"></div>
+  <div class="hedef-modal-alt">
+   <button type="button" class="hedef-ekle" onclick="hedefTarihSatiriEkle()">+ TARİH EKLE</button>
+   <button type="button" class="hedef-kapat" onclick="hedefPenceresiKapat()">KAPAT</button>
+   <button type="button" class="hedef-uygula" onclick="hedefleriDagit()">HESAPLA</button>
+  </div>
+ </div>
+</div>
 
 <script>
+"use strict";
 
+/* HAFIZA: Önceki sürümdeki anahtar korunmuştur. */
+const HAFIZA_ANAHTARI="bilanco_hafiza_v2";
+let hafizaVerisi={};
+let hafizaHazir=false;
+let tabloKuruluyor=false;
 
-/* =====================================================
-   AYLAR
-===================================================== */
+function hafizaOku(){
+ try{
+  hafizaVerisi=JSON.parse(localStorage.getItem(HAFIZA_ANAHTARI)||"{}");
+ }catch(e){
+  hafizaVerisi={};
+ }
+ hafizaHazir=true;
+}
 
-const aylar = [
+function donemAnahtari(ay,yil){
+ return String(yil)+"-"+String(ay).padStart(2,"0");
+}
 
-    "OCAK",
-    "ŞUBAT",
-    "MART",
-    "NİSAN",
-    "MAYIS",
-    "HAZİRAN",
-    "TEMMUZ",
-    "AĞUSTOS",
-    "EYLÜL",
-    "EKİM",
-    "KASIM",
-    "ARALIK"
+function mevcutDonemAnahtari(){
+ return donemAnahtari(
+  Number(document.getElementById("ay").value),
+  Number(document.getElementById("yil").value)
+ );
+}
 
-];
+function donemVerisi(){
+ const anahtar=mevcutDonemAnahtari();
+ if(!hafizaVerisi[anahtar]){
+  hafizaVerisi[anahtar]={ust:{},gunler:{},ozelGunler:[]};
+ }
+ return hafizaVerisi[anahtar];
+}
 
+function hafizayaYaz(){
+ if(!hafizaHazir||tabloKuruluyor)return;
+ try{
+  localStorage.setItem(HAFIZA_ANAHTARI,JSON.stringify(hafizaVerisi));
+  document.getElementById("hafizaBilgi").textContent="Hafızaya kaydedildi.";
+ }catch(e){
+  document.getElementById("hafizaBilgi").textContent="Hafıza kaydedilemedi.";
+ }
+}
 
-/* =====================================================
-   TAM SAYI FORMAT
-===================================================== */
+function ozelGunleriOkuSessiz(){
+ const liste=[];
+ document.querySelectorAll("#hedefTarihListesi .hedef-tarih-satiri").forEach(function(satir){
+  const tarih=satir.querySelector(".ozel-hedef-tarih").value;
+  const tur=satir.querySelector(".ozel-hedef-tur").value;
+  if(tarih)liste.push({tarih,tur});
+ });
+ return liste;
+}
+
+function tumVerileriKaydet(){
+ if(!hafizaHazir||tabloKuruluyor)return;
+
+ const veri=donemVerisi();
+ veri.ust={
+  calismaGunu:document.getElementById("calismaGunu").value,
+  butce:document.getElementById("butce").value,
+  hedef:document.getElementById("hedef").value
+ };
+
+ document.querySelectorAll("#tablo tr").forEach(function(tr){
+  const tarih=tr.querySelector(".tarih");
+  if(!tarih)return;
+  const gun=Number(tarih.textContent.trim().split(".")[0]);
+  const alanlar={};
+  tr.querySelectorAll("input").forEach(function(input){
+   alanlar[input.className]=input.value;
+  });
+  veri.gunler[String(gun)]=alanlar;
+ });
+
+ veri.ozelGunler=ozelGunleriOkuSessiz();
+ hafizayaYaz();
+}
 
 function sayiFormat(deger){
-
-    if(
-        deger === null ||
-        deger === undefined ||
-        deger === "" ||
-        isNaN(deger)
-    ){
-
-        return "0";
-
-    }
-
-    return Math.round(
-        Number(deger)
-    ).toLocaleString("tr-TR");
-
+ if(deger===null||deger===undefined||deger===""||isNaN(deger))return "0";
+ return Math.round(Number(deger)).toLocaleString("tr-TR");
 }
-
-
-/* =====================================================
-   TARİH
-===================================================== */
 
 function tarihFormat(tarih){
-
-    return tarih.toLocaleDateString(
-        "tr-TR",
-        {
-            day:"2-digit",
-            month:"2-digit",
-            year:"numeric"
-        }
-    );
-
+ return tarih.toLocaleDateString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric"});
 }
-
-
-/* =====================================================
-   GÜN
-===================================================== */
 
 function gunAdi(tarih){
-
-    const gunler = [
-
-        "PAZAR",
-        "PAZARTESİ",
-        "SALI",
-        "ÇARŞAMBA",
-        "PERŞEMBE",
-        "CUMA",
-        "CUMARTESİ"
-
-    ];
-
-    return gunler[
-        tarih.getDay()
-    ];
-
+ return ["PAZAR","PAZARTESİ","SALI","ÇARŞAMBA","PERŞEMBE","CUMA","CUMARTESİ"][tarih.getDay()];
 }
 
-
-/* =====================================================
-   TABLO OLUŞTUR
-===================================================== */
-
+/* TABLO OLUŞTURMA VE HAFIZADAN YÜKLEME */
 function tabloOlustur(){
-
-    const ay =
-        Number(
-            document.getElementById(
-                "ay"
-            ).value
-        );
-
-
-    const yil =
-        Number(
-            document.getElementById(
-                "yil"
-            ).value
-        );
-
-
-    /*
-       Ay değiştiğinde çalışma günü
-       otomatik olarak gerçek ay gününe
-       ayarlanır.
-    */
-
-    const otomatikGun =
-        new Date(
-            yil,
-            ay,
-            0
-        ).getDate();
-
-
-    /*
-       Sadece ilk oluşturulurken
-       otomatik gün değerini yaz.
-    */
-
-    const mevcutGun =
-        document.getElementById(
-            "calismaGunu"
-        ).value;
-
-
-    if(
-        !mevcutGun ||
-        mevcutGun === "0"
-    ){
-
-        document.getElementById(
-            "calismaGunu"
-        ).value =
-            otomatikGun;
-
-    }
-
-
-    const gunSayisi =
-        otomatikGun;
-
-
-    const body =
-        document.getElementById(
-            "tablo"
-        );
-
-
-    body.innerHTML = "";
-
-
-    /*
-       Tablo her zaman ayın gerçek
-       günlerini oluşturur.
-    */
-
-    for(
-        let i = 1;
-        i <= gunSayisi;
-        i++
-    ){
-
-        const tarih =
-            new Date(
-                yil,
-                ay - 1,
-                i
-            );
-
-
-        const gun =
-            gunAdi(tarih);
-
-
-        const tr =
-            document.createElement("tr");
-
-
-        if(
-            tarih.getDay() === 0 ||
-            tarih.getDay() === 6
-        ){
-
-            tr.classList.add(
-                "hafta-sonu"
-            );
-
-        }
-
-
-        tr.innerHTML = `
-
-<td class="tarih">
-    ${tarihFormat(tarih)}
-</td>
-
-
-<td class="gun">
-    ${gun}
-</td>
-
-
-<td class="plan-giris">
-
-    <input
-        type="number"
-        class="ciro-plan"
-        data-gun="${i}"
-    >
-
-</td>
-
-
-<td class="giris">
-
-    <input
-        type="number"
-        class="ciro-olan"
-        data-gun="${i}"
-    >
-
-</td>
-
-
-<td class="kumulatif kum-ciro-plan">
-    0
-</td>
-
-
-<td class="kumulatif kum-ciro-olan">
-    0
-</td>
-
-
-<td class="kumulatif ciro-ortalama">
-    0
-</td>
-
-
-<td class="plan-giris">
-
-    <input
-        type="number"
-        class="saat-plan"
-        data-gun="${i}"
-    >
-
-</td>
-
-
-<td class="giris">
-
-    <input
-        type="number"
-        class="saat-olan"
-        data-gun="${i}"
-    >
-
-</td>
-
-
-<td class="kumulatif kum-saat-plan">
-    0
-</td>
-
-
-<td class="kumulatif kum-saat-olan">
-    0
-</td>
-
-
-<td class="performans performans-plan">
-    0
-</td>
-
-
-<td class="performans performans-olan">
-    0
-</td>
-
-
-<td class="giris">
-
-    <input
-        type="number"
-        class="musteri"
-        data-gun="${i}"
-    >
-
-</td>
-
-
-<td class="kumulatif kum-musteri">
-    0
-</td>
-
-`;
-
-
-        body.appendChild(tr);
-
-    }
-
-
-    /*
-       Tablo girişlerini dinle
-    */
-
-    document
-    .querySelectorAll(
-        "#tablo input"
-    )
-    .forEach(
-        input => {
-
-            input.addEventListener(
-                "input",
-                hesapla
-            );
-
-        }
-    );
-
-
-    hesapla();
-
+ const ay=Number(document.getElementById("ay").value);
+ const yil=Number(document.getElementById("yil").value);
+ if(!ay||!yil||yil<1900||yil>9999)return;
+
+ const gunSayisi=new Date(yil,ay,0).getDate();
+ const body=document.getElementById("tablo");
+ const donem=donemVerisi();
+
+ tabloKuruluyor=true;
+ body.innerHTML="";
+
+ if(donem.ust&&donem.ust.calismaGunu!==undefined){
+  document.getElementById("calismaGunu").value=donem.ust.calismaGunu;
+  document.getElementById("butce").value=donem.ust.butce??"";
+  document.getElementById("hedef").value=donem.ust.hedef??"";
+ }else{
+  document.getElementById("calismaGunu").value=gunSayisi;
+  document.getElementById("butce").value="";
+  document.getElementById("hedef").value="";
+ }
+
+ for(let i=1;i<=gunSayisi;i++){
+  const tarih=new Date(yil,ay-1,i);
+  const tr=document.createElement("tr");
+
+  if(tarih.getDay()===0||tarih.getDay()===6)tr.classList.add("hafta-sonu");
+
+  tr.innerHTML=`
+   <td class="tarih">${tarihFormat(tarih)}</td>
+   <td class="gun">${gunAdi(tarih)}</td>
+   <td class="plan-giris"><input type="number" class="ciro-plan" data-gun="${i}"></td>
+   <td class="giris"><input type="number" class="ciro-olan" data-gun="${i}"></td>
+   <td class="kumulatif kum-ciro-plan">0</td>
+   <td class="kumulatif kum-ciro-olan">0</td>
+   <td class="kumulatif ciro-ortalama">0</td>
+   <td class="plan-giris"><input type="number" class="saat-plan" data-gun="${i}"></td>
+   <td class="giris"><input type="number" class="saat-olan" data-gun="${i}"></td>
+   <td class="kumulatif kum-saat-plan">0</td>
+   <td class="kumulatif kum-saat-olan">0</td>
+   <td class="performans performans-plan">0</td>
+   <td class="performans performans-olan">0</td>
+   <td class="giris"><input type="number" class="musteri" data-gun="${i}"></td>
+   <td class="kumulatif kum-musteri">0</td>`;
+
+  const eskiGun=donem.gunler&&donem.gunler[String(i)];
+  if(eskiGun){
+   tr.querySelectorAll("input").forEach(function(input){
+    if(eskiGun[input.className]!==undefined)input.value=eskiGun[input.className];
+   });
+  }
+  body.appendChild(tr);
+ }
+
+ tabloKuruluyor=false;
+ ozelGunleriYukle(donem.ozelGunler||[]);
+
+ document.querySelectorAll("#tablo input").forEach(function(input){
+  input.addEventListener("input",function(){
+   hesapla();
+   tumVerileriKaydet();
+  });
+ });
+
+ hesapla();
+ document.getElementById("hafizaBilgi").textContent=
+  "Dönem: "+donemAnahtari(ay,yil)+" — kayıtlar yüklendi.";
 }
 
-
-/* =====================================================
-   HESAPLAMA
-===================================================== */
-
+/* TABLO HESAPLAMALARI */
 function hesapla(){
-
-    let kumCiroPlan = 0;
-
-    let kumCiroOlan = 0;
-
-    let kumSaatPlan = 0;
-
-    let kumSaatOlan = 0;
-
-    let kumMusteri = 0;
-
-
-    let toplamCiroPlan = 0;
-
-    let toplamCiroOlan = 0;
-
-    let toplamSaatPlan = 0;
-
-    let toplamSaatOlan = 0;
-
-
-    const satirlar =
-        document.querySelectorAll(
-            "#tablo tr"
-        );
-
-
-    satirlar.forEach(
-        (tr,index) => {
-
-
-            const ciroPlan =
-                Number(
-                    tr.querySelector(
-                        ".ciro-plan"
-                    ).value
-                ) || 0;
-
-
-            const ciroOlan =
-                Number(
-                    tr.querySelector(
-                        ".ciro-olan"
-                    ).value
-                ) || 0;
-
-
-            const saatPlan =
-                Number(
-                    tr.querySelector(
-                        ".saat-plan"
-                    ).value
-                ) || 0;
-
-
-            const saatOlan =
-                Number(
-                    tr.querySelector(
-                        ".saat-olan"
-                    ).value
-                ) || 0;
-
-
-            const musteri =
-                Number(
-                    tr.querySelector(
-                        ".musteri"
-                    ).value
-                ) || 0;
-
-
-            kumCiroPlan +=
-                ciroPlan;
-
-
-            kumCiroOlan +=
-                ciroOlan;
-
-
-            kumSaatPlan +=
-                saatPlan;
-
-
-            kumSaatOlan +=
-                saatOlan;
-
-
-            kumMusteri +=
-                musteri;
-
-
-            toplamCiroPlan +=
-                ciroPlan;
-
-
-            toplamCiroOlan +=
-                ciroOlan;
-
-
-            toplamSaatPlan +=
-                saatPlan;
-
-
-            toplamSaatOlan +=
-                saatOlan;
-
-
-            /*
-               KÜMÜLATİF CİRO
-            */
-
-            tr.querySelector(
-                ".kum-ciro-plan"
-            ).textContent =
-                sayiFormat(
-                    kumCiroPlan
-                );
-
-
-            tr.querySelector(
-                ".kum-ciro-olan"
-            ).textContent =
-                sayiFormat(
-                    kumCiroOlan
-                );
-
-
-            /*
-               ORTALAMA
-            */
-
-            const ortalama =
-                (index + 1) > 0
-                ?
-                kumCiroOlan /
-                (index + 1)
-                :
-                0;
-
-
-            tr.querySelector(
-                ".ciro-ortalama"
-            ).textContent =
-                sayiFormat(
-                    ortalama
-                );
-
-
-            /*
-               KÜMÜLATİF SAAT
-            */
-
-            tr.querySelector(
-                ".kum-saat-plan"
-            ).textContent =
-                sayiFormat(
-                    kumSaatPlan
-                );
-
-
-            tr.querySelector(
-                ".kum-saat-olan"
-            ).textContent =
-                sayiFormat(
-                    kumSaatOlan
-                );
-
-
-            /*
-               PERFORMANS PLAN
-            */
-
-            const performansPlan =
-                kumSaatPlan > 0
-                ?
-                kumCiroPlan /
-                kumSaatPlan
-                :
-                0;
-
-
-            tr.querySelector(
-                ".performans-plan"
-            ).textContent =
-                sayiFormat(
-                    performansPlan
-                );
-
-
-            /*
-               PERFORMANS OLAN
-            */
-
-            const performansOlan =
-                kumSaatOlan > 0
-                ?
-                kumCiroOlan /
-                kumSaatOlan
-                :
-                0;
-
-
-            tr.querySelector(
-                ".performans-olan"
-            ).textContent =
-                sayiFormat(
-                    performansOlan
-                );
-
-
-            /*
-               KÜMÜLATİF MÜŞTERİ
-            */
-
-            tr.querySelector(
-                ".kum-musteri"
-            ).textContent =
-                sayiFormat(
-                    kumMusteri
-                );
-
-        }
-    );
-
-
-    /*
-       TOPLAM SATIRI
-    */
-
-    document.getElementById(
-        "toplamCiroPlan"
-    ).textContent =
-        sayiFormat(
-            toplamCiroPlan
-        );
-
-
-    document.getElementById(
-        "toplamCiroOlan"
-    ).textContent =
-        sayiFormat(
-            toplamCiroOlan
-        );
-
-
-    document.getElementById(
-        "toplamKumPlan"
-    ).textContent =
-        sayiFormat(
-            toplamCiroPlan
-        );
-
-
-    document.getElementById(
-        "toplamKumOlan"
-    ).textContent =
-        sayiFormat(
-            toplamCiroOlan
-        );
-
-
-    document.getElementById(
-        "toplamSaatPlan"
-    ).textContent =
-        sayiFormat(
-            toplamSaatPlan
-        );
-
-
-    document.getElementById(
-        "toplamSaatOlan"
-    ).textContent =
-        sayiFormat(
-            toplamSaatOlan
-        );
-
-
-    document.getElementById(
-        "toplamKumSaatPlan"
-    ).textContent =
-        sayiFormat(
-            toplamSaatPlan
-        );
-
-
-    document.getElementById(
-        "toplamKumSaatOlan"
-    ).textContent =
-        sayiFormat(
-            toplamSaatOlan
-        );
-
-
-    /* =================================================
-       HEDEF TOPLAM
-
-       FORMÜL:
-
-       ÇALIŞMA GÜNÜ × HEDEF
-    ================================================= */
-
-    const calismaGunu =
-        Number(
-            document.getElementById(
-                "calismaGunu"
-            ).value
-        ) || 0;
-
-
-    const hedef =
-        Number(
-            document.getElementById(
-                "hedef"
-            ).value
-        ) || 0;
-
-
-    const hedefToplam =
-        calismaGunu * hedef;
-
-
-    document.getElementById(
-        "hedefToplam"
-    ).textContent =
-        sayiFormat(
-            hedefToplam
-        );
-
+ let kumCiroPlan=0,kumCiroOlan=0,kumSaatPlan=0,kumSaatOlan=0,kumMusteri=0;
+ let toplamCiroPlan=0,toplamCiroOlan=0,toplamSaatPlan=0,toplamSaatOlan=0;
+
+ document.querySelectorAll("#tablo tr").forEach(function(tr,index){
+  const cp=Number(tr.querySelector(".ciro-plan").value)||0;
+  const co=Number(tr.querySelector(".ciro-olan").value)||0;
+  const sp=Number(tr.querySelector(".saat-plan").value)||0;
+  const so=Number(tr.querySelector(".saat-olan").value)||0;
+  const mu=Number(tr.querySelector(".musteri").value)||0;
+
+  kumCiroPlan+=cp; kumCiroOlan+=co;
+  kumSaatPlan+=sp; kumSaatOlan+=so; kumMusteri+=mu;
+  toplamCiroPlan+=cp; toplamCiroOlan+=co;
+  toplamSaatPlan+=sp; toplamSaatOlan+=so;
+
+  tr.querySelector(".kum-ciro-plan").textContent=sayiFormat(kumCiroPlan);
+  tr.querySelector(".kum-ciro-olan").textContent=sayiFormat(kumCiroOlan);
+  tr.querySelector(".ciro-ortalama").textContent=sayiFormat(kumCiroOlan/(index+1));
+  tr.querySelector(".kum-saat-plan").textContent=sayiFormat(kumSaatPlan);
+  tr.querySelector(".kum-saat-olan").textContent=sayiFormat(kumSaatOlan);
+  tr.querySelector(".performans-plan").textContent=sayiFormat(kumSaatPlan>0?kumCiroPlan/kumSaatPlan:0);
+  tr.querySelector(".performans-olan").textContent=sayiFormat(kumSaatOlan>0?kumCiroOlan/kumSaatOlan:0);
+  tr.querySelector(".kum-musteri").textContent=sayiFormat(kumMusteri);
+ });
+
+ document.getElementById("toplamCiroPlan").textContent=sayiFormat(toplamCiroPlan);
+ document.getElementById("toplamCiroOlan").textContent=sayiFormat(toplamCiroOlan);
+ document.getElementById("toplamKumPlan").textContent=sayiFormat(toplamCiroPlan);
+ document.getElementById("toplamKumOlan").textContent=sayiFormat(toplamCiroOlan);
+ document.getElementById("toplamSaatPlan").textContent=sayiFormat(toplamSaatPlan);
+ document.getElementById("toplamSaatOlan").textContent=sayiFormat(toplamSaatOlan);
+ document.getElementById("toplamKumSaatPlan").textContent=sayiFormat(toplamSaatPlan);
+ document.getElementById("toplamKumSaatOlan").textContent=sayiFormat(toplamSaatOlan);
+
+ const calismaGunu=Number(document.getElementById("calismaGunu").value)||0;
+ const hedef=Number(document.getElementById("hedef").value)||0;
+ document.getElementById("hedefToplam").textContent=sayiFormat(calismaGunu*hedef);
 }
 
+/* HAFTALIK ORANLAR
+   Pazartesi: -%6,25
+   Salı: hedef
+   Çarşamba: -%6,25
+   Perşembe: -%3,125
+   Cuma: +%6,25
+   Cumartesi: +%3,125
+   Pazar: +%6,25
+*/
+const gunOranlari={
+ 0:1.0625,
+ 1:0.9375,
+ 2:1.0000,
+ 3:0.9375,
+ 4:0.96875,
+ 5:1.0625,
+ 6:1.03125
+};
 
-/* =====================================================
-   AY DEĞİŞİNCE
-===================================================== */
+function hedefPenceresiAc(){
+ ozelGunleriYukle(donemVerisi().ozelGunler||[]);
+ document.getElementById("hedefModal").classList.add("aktif");
+}
 
-document.getElementById("ay")
-.addEventListener(
-    "change",
-    function(){
+function hedefPenceresiKapat(){
+ document.getElementById("hedefModal").classList.remove("aktif");
+ tumVerileriKaydet();
+}
 
-        const ay =
-            Number(this.value);
+function hedefTarihSatiriEkle(eskiKayit){
+ const ay=Number(document.getElementById("ay").value);
+ const yil=Number(document.getElementById("yil").value);
+ const ayMetni=String(ay).padStart(2,"0");
+ const sonGun=new Date(yil,ay,0).getDate();
 
-        const yil =
-            Number(
-                document.getElementById(
-                    "yil"
-                ).value
-            );
+ const satir=document.createElement("div");
+ satir.className="hedef-tarih-satiri";
 
+ satir.innerHTML=`
+  <input type="date" class="ozel-hedef-tarih"
+   min="${yil}-${ayMetni}-01"
+   max="${yil}-${ayMetni}-${String(sonGun).padStart(2,"0")}"
+   aria-label="Özel gün tarihi">
+  <select class="ozel-hedef-tur" aria-label="Özel gün türü">
+   <option value="1.15">Özel gün +%15</option>
+   <option value="1.40">Özel gün +%40</option>
+   <option value="1.50">Özel gün +%50</option>
+   <option value="0">Mağaza kapalı</option>
+  </select>
+  <button type="button" class="hedef-sil" title="Tarihi sil">×</button>`;
 
-        const gun =
-            new Date(
-                yil,
-                ay,
-                0
-            ).getDate();
+ if(eskiKayit){
+  satir.querySelector(".ozel-hedef-tarih").value=eskiKayit.tarih;
+  satir.querySelector(".ozel-hedef-tur").value=eskiKayit.tur;
+ }
 
+ satir.querySelector(".hedef-sil").addEventListener("click",function(){
+  satir.remove();
+  tumVerileriKaydet();
+ });
 
-        /*
-           Ay değişince otomatik gün sayısı
-           gelir ama kullanıcı daha sonra
-           bunu değiştirebilir.
-        */
+ satir.querySelectorAll("input,select").forEach(function(el){
+  el.addEventListener("change",tumVerileriKaydet);
+ });
 
-        document.getElementById(
-            "calismaGunu"
-        ).value =
-            gun;
+ document.getElementById("hedefTarihListesi").appendChild(satir);
+}
 
+function ozelGunleriYukle(liste){
+ const alan=document.getElementById("hedefTarihListesi");
+ alan.innerHTML="";
+ (liste||[]).forEach(function(kayit){hedefTarihSatiriEkle(kayit);});
+}
 
-        tabloOlustur();
+function ozelHedefleriOku(){
+ const ozelGunler={};
+ const ay=Number(document.getElementById("ay").value);
+ const yil=Number(document.getElementById("yil").value);
 
-    }
-);
+ document.querySelectorAll("#hedefTarihListesi .hedef-tarih-satiri").forEach(function(satir){
+  const tarih=satir.querySelector(".ozel-hedef-tarih").value;
+  const tur=Number(satir.querySelector(".ozel-hedef-tur").value);
+  if(!tarih)return;
 
+  const d=new Date(tarih+"T12:00:00");
+  if(d.getFullYear()!==yil||d.getMonth()!==ay-1){
+   throw new Error("Tüm özel tarihler seçili ay ve yıla ait olmalıdır.");
+  }
+  if(Object.prototype.hasOwnProperty.call(ozelGunler,tarih)){
+   throw new Error("Aynı tarih birden fazla seçilmiş. Lütfen düzeltin.");
+  }
+  ozelGunler[tarih]=tur;
+ });
+ return ozelGunler;
+}
 
-/* =====================================================
-   YIL DEĞİŞİNCE
-===================================================== */
+/* ÖZEL GÜN ARTIRIMINI DİĞER AÇIK GÜNLERDEN EŞİT DÜŞ */
+function esitAzalt(hamDagilim,verenIndeksleri,azaltilacak){
+ let kalan=Math.max(0,azaltilacak);
+ let aktif=verenIndeksleri.slice();
+ const EPS=0.000001;
 
-document.getElementById("yil")
-.addEventListener(
-    "change",
-    function(){
+ while(kalan>EPS&&aktif.length){
+  const pay=kalan/aktif.length;
+  let yeniKalan=0;
+  const yeniAktif=[];
 
-        const ay =
-            Number(
-                document.getElementById(
-                    "ay"
-                ).value
-            );
+  aktif.forEach(function(i){
+   const alinabilir=Math.max(0,hamDagilim[i]);
+   const dusum=Math.min(alinabilir,pay);
+   hamDagilim[i]-=dusum;
+   yeniKalan+=pay-dusum;
 
+   if(hamDagilim[i]>EPS)yeniAktif.push(i);
+  });
 
-        const yil =
-            Number(this.value);
+  if(yeniAktif.length===aktif.length&&Math.abs(yeniKalan-kalan)<EPS){
+   break;
+  }
 
+  kalan=yeniKalan;
+  aktif=yeniAktif;
+ }
+}
 
-        const gun =
-            new Date(
-                yil,
-                ay,
-                0
-            ).getDate();
+/* HEDEF DAĞITIMI */
+function hedefleriDagit(){
+ const hedef=Number(document.getElementById("hedef").value)||0;
+ const calismaGunu=Number(document.getElementById("calismaGunu").value)||0;
 
+ if(hedef<=0||calismaGunu<=0){
+  alert("Lütfen geçerli bir HEDEF ve ÇALIŞMA GÜNÜ girin.");
+  return;
+ }
 
-        document.getElementById(
-            "calismaGunu"
-        ).value =
-            gun;
+ let ozelGunler;
+ try{
+  ozelGunler=ozelHedefleriOku();
+ }catch(hata){
+  alert(hata.message);
+  return;
+ }
 
+ const satirlar=Array.from(document.querySelectorAll("#tablo tr"));
+ if(!satirlar.length){
+  alert("Önce aylık tabloyu oluşturun.");
+  return;
+ }
 
-        tabloOlustur();
+ const gunler=satirlar.map(function(tr){
+  const p=tr.querySelector(".tarih").textContent.trim().split(".");
+  const gun=Number(p[0]),ay=Number(p[1]),yil=Number(p[2]);
+  const tarih=new Date(yil,ay-1,gun);
+  const anahtar=yil+"-"+String(ay).padStart(2,"0")+"-"+String(gun).padStart(2,"0");
 
-    }
-);
+  let oran=gunOranlari[tarih.getDay()];
+  let ozelArtis=0;
+  let kapali=false;
 
+  if(Object.prototype.hasOwnProperty.call(ozelGunler,anahtar)){
+   const secim=ozelGunler[anahtar];
+   if(secim===0){
+    kapali=true;
+    oran=0;
+   }else{
+    ozelArtis=secim-1;
+   }
+  }
 
-/* =====================================================
-   ÇALIŞMA GÜNÜ DEĞİŞİNCE
-===================================================== */
+  return {tr,anahtar,oran,ozelArtis,kapali};
+ });
 
-document.getElementById(
-    "calismaGunu"
-)
-.addEventListener(
-    "input",
-    hesapla
-);
+ const acikIndeksleri=[];
+ const ozelIndeksleri=[];
+ const verenIndeksleri=[];
+ let toplamAgirlik=0;
 
+ gunler.forEach(function(g,i){
+  if(g.kapali)return;
+  acikIndeksleri.push(i);
+  toplamAgirlik+=g.oran;
 
-/* =====================================================
-   HEDEF DEĞİŞİNCE
-===================================================== */
+  if(g.ozelArtis>0)ozelIndeksleri.push(i);
+  else verenIndeksleri.push(i);
+ });
 
-document.getElementById(
-    "hedef"
-)
-.addEventListener(
-    "input",
-    hesapla
-);
+ if(!acikIndeksleri.length){
+  alert("Açık gün bulunamadı. Özel tarih seçimlerini kontrol edin.");
+  return;
+ }
 
+ const aylikHedef=Math.round(calismaGunu*hedef);
 
-/* =====================================================
-   BAŞLAT
-===================================================== */
+ /*
+  1. Önce açık günlere haftalık oranlarla temel dağılım yapılır.
+  2. Kapalı günler sıfır kalır.
+  3. Özel gün artışları, günlük HEDEF × seçilen artış oranı olarak hesaplanır.
+  4. Bu artışlar, özel gün olmayan açık günlerden eşit miktarda düşülür.
+  5. Toplamı korumak için son açık güne kalan tutar yazılır.
+ */
 
+ const hamDagilim=gunler.map(function(g){
+  return g.kapali?0:(aylikHedef*g.oran/toplamAgirlik);
+ });
+
+ let toplamOzelArtis=0;
+ ozelIndeksleri.forEach(function(i){
+  const artis=hedef*gunler[i].ozelArtis;
+  hamDagilim[i]+=artis;
+  toplamOzelArtis+=artis;
+ });
+
+ if(verenIndeksleri.length>0&&toplamOzelArtis>0){
+  // İstenen artış, veren günlerin toplam cirosunu aşarsa
+  // mevcut toplamın korunması için artış orantılı sınırlandırılır.
+  const verenToplami=verenIndeksleri.reduce(function(s,i){
+   return s+hamDagilim[i];
+  },0);
+
+  if(toplamOzelArtis>verenToplami&&toplamOzelArtis>0){
+   const katsayi=verenToplami/toplamOzelArtis;
+   ozelIndeksleri.forEach(function(i){
+    const istenen=hedef*gunler[i].ozelArtis;
+    hamDagilim[i]-=istenen*(1-katsayi);
+   });
+   toplamOzelArtis=verenToplami;
+  }
+
+  esitAzalt(hamDagilim,verenIndeksleri,toplamOzelArtis);
+ }else if(toplamOzelArtis>0&&verenIndeksleri.length===0){
+  alert("Özel gün artışını diğer açık günlerden düşmek için en az bir özel gün olmayan açık gün bulunmalıdır. Özel gün seçimlerini kontrol edin.");
+  return;
+ }
+
+ /*
+  Günlük rakamları en yakın 10.000 TL'ye yuvarla.
+  Son açık gün, aylık toplam hedefi tam tutturmak için
+  kalan tutarı alır.
+ */
+ const sonAcikIndex=acikIndeksleri[acikIndeksleri.length-1];
+ let dagitilan=0;
+
+ acikIndeksleri.forEach(function(i){
+  if(i===sonAcikIndex)return;
+  hamDagilim[i]=Math.max(0,Math.round(hamDagilim[i]/10000)*10000);
+  dagitilan+=hamDagilim[i];
+ });
+
+ if(dagitilan>aylikHedef){
+  // Yuvarlama sebebiyle hedef aşılırsa son açık günden önceki
+  // açık günleri 10.000 TL basamaklarıyla azalt.
+  let fazla=dagitilan-aylikHedef;
+
+  for(let j=acikIndeksleri.length-2;j>=0&&fazla>0;j--){
+   const i=acikIndeksleri[j];
+   const mevcut=hamDagilim[i];
+   const dusum=Math.min(mevcut,Math.ceil(fazla/10000)*10000);
+   hamDagilim[i]=Math.max(0,mevcut-dusum);
+   fazla-=mevcut-hamDagilim[i];
+  }
+
+  dagitilan=acikIndeksleri.reduce(function(s,i){
+   return i===sonAcikIndex?s:s+hamDagilim[i];
+  },0);
+ }
+
+ gunler.forEach(function(g,i){
+  g.tr.querySelector(".ciro-plan").value=g.kapali?0:"";
+ });
+
+ hamDagilim[sonAcikIndex]=aylikHedef-dagitilan;
+
+ gunler.forEach(function(g,i){
+  g.tr.querySelector(".ciro-plan").value=
+   g.kapali?0:Math.round(hamDagilim[i]);
+ });
+
+ const veri=donemVerisi();
+ veri.ozelGunler=ozelGunleriOkuSessiz();
+
+ hesapla();
+ tumVerileriKaydet();
+ hedefPenceresiKapat();
+
+ document.getElementById("durum").textContent=
+  "Ciro dağıtımı tamamlandı. Planlanan toplam: "+sayiFormat(aylikHedef);
+}
+
+/* ÜST ALAN DEĞİŞİKLİKLERİ */
+["calismaGunu","butce","hedef"].forEach(function(id){
+ document.getElementById(id).addEventListener("input",function(){
+  hesapla();
+  tumVerileriKaydet();
+ });
+});
+
+document.getElementById("ay").addEventListener("change",tabloOlustur);
+document.getElementById("yil").addEventListener("change",tabloOlustur);
+
+/* BAŞLAT */
+hafizaOku();
 tabloOlustur();
-
 </script>
-
 </body>
 </html>
