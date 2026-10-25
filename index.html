@@ -804,56 +804,68 @@ async function getTelegramInitData() {
  * YETKİ KONTROL
  *************************************************/
 
+
+let aktifUyelikTuru = "";
+
 async function miniAppYetkiKontrol() {
   progressGoster(
     "Telegram doğrulanıyor...",
-    "Kullanıcı bilgileriniz kontrol ediliyor."
+    "Üyelik bilgileriniz kontrol ediliyor."
   );
 
   try {
     const initData = await getTelegramInitData();
 
     if (!initData) {
-      status.textContent =
-        "❌ Telegram doğrulaması alınamadı.";
-
+      status.textContent = "❌ Telegram doğrulaması alınamadı.";
       results.innerHTML = "";
       return false;
     }
 
     const url =
       API_URL +
-      "?func=URUN_ARA" +
+      "?func=UYELIK_BILGISI" +
       "&initData=" +
-      encodeURIComponent(initData) +
-      "&query=";
+      encodeURIComponent(initData);
 
     const response = await fetch(url);
     const data = await response.json();
 
-    if (
-      !data ||
-      data.success !== true ||
-      data.authorized !== true
-    ) {
-      status.textContent =
-        data && data.message
-          ? "❌ " + data.message
-          : "❌ Kullanım yetkiniz yok.";
-
+    if (!data || data.success !== true || data.authorized !== true) {
+      aktifUyelikTuru = "";
+      status.textContent = data && data.message
+        ? "❌ " + data.message
+        : "❌ Kullanım yetkiniz yok.";
       results.innerHTML = "";
       return false;
     }
 
-    status.textContent = "Ürün aramaya hazır.";
+    aktifUyelikTuru = String(data.uyelik || "")
+      .trim()
+      .toLocaleUpperCase("tr-TR");
+
+    if (
+      aktifUyelikTuru !== "ÜCRETSİZ" &&
+      aktifUyelikTuru !== "ÜCRETLİ" &&
+      aktifUyelikTuru !== "SÜRESİZ"
+    ) {
+      aktifUyelikTuru = "";
+      status.textContent = "❌ Üyelik türünüz belirlenemedi.";
+      results.innerHTML = "";
+      return false;
+    }
+
+    status.textContent =
+      aktifUyelikTuru === "ÜCRETSİZ"
+        ? "Ücretsiz deneme üyeliğiniz aktif."
+        : "Üyeliğiniz aktif. Ürün aramaya hazır.";
+
     return true;
 
   } catch (err) {
-    console.error("Telegram yetki hatası:", err);
-
-    status.textContent =
-      "❌ Sunucu bağlantısı kurulamadı.";
-
+    console.error("Üyelik kontrol hatası:", err);
+    aktifUyelikTuru = "";
+    status.textContent = "❌ Sunucu bağlantısı kurulamadı.";
     return false;
 
   } finally {
@@ -900,13 +912,21 @@ async function searchProducts(force = false) {
       return;
     }
 
-    const url =
-      API_URL +
-      "?func=URUN_ARA" +
-      "&initData=" +
-      encodeURIComponent(initData) +
-      "&query=" +
-      encodeURIComponent(query);
+    
+const aramaFonksiyonu =
+  (aktifUyelikTuru === "ÜCRETLİ" ||
+   aktifUyelikTuru === "SÜRESİZ")
+    ? "URUN_ARA_UCRETLİ"
+    : "URUN_ARA";
+
+const url =
+  API_URL +
+  "?func=" + encodeURIComponent(aramaFonksiyonu) +
+  "&initData=" +
+  encodeURIComponent(initData) +
+  "&query=" +
+  encodeURIComponent(query);
+
 
     const response = await fetch(url);
     const data = await response.json();
