@@ -879,7 +879,196 @@ async function miniAppYetkiKontrol() {
 
 let sonArama = "";
 
+// Ücretli üyeler için ürün verisi cihazda IndexedDB ile önbelleğe alınır.
+const URUN_CACHE_DB = "kisakod_plus_urun_cache_v1";
+const URUN_CACHE_STORE = "urunler";
+const URUN_CACHE_KEY = "ucretli_tum_urunler";
+const URUN_CACHE_SURESI = 6 * 60 * 60 * 1000; // 6 saat
+
+let ucretliUrunVerileri = null;
+let ucretliUrunAramaIndeksi = null;
+
+function urunCacheDbAc() {
+  return new Promise(function(resolve, reject) {
+    if (!("indexedDB" in window)) {
+      reject(new Error("Bu cihaz IndexedDB desteklemiyor."));
+      return;
+    }
+    const request = indexedDB.open(URUN_CACHE_DB, 1);
+    request.onupgradeneeded = function() {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(URUN_CACHE_STORE)) {
+        db.createObjectStore(URUN_CACHE_STORE, { keyPath: "key" });
+      }
+    };
+    request.onsuccess = function() { resolve(request.result); };
+    request.onerror = function() {
+      reject(request.error || new Error("Ürün önbelleği açılamadı."));
+    };
+  });
+}
+
+async function urunCacheOku() {
+  const db = await urunCacheDbAc();
+  return new Promise(function(resolve, reject) {
+    const tx = db.transaction(URUN_CACHE_STORE, "readonly");
+    const request = tx.objectStore(URUN_CACHE_STORE).get(URUN_CACHE_KEY);
+    request.onsuccess = function() {
+      resolve(request.result || null);
+      db.close();
+    };
+    request.onerror = function() {
+      reject(request.error || new Error("Ürün önbelleği okunamadı."));
+      db.close();
+    };
+  });
+}
+
+async function urunCacheKaydet(products) {
+  const db = await urunCacheDbAc();
+  return new Promise(function(resolve, reject) {
+    const tx = db.transaction(URUN_CACHE_STORE, "readwrite");
+    tx.objectStore(URUN_CACHE_STORE).put({
+      key: URUN_CACHE_KEY,
+      savedAt: Date.now(),
+      products: products
+    });
+    tx.oncomplete = function() { db.close(); resolve(true); };
+    tx.onerror = function() {
+      db.close();
+      reject(tx.error || new Error("Ürün önbelleği kaydedilemedi."));
+    };
+    tx.onabort = function() {
+      db.close();
+      reject(tx.error || new Error("Ürün önbelleği kaydedilemedi."));
+    };
+  });
+}
+
+function aramaMetniNormalize(value) {
+  return String(value === null || value === undefined ? "" : value)
+    .toLocaleLowerCase("tr-TR")
+    .replace(/ı/g, "i")
+    .replace(/İ/g, "i")
+    .replace(/ğ/g, "g")
+    .replace(/Ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/Ü/g, "u")
+    .replace(/ş/g, "s")
+    .replace(/Ş/g, "s")
+    .replace(/ö/g, "o")
+    .replace(/Ö/g, "o")
+    .replace(/ç/g, "c")
+    .replace(/Ç/g, "c")
+    .trim();
+}
+
+function barkodMetniNormalize(value) {
+  let str = String(value === null || value === undefined ? "" : value)
+    .trim()
+    .replace(/\s/g, "")
+    .replace(/-/g, "");
+  if (str.endsWith(".0")) str = str.substring(0, str.length - 2);
+  return str.replace(/\D/g, "");
+}
+
+function ucretliAramaIndeksiHazirla(products) {
+  ucretliUrunVerileri = Array.isArray(products) ? products : [];
+  ucretliUrunAramaIndeksi = ucretliUrunVerileri.map(function(urun) {
+    return {
+      urun: urun,
+      urunKodu: aramaMetniNormalize(urun.urunKodu),
+      kod: aramaMetniNormalize(urun.kod),
+      fiyat: aramaMetniNormalize(urun.fiyat),
+      tarih: aramaMetniNormalize(urun.tarih),
+      barkod: barkodMetniNormalize(urun.barkod)
+    };
+  });
+}
+
+function ucretliUrunleriYerelAra(query) {
+  const q = aramaMetniNormalize(query);
+  const qBarkod = barkodMetniNormalize(query);
+  const bulunan = [];
+  if (!q || !Array.isArray(ucretliUrunAramaIndeksi)) return bulunan;
+
+  for (let i = 0; i < ucretliUrunAramaIndeksi.length; i++) {
+    const item = ucretliUrunAramaIndeksi[i];
+    const eslesti =
+      item.urunKodu.indexOf(q) !== -1 ||
+      item.kod.indexOf(q) !== -1 ||
+      item.fiyat.indexOf(q) !== -1 ||
+      item.tarih.indexOf(q) !== -1 ||
+      (qBarkod && item.barkod.indexOf(qBarkod) !== -1);
+
+    if (eslesti) {
+      bulunan.push(item.urun);
+      if (bulunan.length >= 20) break;
+    }
+  }
+  return bulunan;
+}
+
+async function ucretliUrunJsonIndir(yuklemeEkraniGoster) {
+  const initData = await getTelegramInitData();
+  if (!initData) throw new Error("Telegram doğrulaması alınamadı.");
+
+  if (yuklemeEkraniGoster) {
+    progressGoster(
+      "Ürün verileri indiriliyor...",
+      "İlk indirme biraz sürebilir. Sonraki aramalar cihazınızda yapılacak."
+    );
+  }
+
+  const url = API_URL +
+    "?func=URUN_JSON_UCRETLİ&initData=" +
+    encodeURIComponent(initData) +
+    "&t=" + Date.now();
+
+  const response = await fetch(url, { cache: "no-store" });
+  const data = await response.json();
+
+  if (!data || data.success !== true || data.authorized !== true ||
+      !Array.isArray(data.products)) {
+    throw new Error(data && data.message ? data.message : "Ürün verileri alınamadı.");
+  }
+
+  ucretliAramaIndeksiHazirla(data.products);
+  try {
+    await urunCacheKaydet(data.products);
+  } catch (cacheError) {
+    console.warn("Ürünler indirildi ancak cihaz önbelleğine kaydedilemedi:", cacheError);
+  }
+
+  status.textContent = data.products.length + " ürün hazır. Hızlı arama kullanıma hazır.";
+  return true;
+}
+
+async function ucretliUrunleriHazirla() {
+  if (aktifUyelikTuru !== "ÜCRETLİ" && aktifUyelikTuru !== "SÜRESİZ") return;
+
+  try {
+    const cache = await urunCacheOku();
+    if (cache && Array.isArray(cache.products)) {
+      ucretliAramaIndeksiHazirla(cache.products);
+      status.textContent = cache.products.length + " ürün hazır. Hızlı arama kullanıma hazır.";
+
+      if (!cache.savedAt || Date.now() - cache.savedAt > URUN_CACHE_SURESI) {
+        ucretliUrunJsonIndir(false).catch(function(err) {
+          console.warn("Ürün verileri arka planda yenilenemedi:", err);
+        });
+      }
+      return;
+    }
+  } catch (cacheError) {
+    console.warn("Cihaz önbelleği okunamadı; ürünler sunucudan indirilecek:", cacheError);
+  }
+
+  await ucretliUrunJsonIndir(true);
+}
+
 async function searchProducts(force = false) {
+
   const query =
     String(searchInput.value || "").trim();
 
@@ -902,31 +1091,33 @@ async function searchProducts(force = false) {
   status.textContent = "";
 
   try {
+    // Ücretli/süresiz üyeler hazır ürün listesi varsa aramayı cihazda yapar.
+    if (
+      (aktifUyelikTuru === "ÜCRETLİ" || aktifUyelikTuru === "SÜRESİZ") &&
+      Array.isArray(ucretliUrunAramaIndeksi)
+    ) {
+      renderResults(ucretliUrunleriYerelAra(query));
+      return;
+    }
+
     const initData = await getTelegramInitData();
 
     if (!initData) {
-      status.textContent =
-        "❌ Telegram doğrulaması alınamadı.";
-
+      status.textContent = "❌ Telegram doğrulaması alınamadı.";
       results.innerHTML = "";
       return;
     }
 
-    
-const aramaFonksiyonu =
-  (aktifUyelikTuru === "ÜCRETLİ" ||
-   aktifUyelikTuru === "SÜRESİZ")
-    ? "URUN_ARA_UCRETLİ"
-    : "URUN_ARA";
+    const aramaFonksiyonu =
+      (aktifUyelikTuru === "ÜCRETLİ" || aktifUyelikTuru === "SÜRESİZ")
+        ? "URUN_ARA_UCRETLİ"
+        : "URUN_ARA";
 
-const url =
-  API_URL +
-  "?func=" + encodeURIComponent(aramaFonksiyonu) +
-  "&initData=" +
-  encodeURIComponent(initData) +
-  "&query=" +
-  encodeURIComponent(query);
-
+    const url =
+      API_URL +
+      "?func=" + encodeURIComponent(aramaFonksiyonu) +
+      "&initData=" + encodeURIComponent(initData) +
+      "&query=" + encodeURIComponent(query);
 
     const response = await fetch(url);
     const data = await response.json();
@@ -1353,7 +1544,19 @@ document.addEventListener("DOMContentLoaded", async function() {
   telegramWebApp.ready();
   telegramWebApp.expand();
 
-  await miniAppYetkiKontrol();
+  const yetkili = await miniAppYetkiKontrol();
+
+  if (
+    yetkili &&
+    (aktifUyelikTuru === "ÜCRETLİ" || aktifUyelikTuru === "SÜRESİZ")
+  ) {
+    try {
+      await ucretliUrunleriHazirla();
+    } catch (err) {
+      console.error("Ücretli ürün verileri hazırlanamadı:", err);
+      status.textContent = "⚠️ Ürün listesi indirilemedi. Arama sunucu üzerinden devam edebilir.";
+    }
+  }
 });
 
 /*************************************************
