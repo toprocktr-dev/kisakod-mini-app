@@ -445,7 +445,7 @@ body {
 
 <div class="header">
   <div class="title">
-    🔎 KısaKod PLUS <span class="version-tag">v.1</span>
+    🔎 KısaKod PLUS <span class="version-tag">v.2</span>
   </div>
 
   <div class="search-row">
@@ -559,14 +559,9 @@ body {
 <!-- BARKOD -->
 <div id="scanner" class="scanner">
   <video id="scannerVideo" playsinline></video>
-
+  <button id="scannerClose" class="scanner-close">×</button>
   <div class="scanner-line"></div>
-
-  <button id="scannerClose" class="scanner-close">
-    ✕
-  </button>
 </div>
-
 <script>
 /*************************************************
  * TELEGRAM
@@ -594,32 +589,15 @@ const API_URL =
  * ELEMENTLER
  *************************************************/
 
-const searchInput =
-  document.getElementById("searchInput");
-
-const searchButton =
-  document.getElementById("searchButton");
-
-const barcodeButton =
-  document.getElementById("barcodeButton");
-
-const favoriteButton =
-  document.getElementById("favoriteButton");
-
-const favoriteCount =
-  document.getElementById("favoriteCount");
-
-const favoritesModal =
-  document.getElementById("favoritesModal");
-
-const favoritesResults =
-  document.getElementById("favoritesResults");
-
-const favoritesStatus =
-  document.getElementById("favoritesStatus");
-
-const detailFavoriteButton =
-  document.getElementById("detailFavoriteButton");
+const searchInput = document.getElementById("searchInput");
+const searchButton = document.getElementById("searchButton");
+const barcodeButton = document.getElementById("barcodeButton");
+const favoriteButton = document.getElementById("favoriteButton");
+const favoriteCount = document.getElementById("favoriteCount");
+const favoritesModal = document.getElementById("favoritesModal");
+const favoritesResults = document.getElementById("favoritesResults");
+const favoritesStatus = document.getElementById("favoritesStatus");
+const detailFavoriteButton = document.getElementById("detailFavoriteButton");
 
 let seciliUrun = null;
 const FAVORITES_STORAGE_KEY = "kisakod_plus_favorites_v1";
@@ -686,7 +664,6 @@ function favoriDegistir(urun) {
   if (mevcutIndex >= 0) {
     favoriUrunler.splice(mevcutIndex, 1);
   } else {
-    // Aynı ürünü ikinci kez eklememek için ürün anahtarı kontrol edilir.
     favoriUrunler.push(urun);
   }
 
@@ -739,20 +716,11 @@ function favoriPenceresiniKapat() {
   favoritesModal.style.display = "none";
 }
 
-const results =
-  document.getElementById("results");
-
-const status =
-  document.getElementById("status");
-
-const loadingScreen =
-  document.getElementById("loadingScreen");
-
-const loadingTitle =
-  document.getElementById("loadingTitle");
-
-const loadingDescription =
-  document.getElementById("loadingDescription");
+const results = document.getElementById("results");
+const status = document.getElementById("status");
+const loadingScreen = document.getElementById("loadingScreen");
+const loadingTitle = document.getElementById("loadingTitle");
+const loadingDescription = document.getElementById("loadingDescription");
 
 /*************************************************
  * YÜKLENME EKRANI
@@ -760,11 +728,8 @@ const loadingDescription =
 
 function progressGoster(baslik, aciklama) {
   results.innerHTML = "";
-
   loadingTitle.textContent = baslik;
-  loadingDescription.textContent =
-    aciklama || "Lütfen bekleyin.";
-
+  loadingDescription.textContent = aciklama || "Lütfen bekleyin.";
   loadingScreen.style.display = "flex";
 }
 
@@ -777,33 +742,25 @@ function progressGizle() {
  *************************************************/
 
 function getInitData() {
-  if (!telegramWebApp) {
-    return "";
-  }
-
+  if (!telegramWebApp) return "";
   return telegramWebApp.initData || "";
 }
 
 async function getTelegramInitData() {
   for (let i = 0; i < 20; i++) {
     const initData = getInitData();
-
-    if (initData) {
-      return initData;
-    }
+    if (initData) return initData;
 
     await new Promise(function(resolve) {
       setTimeout(resolve, 250);
     });
   }
-
   return "";
 }
 
 /*************************************************
  * YETKİ KONTROL
  *************************************************/
-
 
 let aktifUyelikTuru = "";
 
@@ -874,20 +831,18 @@ async function miniAppYetkiKontrol() {
 }
 
 /*************************************************
- * ÜRÜN ARAMA
+ * ÜRÜN ARAMA VE ÖNBELLEK
  *************************************************/
 
 let sonArama = "";
 
-// Ücretli üyeler için ürün verisi cihazda IndexedDB ile önbelleğe alınır.
 const URUN_CACHE_DB = "kisakod_plus_urun_cache_v1";
 const URUN_CACHE_STORE = "urunler";
 const URUN_CACHE_KEY = "ucretli_tum_urunler";
-const URUN_CACHE_SURESI = 6 * 60 * 60 * 1000; // 6 saat
+const URUN_CACHE_SURESI = 6 * 60 * 60 * 1000;
 
 let ucretliUrunVerileri = null;
 let ucretliUrunAramaIndeksi = null;
-// Ücretli ürün listesi yüklenirken aramanın eski sunucu yöntemine düşmesini önler.
 let ucretliUrunHazirlamaPromise = null;
 
 function urunCacheDbAc() {
@@ -896,14 +851,20 @@ function urunCacheDbAc() {
       reject(new Error("Bu cihaz IndexedDB desteklemiyor."));
       return;
     }
+
     const request = indexedDB.open(URUN_CACHE_DB, 1);
+
     request.onupgradeneeded = function() {
       const db = request.result;
       if (!db.objectStoreNames.contains(URUN_CACHE_STORE)) {
         db.createObjectStore(URUN_CACHE_STORE, { keyPath: "key" });
       }
     };
-    request.onsuccess = function() { resolve(request.result); };
+
+    request.onsuccess = function() {
+      resolve(request.result);
+    };
+
     request.onerror = function() {
       reject(request.error || new Error("Ürün önbelleği açılamadı."));
     };
@@ -912,13 +873,16 @@ function urunCacheDbAc() {
 
 async function urunCacheOku() {
   const db = await urunCacheDbAc();
+
   return new Promise(function(resolve, reject) {
     const tx = db.transaction(URUN_CACHE_STORE, "readonly");
     const request = tx.objectStore(URUN_CACHE_STORE).get(URUN_CACHE_KEY);
+
     request.onsuccess = function() {
       resolve(request.result || null);
       db.close();
     };
+
     request.onerror = function() {
       reject(request.error || new Error("Ürün önbelleği okunamadı."));
       db.close();
@@ -928,18 +892,26 @@ async function urunCacheOku() {
 
 async function urunCacheKaydet(products) {
   const db = await urunCacheDbAc();
+
   return new Promise(function(resolve, reject) {
     const tx = db.transaction(URUN_CACHE_STORE, "readwrite");
+
     tx.objectStore(URUN_CACHE_STORE).put({
       key: URUN_CACHE_KEY,
       savedAt: Date.now(),
       products: products
     });
-    tx.oncomplete = function() { db.close(); resolve(true); };
+
+    tx.oncomplete = function() {
+      db.close();
+      resolve(true);
+    };
+
     tx.onerror = function() {
       db.close();
       reject(tx.error || new Error("Ürün önbelleği kaydedilemedi."));
     };
+
     tx.onabort = function() {
       db.close();
       reject(tx.error || new Error("Ürün önbelleği kaydedilemedi."));
@@ -970,12 +942,14 @@ function barkodMetniNormalize(value) {
     .trim()
     .replace(/\s/g, "")
     .replace(/-/g, "");
+
   if (str.endsWith(".0")) str = str.substring(0, str.length - 2);
   return str.replace(/\D/g, "");
 }
 
 function ucretliAramaIndeksiHazirla(products) {
   ucretliUrunVerileri = Array.isArray(products) ? products : [];
+
   ucretliUrunAramaIndeksi = ucretliUrunVerileri.map(function(urun) {
     return {
       urun: urun,
@@ -992,10 +966,12 @@ function ucretliUrunleriYerelAra(query) {
   const q = aramaMetniNormalize(query);
   const qBarkod = barkodMetniNormalize(query);
   const bulunan = [];
+
   if (!q || !Array.isArray(ucretliUrunAramaIndeksi)) return bulunan;
 
   for (let i = 0; i < ucretliUrunAramaIndeksi.length; i++) {
     const item = ucretliUrunAramaIndeksi[i];
+
     const eslesti =
       item.urunKodu.indexOf(q) !== -1 ||
       item.kod.indexOf(q) !== -1 ||
@@ -1008,6 +984,7 @@ function ucretliUrunleriYerelAra(query) {
       if (bulunan.length >= 20) break;
     }
   }
+
   return bulunan;
 }
 
@@ -1030,19 +1007,26 @@ async function ucretliUrunJsonIndir(yuklemeEkraniGoster) {
   const response = await fetch(url, { cache: "no-store" });
   const data = await response.json();
 
-  if (!data || data.success !== true || data.authorized !== true ||
-      !Array.isArray(data.products)) {
+  if (
+    !data ||
+    data.success !== true ||
+    data.authorized !== true ||
+    !Array.isArray(data.products)
+  ) {
     throw new Error(data && data.message ? data.message : "Ürün verileri alınamadı.");
   }
 
   ucretliAramaIndeksiHazirla(data.products);
+
   try {
     await urunCacheKaydet(data.products);
   } catch (cacheError) {
     console.warn("Ürünler indirildi ancak cihaz önbelleğine kaydedilemedi:", cacheError);
   }
 
-  status.textContent = data.products.length + " ürün hazır. Hızlı arama kullanıma hazır.";
+  status.textContent =
+    data.products.length + " ürün hazır. Hızlı arama kullanıma hazır.";
+
   return true;
 }
 
@@ -1051,15 +1035,19 @@ async function ucretliUrunleriHazirla() {
 
   try {
     const cache = await urunCacheOku();
+
     if (cache && Array.isArray(cache.products)) {
       ucretliAramaIndeksiHazirla(cache.products);
-      status.textContent = cache.products.length + " ürün hazır. Hızlı arama kullanıma hazır.";
+
+      status.textContent =
+        cache.products.length + " ürün hazır. Hızlı arama kullanıma hazır.";
 
       if (!cache.savedAt || Date.now() - cache.savedAt > URUN_CACHE_SURESI) {
         ucretliUrunJsonIndir(false).catch(function(err) {
           console.warn("Ürün verileri arka planda yenilenemedi:", err);
         });
       }
+
       return;
     }
   } catch (cacheError) {
@@ -1070,17 +1058,10 @@ async function ucretliUrunleriHazirla() {
 }
 
 async function searchProducts(force = false) {
+  const query = String(searchInput.value || "").trim();
 
-  const query =
-    String(searchInput.value || "").trim();
-
-  if (!query) {
-    return;
-  }
-
-  if (!force && query === sonArama) {
-    return;
-  }
+  if (!query) return;
+  if (!force && query === sonArama) return;
 
   sonArama = query;
   searchButton.disabled = true;
@@ -1096,8 +1077,6 @@ async function searchProducts(force = false) {
     const ucretliMi =
       aktifUyelikTuru === "ÜCRETLİ" ||
       aktifUyelikTuru === "SÜRESİZ";
-
-    // Ücretli/süresiz kullanıcıda önce ürün listesinin yüklenmesini bekle.
     // Liste hazır değilse eski ve yavaş sunucu aramasına sessizce geçme.
     if (ucretliMi) {
       if (!Array.isArray(ucretliUrunAramaIndeksi)) {
@@ -1187,24 +1166,16 @@ const SONRAKI_GOSTERIM = 10;
 function renderResults(data) {
   results.innerHTML = "";
 
-  tumUrunler = Array.isArray(data)
-    ? data
-    : [];
-
+  tumUrunler = Array.isArray(data) ? data : [];
   gosterilenUrunSayisi = 0;
 
   if (tumUrunler.length === 0) {
     status.textContent = "❌ Ürün bulunamadı.";
-
-    results.innerHTML =
-      '<div class="empty">Ürün bulunamadı.</div>';
-
+    results.innerHTML = '<div class="empty">Ürün bulunamadı.</div>';
     return;
   }
 
-  status.textContent =
-    tumUrunler.length + " ürün bulundu.";
-
+  status.textContent = tumUrunler.length + " ürün bulundu.";
   sonrakiUrunleriGoster(ILK_GOSTERIM);
 }
 
@@ -1215,6 +1186,7 @@ function urunKartiOlustur(urun, favoriPenceresinde) {
   const img = document.createElement("img");
   img.className = "product-image";
   img.alt = urun.kod || "Ürün";
+
   if (urun.link) {
     img.src = urun.link;
   } else {
@@ -1251,7 +1223,11 @@ function urunKartiOlustur(urun, favoriPenceresinde) {
   favorite.dataset.favoriteKey = urunFavoriAnahtari(urun);
   favorite.textContent = urunFavorideMi(urun) ? "★" : "☆";
   favorite.classList.toggle("is-favorite", urunFavorideMi(urun));
-  favorite.setAttribute("aria-label", urunFavorideMi(urun) ? "Favorilerden çıkar" : "Favorilere ekle");
+  favorite.setAttribute(
+    "aria-label",
+    urunFavorideMi(urun) ? "Favorilerden çıkar" : "Favorilere ekle"
+  );
+
   favorite.addEventListener("click", function(event) {
     event.stopPropagation();
     favoriDegistir(urun);
@@ -1271,11 +1247,7 @@ function urunKartiOlustur(urun, favoriPenceresinde) {
 
 function sonrakiUrunleriGoster(adet) {
   const baslangic = gosterilenUrunSayisi;
-
-  const bitis = Math.min(
-    gosterilenUrunSayisi + adet,
-    tumUrunler.length
-  );
+  const bitis = Math.min(gosterilenUrunSayisi + adet, tumUrunler.length);
 
   for (let i = baslangic; i < bitis; i++) {
     results.appendChild(urunKartiOlustur(tumUrunler[i], false));
@@ -1296,20 +1268,14 @@ function sonrakiUrunleriGoster(adet) {
 
 function showProductDetail(urun) {
   seciliUrun = urun;
+
   const modal = document.getElementById("productModal");
   const modalImage = document.getElementById("modalImage");
 
-  document.getElementById("modalTitle").textContent =
-    urun.kod || "Ürün";
-
-  document.getElementById("modalPrice").textContent =
-    urun.fiyat || "";
-
-  document.getElementById("modalCode").textContent =
-    urun.urunKodu || "";
-
-  document.getElementById("modalDate").textContent =
-    urun.tarih || "";
+  document.getElementById("modalTitle").textContent = urun.kod || "Ürün";
+  document.getElementById("modalPrice").textContent = urun.fiyat || "";
+  document.getElementById("modalCode").textContent = urun.urunKodu || "";
+  document.getElementById("modalDate").textContent = urun.tarih || "";
 
   if (urun.link) {
     modalImage.src = urun.link;
@@ -1354,19 +1320,15 @@ function escapeHtml(value) {
  * MODAL KAPAT
  *************************************************/
 
-document
-  .getElementById("closeModal")
-  .addEventListener("click", function() {
-    document.getElementById("productModal").style.display = "none";
-  });
+document.getElementById("closeModal").addEventListener("click", function() {
+  document.getElementById("productModal").style.display = "none";
+});
 
-document
-  .getElementById("productModal")
-  .addEventListener("click", function(e) {
-    if (e.target === this) {
-      this.style.display = "none";
-    }
-  });
+document.getElementById("productModal").addEventListener("click", function(e) {
+  if (e.target === this) {
+    this.style.display = "none";
+  }
+});
 
 /*************************************************
  * ARAMA BUTONU
@@ -1397,13 +1359,10 @@ if (window.visualViewport) {
   window.visualViewport.addEventListener("resize", function() {
     const height = window.visualViewport.height;
     const windowHeight = window.innerHeight;
-
-    const keyboardOpen =
-      windowHeight - height > 150;
+    const keyboardOpen = windowHeight - height > 150;
 
     if (keyboardOpen) {
       keyboardWasOpen = true;
-
     } else if (keyboardWasOpen) {
       keyboardWasOpen = false;
 
@@ -1420,7 +1379,10 @@ if (window.visualViewport) {
 
 favoriteButton.addEventListener("click", favoriPenceresiniAc);
 
-document.getElementById("closeFavorites").addEventListener("click", favoriPenceresiniKapat);
+document.getElementById("closeFavorites").addEventListener(
+  "click",
+  favoriPenceresiniKapat
+);
 
 favoritesModal.addEventListener("click", function(e) {
   if (e.target === favoritesModal) favoriPenceresiniKapat();
@@ -1446,24 +1408,20 @@ async function startScanner() {
   scanner.style.display = "block";
 
   try {
-    codeReader =
-      new ZXingBrowser.BrowserMultiFormatReader();
+    codeReader = new ZXingBrowser.BrowserMultiFormatReader();
 
-    scannerControls =
-      await codeReader.decodeFromVideoDevice(
-        undefined,
-        video,
-        function(result, error) {
-          if (result) {
-            const barkod = result.getText();
-
-            stopScanner();
-
-            searchInput.value = barkod;
-            searchProducts(true);
-          }
+    scannerControls = await codeReader.decodeFromVideoDevice(
+      undefined,
+      video,
+      function(result, error) {
+        if (result) {
+          const barkod = result.getText();
+          stopScanner();
+          searchInput.value = barkod;
+          searchProducts(true);
         }
-      );
+      }
+    );
 
   } catch (err) {
     console.error(err);
@@ -1508,11 +1466,9 @@ barcodeButton.addEventListener("click", function() {
  * SCANNER KAPAT
  *************************************************/
 
-document
-  .getElementById("scannerClose")
-  .addEventListener("click", function() {
-    stopScanner();
-  });
+document.getElementById("scannerClose").addEventListener("click", function() {
+  stopScanner();
+});
 
 /*************************************************
  * TELEGRAM GERİ BUTONU
@@ -1549,9 +1505,7 @@ if (telegramWebApp) {
 
 document.addEventListener("DOMContentLoaded", async function() {
   if (!telegramWebApp) {
-    status.textContent =
-      "❌ Bu uygulama Telegram içinden açılmalıdır.";
-
+    status.textContent = "❌ Bu uygulama Telegram içinden açılmalıdır.";
     return;
   }
 
@@ -1564,13 +1518,13 @@ document.addEventListener("DOMContentLoaded", async function() {
     yetkili &&
     (aktifUyelikTuru === "ÜCRETLİ" || aktifUyelikTuru === "SÜRESİZ")
   ) {
-    // Arama butonuna yükleme bitmeden basılırsa aynı yükleme işlemini beklesin.
     ucretliUrunHazirlamaPromise = ucretliUrunleriHazirla();
 
     try {
       await ucretliUrunHazirlamaPromise;
     } catch (err) {
       console.error("Ücretli ürün verileri hazırlanamadı:", err);
+
       status.textContent =
         "❌ Ürün listesi indirilemedi: " +
         (err && err.message ? err.message : "Bilinmeyen hata") +
@@ -1584,11 +1538,8 @@ document.addEventListener("DOMContentLoaded", async function() {
  *************************************************/
 
 window.addEventListener("scroll", function() {
-  const scrollPosition =
-    window.innerHeight + window.scrollY;
-
-  const documentHeight =
-    document.documentElement.scrollHeight;
+  const scrollPosition = window.innerHeight + window.scrollY;
+  const documentHeight = document.documentElement.scrollHeight;
 
   if (scrollPosition >= documentHeight - 300) {
     if (gosterilenUrunSayisi < tumUrunler.length) {
