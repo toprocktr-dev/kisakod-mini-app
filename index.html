@@ -887,6 +887,8 @@ const URUN_CACHE_SURESI = 6 * 60 * 60 * 1000; // 6 saat
 
 let ucretliUrunVerileri = null;
 let ucretliUrunAramaIndeksi = null;
+// Ücretli ürün listesi yüklenirken aramanın eski sunucu yöntemine düşmesini önler.
+let ucretliUrunHazirlamaPromise = null;
 
 function urunCacheDbAc() {
   return new Promise(function(resolve, reject) {
@@ -1091,11 +1093,23 @@ async function searchProducts(force = false) {
   status.textContent = "";
 
   try {
-    // Ücretli/süresiz üyeler hazır ürün listesi varsa aramayı cihazda yapar.
-    if (
-      (aktifUyelikTuru === "ÜCRETLİ" || aktifUyelikTuru === "SÜRESİZ") &&
-      Array.isArray(ucretliUrunAramaIndeksi)
-    ) {
+    const ucretliMi =
+      aktifUyelikTuru === "ÜCRETLİ" ||
+      aktifUyelikTuru === "SÜRESİZ";
+
+    // Ücretli/süresiz kullanıcıda önce ürün listesinin yüklenmesini bekle.
+    // Liste hazır değilse eski ve yavaş sunucu aramasına sessizce geçme.
+    if (ucretliMi) {
+      if (!Array.isArray(ucretliUrunAramaIndeksi)) {
+        if (ucretliUrunHazirlamaPromise) {
+          await ucretliUrunHazirlamaPromise;
+        }
+      }
+
+      if (!Array.isArray(ucretliUrunAramaIndeksi)) {
+        throw new Error("Ürün listesi henüz hazır değil. Uygulamayı kapatıp yeniden açın.");
+      }
+
       renderResults(ucretliUrunleriYerelAra(query));
       return;
     }
@@ -1550,11 +1564,17 @@ document.addEventListener("DOMContentLoaded", async function() {
     yetkili &&
     (aktifUyelikTuru === "ÜCRETLİ" || aktifUyelikTuru === "SÜRESİZ")
   ) {
+    // Arama butonuna yükleme bitmeden basılırsa aynı yükleme işlemini beklesin.
+    ucretliUrunHazirlamaPromise = ucretliUrunleriHazirla();
+
     try {
-      await ucretliUrunleriHazirla();
+      await ucretliUrunHazirlamaPromise;
     } catch (err) {
       console.error("Ücretli ürün verileri hazırlanamadı:", err);
-      status.textContent = "⚠️ Ürün listesi indirilemedi. Arama sunucu üzerinden devam edebilir.";
+      status.textContent =
+        "❌ Ürün listesi indirilemedi: " +
+        (err && err.message ? err.message : "Bilinmeyen hata") +
+        " Arama için sunucuya geri dönülmedi.";
     }
   }
 });
