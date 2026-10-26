@@ -1257,6 +1257,11 @@ if (telegramWebApp) {
  *************************************************/
 
 
+
+/*************************************************
+ * BAŞLANGIÇ
+ *************************************************/
+
 document.addEventListener("DOMContentLoaded", async function() {
   if (!telegramWebApp) {
     status.textContent =
@@ -1267,16 +1272,59 @@ document.addEventListener("DOMContentLoaded", async function() {
   telegramWebApp.ready();
   telegramWebApp.expand();
 
-  const initData = await getTelegramInitData();
+  progressGoster(
+    "Telegram doğrulanıyor...",
+    "Sunucu üzerinden Telegram bağlantısı kontrol ediliyor."
+  );
 
-  if (!initData) {
+  try {
+    const initData = await getTelegramInitData();
+
+    if (!initData) {
+      status.textContent =
+        "❌ Telegram doğrulaması alınamadı.";
+      return;
+    }
+
+    // Üyelik kontrolü yerine normal arama API'sini
+    // boş sorguyla çağırarak sunucu doğrulamasını yap.
+    const url =
+      API_URL +
+      "?func=URUN_ARA" +
+      "&initData=" + encodeURIComponent(initData) +
+      "&query=";
+
+    const response = await fetch(url, {
+      cache: "no-store"
+    });
+
+    const data = await response.json();
+
+    if (
+      !response.ok ||
+      !data ||
+      data.success !== true ||
+      data.authorized !== true
+    ) {
+      status.textContent =
+        data && data.message
+          ? "❌ " + data.message
+          : "❌ Telegram doğrulaması başarısız.";
+      return;
+    }
+
+    status.textContent = "Ürün aramaya hazır.";
+
+  } catch (err) {
+    console.error("Açılış doğrulama hatası:", err);
     status.textContent =
-      "❌ Telegram doğrulaması alınamadı.";
-    return;
-  }
+      "❌ Sunucu bağlantısı kurulamadı.";
 
-  status.textContent = "Ürün aramaya hazır.";
+  } finally {
+    progressGizle();
+  }
 });
+
 
 
 /*************************************************
