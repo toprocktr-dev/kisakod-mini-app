@@ -923,17 +923,6 @@ async function plusJsonYukle(forceRefresh) {
     status.textContent = "Ürün verileri cihazdan yüklendi.";
     return;
   }
-// GEÇİCİ HMAC TESTİ
-const testUrl = API_URL +
-  "?func=IMZA_TEST&initData=" + encodeURIComponent(initData);
-
-const testResponse = await fetch(testUrl, {
-  cache: "no-store"
-});
-
-const testData = await testResponse.json();
-
-console.log("HMAC TEST SONUCU:", testData);
   const url = API_URL +
     "?func=PLUS_JSON&initData=" + encodeURIComponent(initData);
 
@@ -1422,14 +1411,10 @@ document.addEventListener("DOMContentLoaded", async function() {
       status.textContent = "Kayıtlı ürün verileri hazır. Güncelleme kontrol ediliyor...";
     }
 
-    // İlk açılışta veya 24 saat geçtiyse sunucudan doğrula ve güncelle.
+    // İlk açılışta veya 24 saatlik önbellek süresi dolduysa API'den indir.
+    // Önbellek güncelse ürünler cihazdan kullanılır; her açılışta API çağrısı yapılmaz.
     if (!cacheGuncel) {
       await plusJsonYukle(true);
-    } else {
-      // Cache doğrulaması 24 saat içinde yapılmış; ağ varsa sessiz yenileme dene.
-      plusJsonYukle(true).catch(function(err) {
-        console.warn("PLUS arka plan yenilemesi başarısız:", err);
-      });
     }
 
     status.textContent = "Ürün aramaya hazır.";
