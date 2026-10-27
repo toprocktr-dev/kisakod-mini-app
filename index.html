@@ -923,7 +923,17 @@ async function plusJsonYukle(forceRefresh) {
     status.textContent = "Ürün verileri cihazdan yüklendi.";
     return;
   }
+// GEÇİCİ HMAC TESTİ
+const testUrl = API_URL +
+  "?func=IMZA_TEST&initData=" + encodeURIComponent(initData);
 
+const testResponse = await fetch(testUrl, {
+  cache: "no-store"
+});
+
+const testData = await testResponse.json();
+
+console.log("HMAC TEST SONUCU:", testData);
   const url = API_URL +
     "?func=PLUS_JSON&initData=" + encodeURIComponent(initData);
 
