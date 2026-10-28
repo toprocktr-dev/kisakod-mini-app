@@ -583,27 +583,6 @@ if (telegramWebApp) {
   telegramWebApp.expand();
 }
 
-  console.log(
-  "Telegram WebApp mevcut:",
-  !!telegramWebApp
-);
-
-console.log(
-  "Telegram initData mevcut:",
-  !!(
-    telegramWebApp &&
-    telegramWebApp.initData
-  )
-);
-
-console.log(
-  "Telegram kullanıcı bilgisi mevcut:",
-  !!(
-    telegramWebApp &&
-    telegramWebApp.initDataUnsafe &&
-    telegramWebApp.initDataUnsafe.user
-  )
-);
 /*************************************************
  * API
  *************************************************/
@@ -828,130 +807,7 @@ async function getTelegramInitData() {
 
 
 /*************************************************
- * PLUS JSON + CİHAZDA ÖNBELLEK
- * Mevcut arayüz ve ürün kartları korunmuştur.
- *************************************************/
-
-const PLUS_CACHE_DB = "kisakod_plus_db_v1";
-const PLUS_CACHE_STORE = "urunler";
-const PLUS_CACHE_KEY = "plus_products";
-const PLUS_CACHE_TTL = 24 * 60 * 60 * 1000;
-
-let plusUrunler = [];
-let plusVeriHazir = false;
-let plusYetkili = false;
-let plusSonYenileme = 0;
-
-function plusDbAc() {
-  return new Promise(function(resolve, reject) {
-    const request = indexedDB.open(PLUS_CACHE_DB, 1);
-    request.onupgradeneeded = function() {
-      const db = request.result;
-      if (!db.objectStoreNames.contains(PLUS_CACHE_STORE)) {
-        db.createObjectStore(PLUS_CACHE_STORE, { keyPath: "key" });
-      }
-    };
-    request.onsuccess = function() { resolve(request.result); };
-    request.onerror = function() { reject(request.error); };
-  });
-}
-
-async function plusCacheOku() {
-  const db = await plusDbAc();
-  return new Promise(function(resolve, reject) {
-    const tx = db.transaction(PLUS_CACHE_STORE, "readonly");
-    const request = tx.objectStore(PLUS_CACHE_STORE).get(PLUS_CACHE_KEY);
-    request.onsuccess = function() {
-      resolve(request.result || null);
-      db.close();
-    };
-    request.onerror = function() {
-      reject(request.error);
-      db.close();
-    };
-  });
-}
-
-async function plusCacheKaydet(products, verifiedAt) {
-  const db = await plusDbAc();
-  return new Promise(function(resolve, reject) {
-    const tx = db.transaction(PLUS_CACHE_STORE, "readwrite");
-    tx.objectStore(PLUS_CACHE_STORE).put({
-      key: PLUS_CACHE_KEY,
-      products: products,
-      verifiedAt: verifiedAt,
-      savedAt: Date.now()
-    });
-    tx.oncomplete = function() { resolve(); db.close(); };
-    tx.onerror = function() { reject(tx.error); db.close(); };
-  });
-}
-
-function urunAramaMetniNormalize(value) {
-  return String(value == null ? "" : value)
-    .toLocaleLowerCase("tr-TR")
-    .replace(/ı/g, "i")
-    .replace(/İ/g, "i")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
-}
-
-async function plusJsonYukle(forceRefresh) {
-  const initData = await getTelegramInitData();
-  if (!initData) {
-    throw new Error("Telegram doğrulaması alınamadı.");
-  }
-
-  const cache = await plusCacheOku().catch(function() { return null; });
-  const cacheGuncel = !!(
-    cache &&
-    Array.isArray(cache.products) &&
-    Date.now() - Number(cache.verifiedAt || 0) < PLUS_CACHE_TTL
-  );
-
-  // Daha önce doğrulanmış 24 saatlik yerel veri varsa önce onu kullan.
-  if (!forceRefresh && cacheGuncel) {
-    plusUrunler = cache.products;
-    plusSonYenileme = Number(cache.verifiedAt || 0);
-    plusVeriHazir = true;
-    plusYetkili = true;
-  }
-
-  // Cache güncelse, her aramada sunucuya bağlanma.
-  if (!forceRefresh && cacheGuncel) {
-    status.textContent = "Ürün verileri cihazdan yüklendi.";
-    return;
-  }
-  const url = API_URL +
-    "?func=PLUS_JSON&initData=" + encodeURIComponent(initData);
-
-  const response = await fetch(url, { cache: "no-store" });
-  const data = await response.json();
-
-  if (!response.ok || !data || data.success !== true || data.authorized !== true) {
-    plusYetkili = false;
-    plusVeriHazir = false;
-    plusUrunler = [];
-    throw new Error(data && data.error ? data.error : "PLUS üyelik doğrulaması başarısız.");
-  }
-
-  if (!Array.isArray(data.products)) {
-    throw new Error("Sunucudan geçerli ürün listesi alınamadı.");
-  }
-
-  plusUrunler = data.products;
-  plusSonYenileme = Date.now();
-  plusVeriHazir = true;
-  plusYetkili = true;
-
-  await plusCacheKaydet(plusUrunler, plusSonYenileme).catch(function(err) {
-    console.warn("Ürün önbelleği kaydedilemedi:", err);
-  });
-}
-
-/*************************************************
- * NORMAL ÜRÜN ARAMA - ARTIK YEREL JSON ÜZERİNDEN
+ * NORMAL ÜRÜN ARAMA
  *************************************************/
 
 let sonArama = "";
@@ -965,46 +821,68 @@ async function searchProducts(force = false) {
     return;
   }
 
-  if (!force && query === sonArama) return;
-  sonArama = query;
+  if (!force && query === sonArama) {
+    return;
+  }
 
+  sonArama = query;
   searchButton.disabled = true;
-  progressGoster("Ürünler aranıyor...", "Aradığınız ürünler getiriliyor.");
+
+  progressGoster(
+    "Ürünler aranıyor...",
+    "Aradığınız ürünler getiriliyor."
+  );
+
+  status.textContent = "";
 
   try {
     const initData = await getTelegramInitData();
 
     if (!initData) {
       status.textContent = "❌ Telegram doğrulaması alınamadı.";
+      results.innerHTML = "";
       return;
     }
 
-    const url = API_URL +
+    const url =
+      API_URL +
       "?func=URUN_ARA" +
       "&initData=" + encodeURIComponent(initData) +
       "&query=" + encodeURIComponent(query);
 
-    const response = await fetch(url, { cache: "no-store" });
+    const response = await fetch(url);
     const data = await response.json();
 
-    if (!data || data.success !== true || data.authorized !== true) {
-      status.textContent = "❌ " +
-        (data && (data.message || data.error)
-          ? (data.message || data.error)
-          : "Arama yapılamadı.");
+    if (!data || data.success !== true) {
+      status.textContent = data && data.message
+        ? "❌ " + data.message
+        : "❌ Arama yapılamadı.";
       return;
     }
 
-    renderResults(Array.isArray(data.products) ? data.products : []);
+    if (data.authorized !== true) {
+      status.textContent = data.message
+        ? "❌ " + data.message
+        : "❌ Telegram doğrulaması başarısız.";
+      return;
+    }
+
+    renderResults(
+      Array.isArray(data.products) ? data.products : []
+    );
 
   } catch (err) {
     console.error("Ürün arama hatası:", err);
-    status.textContent = "❌ Bağlantı hatası.";
+    results.innerHTML =
+      '<div class="empty">❌ Bağlantı hatası oluştu.</div>';
+    status.textContent = "Bağlantı hatası.";
+
   } finally {
     progressGizle();
     searchButton.disabled = false;
   }
 }
+
 /*************************************************
  * SONUÇLARI GÖSTER
  *************************************************/
@@ -1386,7 +1264,8 @@ if (telegramWebApp) {
 
 document.addEventListener("DOMContentLoaded", async function() {
   if (!telegramWebApp) {
-    status.textContent = "❌ Bu uygulama Telegram içinden açılmalıdır.";
+    status.textContent =
+      "❌ Bu uygulama Telegram içinden açılmalıdır.";
     return;
   }
 
@@ -1394,39 +1273,53 @@ document.addEventListener("DOMContentLoaded", async function() {
   telegramWebApp.expand();
 
   progressGoster(
-    "PLUS üyeliği kontrol ediliyor...",
-    "Ürün verileri hazırlanıyor."
+    "Telegram doğrulanıyor...",
+    "Sunucu üzerinden Telegram bağlantısı kontrol ediliyor."
   );
 
   try {
-    // Önce cihazda geçerli, daha önce sunucuda doğrulanmış önbelleği dene.
-    const cache = await plusCacheOku().catch(function() { return null; });
-    const cacheGuncel = !!(
-      cache &&
-      Array.isArray(cache.products) &&
-      Date.now() - Number(cache.verifiedAt || 0) < PLUS_CACHE_TTL
-    );
+    const initData = await getTelegramInitData();
 
-    if (cacheGuncel) {
-      plusUrunler = cache.products;
-      plusSonYenileme = Number(cache.verifiedAt || 0);
-      plusVeriHazir = true;
-      plusYetkili = true;
-      status.textContent = "Kayıtlı ürün verileri hazır. Güncelleme kontrol ediliyor...";
+    if (!initData) {
+      status.textContent =
+        "❌ Telegram doğrulaması alınamadı.";
+      return;
     }
 
-    // İlk açılışta veya 24 saatlik önbellek süresi dolduysa API'den indir.
-    // Önbellek güncelse ürünler cihazdan kullanılır; her açılışta API çağrısı yapılmaz.
-    if (!cacheGuncel) {
-      await plusJsonYukle(true);
+    // Üyelik kontrolü yerine normal arama API'sini
+    // boş sorguyla çağırarak sunucu doğrulamasını yap.
+    const url =
+      API_URL +
+      "?func=URUN_ARA" +
+      "&initData=" + encodeURIComponent(initData) +
+      "&query=";
+
+    const response = await fetch(url, {
+      cache: "no-store"
+    });
+
+    const data = await response.json();
+
+    if (
+      !response.ok ||
+      !data ||
+      data.success !== true ||
+      data.authorized !== true
+    ) {
+      status.textContent =
+        data && data.message
+          ? "❌ " + data.message
+          : "❌ Telegram doğrulaması başarısız.";
+      return;
     }
 
     status.textContent = "Ürün aramaya hazır.";
+
   } catch (err) {
-    console.error("PLUS açılış kontrolü:", err);
-    if (!plusVeriHazir) {
-      status.textContent = "❌ " + (err && err.message ? err.message : "PLUS doğrulaması başarısız.");
-    }
+    console.error("Açılış doğrulama hatası:", err);
+    status.textContent =
+      "❌ Sunucu bağlantısı kurulamadı.";
+
   } finally {
     progressGizle();
   }
