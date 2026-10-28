@@ -961,46 +961,50 @@ async function searchProducts(force = false) {
 
   if (!query) {
     results.innerHTML = "";
-    status.textContent = plusVeriHazir ? "Ürün aramaya hazır." : "";
+    status.textContent = "";
     return;
   }
 
   if (!force && query === sonArama) return;
   sonArama = query;
 
-  if (!plusVeriHazir || !plusYetkili) {
-    status.textContent = "❌ Ürün verileri henüz hazır değil. Biraz sonra tekrar deneyin.";
-    return;
-  }
-
   searchButton.disabled = true;
-  progressGoster("Ürünler aranıyor...", "Ürünler cihazınızdaki kayıtlı verilerde aranıyor.");
+  progressGoster("Ürünler aranıyor...", "Aradığınız ürünler getiriliyor.");
 
   try {
-    const q = urunAramaMetniNormalize(query);
-    const bulunanlar = plusUrunler.filter(function(urun) {
-      const alanlar = [
-        urun.kod,
-        urun.urunKodu,
-        urun.barkod,
-        urun.fiyat,
-        urun.tarih
-      ];
-      return alanlar.some(function(deger) {
-        return urunAramaMetniNormalize(deger).includes(q);
-      });
-    });
+    const initData = await getTelegramInitData();
 
-    renderResults(bulunanlar);
+    if (!initData) {
+      status.textContent = "❌ Telegram doğrulaması alınamadı.";
+      return;
+    }
+
+    const url = API_URL +
+      "?func=URUN_ARA" +
+      "&initData=" + encodeURIComponent(initData) +
+      "&query=" + encodeURIComponent(query);
+
+    const response = await fetch(url, { cache: "no-store" });
+    const data = await response.json();
+
+    if (!data || data.success !== true || data.authorized !== true) {
+      status.textContent = "❌ " +
+        (data && (data.message || data.error)
+          ? (data.message || data.error)
+          : "Arama yapılamadı.");
+      return;
+    }
+
+    renderResults(Array.isArray(data.products) ? data.products : []);
+
   } catch (err) {
-    console.error("Yerel ürün arama hatası:", err);
-    status.textContent = "Ürün arama sırasında hata oluştu.";
+    console.error("Ürün arama hatası:", err);
+    status.textContent = "❌ Bağlantı hatası.";
   } finally {
     progressGizle();
     searchButton.disabled = false;
   }
 }
-
 /*************************************************
  * SONUÇLARI GÖSTER
  *************************************************/
