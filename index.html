@@ -683,10 +683,16 @@ function favoriDegistir(urun) {
     return urunFavoriAnahtari(item) === anahtar;
   });
 
-  if (mevcutIndex >= 0) {
+   if (mevcutIndex >= 0) {
+    // Favoride varsa listeden çıkar.
     favoriUrunler.splice(mevcutIndex, 1);
   } else {
-    // Aynı ürünü ikinci kez eklememek için ürün anahtarı kontrol edilir.
+    // En fazla 10 favori ürün eklenebilir.
+    if (favoriUrunler.length >= 10) {
+      alert("⭐ En fazla 10 ürün favorilere ekleyebilirsiniz.");
+      return;
+    }
+
     favoriUrunler.push(urun);
   }
 
