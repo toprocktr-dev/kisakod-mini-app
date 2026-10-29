@@ -810,6 +810,7 @@ async function getTelegramInitData() {
  * NORMAL ÜRÜN ARAMA
  *************************************************/
 
+
 let sonArama = "";
 
 async function searchProducts(force = false) {
@@ -820,6 +821,14 @@ async function searchProducts(force = false) {
     status.textContent = "";
     return;
   }
+
+  // En az 3 karakter kontrolü
+if (query.length < 3) {
+  results.innerHTML = "";
+  status.textContent =
+    "🔎 Arama yapmak için en az 3 harf yazın.";
+  return;
+}
 
   if (!force && query === sonArama) {
     return;
@@ -839,7 +848,8 @@ async function searchProducts(force = false) {
     const initData = await getTelegramInitData();
 
     if (!initData) {
-      status.textContent = "❌ Telegram doğrulaması alınamadı.";
+      status.textContent =
+        "❌ Telegram doğrulaması alınamadı.";
       results.innerHTML = "";
       return;
     }
@@ -850,13 +860,17 @@ async function searchProducts(force = false) {
       "&initData=" + encodeURIComponent(initData) +
       "&query=" + encodeURIComponent(query);
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      cache: "no-store"
+    });
+
     const data = await response.json();
 
     if (!data || data.success !== true) {
       status.textContent = data && data.message
         ? "❌ " + data.message
         : "❌ Arama yapılamadı.";
+      results.innerHTML = "";
       return;
     }
 
@@ -864,6 +878,7 @@ async function searchProducts(force = false) {
       status.textContent = data.message
         ? "❌ " + data.message
         : "❌ Telegram doğrulaması başarısız.";
+      results.innerHTML = "";
       return;
     }
 
