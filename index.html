@@ -441,26 +441,24 @@ body {
 </style>
 
 <style>
-/* Genel metin koruması */
+/* Metin koruması */
 body, body * {
   -webkit-user-select: none !important;
   user-select: none !important;
   -webkit-touch-callout: none;
 }
 
-/* Arama ve yazı alanlarını serbest bırak */
+/* Kullanıcı giriş alanları serbest */
 input,
 textarea,
 select,
-[contenteditable="true"],
-.search-box,
-.search-input {
+[contenteditable="true"] {
   -webkit-user-select: text !important;
   user-select: text !important;
   -webkit-touch-callout: default !important;
 }
 
-/* Görselleri sürüklemeyi engelle */
+/* Görseller */
 img {
   -webkit-user-drag: none;
 }
@@ -965,17 +963,7 @@ function renderResults(data) {
   sonrakiUrunleriGoster(ILK_GOSTERIM);
 }
 
-if (data.rateLimited) {
-  miniAppBeklemeEkrani(data.waitSeconds || 600);
-  return;
-}
 
-if (data.minLength) {
-  results.innerHTML = "";
-  status.textContent =
-    "🔎 Arama yapmak için en az 3 karakter yazın.";
-  return;
-}
 
 function urunKartiOlustur(urun, favoriPenceresinde) {
   const card = document.createElement("div");
