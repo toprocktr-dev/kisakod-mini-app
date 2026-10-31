@@ -439,6 +439,33 @@ body {
   background: red;
 }
 </style>
+
+<style>
+/* Genel metin koruması */
+body, body * {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none;
+}
+
+/* Arama ve yazı alanlarını serbest bırak */
+input,
+textarea,
+select,
+[contenteditable="true"],
+.search-box,
+.search-input {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+}
+
+/* Görselleri sürüklemeyi engelle */
+img {
+  -webkit-user-drag: none;
+}
+</style>
+  
 </head>
 
 <body>
@@ -938,6 +965,18 @@ function renderResults(data) {
   sonrakiUrunleriGoster(ILK_GOSTERIM);
 }
 
+if (data.rateLimited) {
+  miniAppBeklemeEkrani(data.waitSeconds || 600);
+  return;
+}
+
+if (data.minLength) {
+  results.innerHTML = "";
+  status.textContent =
+    "🔎 Arama yapmak için en az 3 karakter yazın.";
+  return;
+}
+
 function urunKartiOlustur(urun, favoriPenceresinde) {
   const card = document.createElement("div");
   card.className = "product-card";
@@ -1364,6 +1403,113 @@ window.addEventListener("scroll", function() {
       sonrakiUrunleriGoster(SONRAKI_GOSTERIM);
     }
   }
+});
+
+let aramaBeklemeZamanlayici = null;
+
+function miniAppBeklemeEkrani(gelenSaniye) {
+  let kalan = Math.max(1, Number(gelenSaniye) || 600);
+
+  if (aramaBeklemeZamanlayici) {
+    clearInterval(aramaBeklemeZamanlayici);
+  }
+
+  const results = document.getElementById("results");
+  const status = document.getElementById("status");
+
+  function ekraniGuncelle() {
+    const dakika = Math.floor(kalan / 60);
+    const saniye = kalan % 60;
+    const sure = String(dakika).padStart(2, "0") +
+      ":" + String(saniye).padStart(2, "0");
+
+    if (status) {
+      status.textContent = "";
+    }
+
+    if (results) {
+      results.innerHTML = `
+        <div style="
+          padding:28px 18px;
+          margin:16px 0;
+          text-align:center;
+          border-radius:16px;
+          background:#fff3f3;
+          color:#9d2020;
+          border:1px solid #ffd0d0;
+        ">
+          <div style="font-size:42px;">⏳</div>
+          <h3 style="margin:12px 0;">Arama molası</h3>
+          <p>5 arama hakkınızı kullandınız.</p>
+          <p>Yeni arama yapabilmek için lütfen bekleyin.</p>
+          <div style="
+            font-size:38px;
+            font-weight:bold;
+            margin:18px 0;
+            font-variant-numeric:tabular-nums;
+          ">${sure}</div>
+          <p style="font-size:13px;">
+            Süre dolunca tekrar arama yapabilirsiniz.
+          </p>
+        </div>
+      `;
+    }
+
+    if (kalan <= 0) {
+      clearInterval(aramaBeklemeZamanlayici);
+      aramaBeklemeZamanlayici = null;
+
+      if (status) {
+        status.textContent = "✅ Bekleme süresi doldu. Yeni arama yapabilirsiniz.";
+      }
+
+      if (results) {
+        results.innerHTML = "";
+      }
+      return;
+    }
+
+    kalan--;
+  }
+
+  ekraniGuncelle();
+  aramaBeklemeZamanlayici = setInterval(ekraniGuncelle, 1000);
+}
+
+  
+</script>
+
+<script>
+// Sağ tık engeli
+document.addEventListener("contextmenu", function(e) {
+  if (e.target.closest(
+    'input, textarea, select, [contenteditable="true"], .search-box, .search-input'
+  )) return;
+
+  e.preventDefault();
+});
+
+// Kopyalama engeli
+document.addEventListener("copy", function(e) {
+  if (e.target.closest(
+    'input, textarea, select, [contenteditable="true"], .search-box, .search-input'
+  )) return;
+
+  e.preventDefault();
+});
+
+// Kesme engeli
+document.addEventListener("cut", function(e) {
+  if (e.target.closest(
+    'input, textarea, select, [contenteditable="true"], .search-box, .search-input'
+  )) return;
+
+  e.preventDefault();
+});
+
+// Sürükleme engeli
+document.addEventListener("dragstart", function(e) {
+  e.preventDefault();
 });
 </script>
 
