@@ -450,6 +450,19 @@ body {
   font-size: 22px;
 }
 
+  .scanner-torch {
+  position: absolute;
+  z-index: 201;
+  top: 20px;
+  left: 15px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 25px;
+  background: rgba(255,255,255,.9);
+  color: #111;
+  font-size: 14px;
+  font-weight: bold;
+}
 .scanner-line {
   position: absolute;
   z-index: 10;
@@ -606,6 +619,12 @@ img {
 <div id="scanner" class="scanner">
   <div id="scannerViewport"></div>
   <div class="scanner-line"></div>
+  <button
+  id="scannerTorch"
+  class="scanner-torch"
+  onclick="toggleScannerTorch()">
+  ⚡ Flaş Aç
+</button>
   <button id="scannerClose" class="scanner-close">✕</button>
 </div>
 
@@ -1213,7 +1232,27 @@ favoriSayisiniGuncelle();
 let scannerInitialized = false;
 let scannerOpen = false;
 let scannerDetected = false;
+let torchEnabled = false;
 
+async function toggleScannerTorch() {
+  try {
+    if (!window.Quagga || !scannerInitialized) return;
+
+    if (torchEnabled) {
+      await Quagga.CameraAccess.disableTorch();
+      torchEnabled = false;
+      document.getElementById("scannerTorch").textContent = "⚡ Flaş Aç";
+    } else {
+      await Quagga.CameraAccess.enableTorch();
+      torchEnabled = true;
+      document.getElementById("scannerTorch").textContent = "⚡ Flaş Kapat";
+    }
+
+  } catch (error) {
+    alert("Bu cihazda kamera flaşı desteklenmiyor.");
+  }
+}
+  
 function scannerDetectedHandler(result) {
   if (!result || !result.codeResult || scannerDetected) return;
 
@@ -1301,14 +1340,18 @@ function stopScanner() {
 
   if (window.Quagga) {
     Quagga.offDetected(scannerDetectedHandler);
-
+  if (torchEnabled) {
+  Quagga.CameraAccess.disableTorch().catch(() => {});
+  torchEnabled = false;
+}
     if (scannerInitialized) {
       Quagga.stop();
     }
   }
 
   scannerInitialized = false;
-
+  torchEnabled = false;
+  document.getElementById("scannerTorch").textContent = "⚡ Flaş Aç";
   const scanner = document.getElementById("scanner");
   const viewport = document.getElementById("scannerViewport");
 
