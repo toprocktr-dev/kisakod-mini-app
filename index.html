@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <script>
-const KISAKOD_SURUM = "1.0.6";
+const KISAKOD_SURUM = "1.0.7";
 console.log("KısaKod sürüm:", KISAKOD_SURUM);
 </script>
 <meta charset="UTF-8">
@@ -504,6 +504,32 @@ select,
 img {
   -webkit-user-drag: none;
 }
+  .recent-searches {
+  display: none;
+  position: relative;
+  margin: 5px 12px 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 50;
+}
+
+.recent-search-item {
+  padding: 11px 14px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.recent-search-item:last-child {
+  border-bottom: none;
+}
+
+.recent-search-item:active {
+  background: #f1f1f1;
+}
 </style>
   
 </head>
@@ -519,12 +545,14 @@ img {
   <div class="search-row">
     <input
       id="searchInput"
+      onfocus="sonAramalariGoster()"
       class="search-input"
       type="search"
       placeholder="Ürün adı, kod veya barkod"
       autocomplete="off"
       autocorrect="off"
       spellcheck="false"
+      
     >
 
     <button
@@ -550,8 +578,10 @@ img {
     >
       ⭐<span id="favoriteCount" class="favorite-count">0</span>
     </button>
-  </div>
+   </div>
 </div>
+
+<div id="recentSearches" class="recent-searches"></div>
 
 <div id="status" class="status">
   Hazırlanıyor...
@@ -888,7 +918,56 @@ async function getTelegramInitData() {
 
 
 let sonArama = "";
+// SON 4 ARAMAYI KAYDET VE GÖSTER
+function sonAramalariGoster() {
+  const alan = document.getElementById("recentSearches");
+  const liste = JSON.parse(
+    localStorage.getItem("kisakod_son_aramalar") || "[]"
+  );
 
+  if (!liste.length) {
+    alan.style.display = "none";
+    return;
+  }
+
+  alan.innerHTML = liste.map((urun, index) => `
+    <div class="recent-search-item"
+         onclick="sonAramayiSec(${index})">
+      🕘 ${urun.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+    </div>
+  `).join("");
+
+  alan.style.display = "block";
+}
+
+function sonAramayiKaydet(query) {
+  let liste = JSON.parse(
+    localStorage.getItem("kisakod_son_aramalar") || "[]"
+  );
+
+  liste = liste.filter(x => x !== query);
+  liste.unshift(query);
+  liste = liste.slice(0, 4);
+
+  localStorage.setItem(
+    "kisakod_son_aramalar",
+    JSON.stringify(liste)
+  );
+}
+
+function sonAramayiSec(index) {
+  const liste = JSON.parse(
+    localStorage.getItem("kisakod_son_aramalar") || "[]"
+  );
+
+  if (!liste[index]) return;
+
+  searchInput.value = liste[index];
+
+  document.getElementById("recentSearches").style.display = "none";
+
+  searchProducts(true);
+}
 async function searchProducts(force = false) {
   const query = String(searchInput.value || "").trim();
 
@@ -911,6 +990,9 @@ if (query.length < 3) {
   }
 
   sonArama = query;
+  sonAramayiKaydet(query);
+
+  document.getElementById("recentSearches").style.display = "none";
   searchButton.disabled = true;
 
   progressGoster(
