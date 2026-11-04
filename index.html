@@ -539,7 +539,7 @@ img {
 <div class="header">
   <div class="title">
     🔎 KısaKod PLUS
-    <span class="app-version">v.1.0.8</span>
+    <span class="app-version">v.1.1.0</span>
   </div>
 
   <div class="search-row">
@@ -1531,13 +1531,11 @@ document.addEventListener("DOMContentLoaded", async function() {
       return;
     }
 
-    // Üyelik kontrolü yerine normal arama API'sini
-    // boş sorguyla çağırarak sunucu doğrulamasını yap.
-    const url =
-      API_URL +
-      "?func=URUN_ARA" +
-      "&initData=" + encodeURIComponent(initData) +
-      "&query=";
+   // Günlük üyelik kontrolü
+const url =
+  API_URL +
+  "?func=FIREBASE_YETKI_KONTROL" +
+  "&initData=" + encodeURIComponent(initData);
 
     const response = await fetch(url, {
       cache: "no-store"
