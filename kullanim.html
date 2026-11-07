@@ -746,10 +746,7 @@ async function start(){
     fail('Telegram doğrulaması alınamadı','Telegram kullanıcı bilgisi alınamadı. Mini App’i Telegram içerisinden yeniden açın.');
     return
   }
-if(API_URL==='https://script.google.com/macros/s/AKfycbyvFzWWiVmBp6hS3lxVsVtWNg4NIW0FZmTCx4qzqOdTKBthhQpQYxdNmVktDVim8iPEhg/exec'){
-  fail('Sunucu bağlantısı henüz ayarlanmadı','Telegram bağlantısı hazır. Apps Script adresi ve KULLANIM_BILGILERI API’si tamamlandığında gerçek üyelik bilgileriniz yüklenecek.');
-  return
-}
+
 document.getElementById('loadingStatus').textContent='Telegram doğrulandı. Üyelik bilgileriniz getiriliyor...';
 const r=await fetch(API_URL+'?func=KULLANIM_BILGILERI&initData='+encodeURIComponent(tg.initData),{
   cache:'no-store'
