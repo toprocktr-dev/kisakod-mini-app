@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>KısaKod</title>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f5f6f8;
+  color:#222;
+}
+
+/* =========================
+   HEADER
+   ========================= */
+
+.header{
+  background:#fff;
+  padding:18px 16px 14px;
+  position:sticky;
+  top:0;
+  z-index:10;
+  box-shadow:0 1px 8px rgba(0,0,0,.08);
+}
+
+.logo{
+  font-size:27px;
+  font-weight:800;
+  text-align:center;
+  margin-bottom:14px;
+}
+
+.search{
+  width:100%;
+  border:1px solid #ddd;
+  border-radius:14px;
+  padding:14px 16px;
+  font-size:16px;
+  outline:none;
+  background:#f7f7f7;
+}
+
+.search:focus{
+  border-color:#888;
+  background:#fff;
+}
+
+/* =========================
+   BARKOD BUTONU
+   ========================= */
+
+.barcode-button{
+  width:100%;
+  margin-top:9px;
+  padding:12px 16px;
+  border:0;
+  border-radius:12px;
+  background:#111;
+  color:#fff;
+  font-size:15px;
+  cursor:pointer;
+}
+
+.barcode-button:active{
+  transform:scale(.98);
+}
+
+/* =========================
+   CONTAINER
+   ========================= */
+
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:16px;
+}
+
+.status{
+  text-align:center;
+  color:#777;
+  padding:14px 4px;
+  font-size:14px;
+}
+
+/* =========================
+   CARDS
+   ========================= */
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:12px;
+}
+
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,.06);
+  overflow:hidden;
+  position:relative;
+}
+
+.product-image-wrap{
+  position:relative;
+}
+
+.product-img{
+  width:100%;
+  height:155px;
+  object-fit:contain;
+  background:#fafafa;
+  border-radius:12px;
+  display:block;
+}
+
+/* =========================
+   PAYLAS BUTONU
+   ========================= */
+
+.share-button{
+  position:absolute;
+  right:8px;
+  bottom:8px;
+
+  width:38px;
+  height:38px;
+
+  border:0;
+  border-radius:50%;
+
+  background:rgba(0,0,0,.75);
+  color:#fff;
+
+  font-size:18px;
+  cursor:pointer;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  box-shadow:0 2px 7px rgba(0,0,0,.25);
+}
+
+.share-button:active{
+  transform:scale(.92);
+}
+
+/* Resim yoksa paylaş butonu */
+
+.share-button.no-image{
+  position:static;
+  width:auto;
+  height:auto;
+  border-radius:10px;
+  padding:9px 12px;
+  margin-top:9px;
+  font-size:14px;
+}
+
+/* =========================
+   PRODUCT INFO
+   ========================= */
+
+.name{
+  font-size:15px;
+  font-weight:700;
+  margin-top:10px;
+  line-height:1.25;
+}
+
+.code{
+  color:#666;
+  font-size:13px;
+  margin-top:6px;
+}
+
+.barcode-info{
+  color:#888;
+  font-size:12px;
+  margin-top:4px;
+}
+
+.price{
+  font-size:18px;
+  font-weight:800;
+  margin-top:7px;
+}
+
+.date{
+  color:#888;
+  font-size:12px;
+  margin-top:5px;
+}
+
+.empty{
+  text-align:center;
+  padding:40px 10px;
+  color:#777;
+}
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media(max-width:430px){
+
+  .cards{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+
+  .card{
+    padding:8px;
+    border-radius:13px;
+  }
+
+  .product-img{
+    height:135px;
+  }
+
+  .name{
+    font-size:14px;
+  }
+
+  .price{
+    font-size:17px;
+  }
+
+}
+
+/* =========================
+   SCANNER
+   ========================= */
+
+.scanner-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  background:#000;
+  color:#fff;
+  overflow:hidden;
+}
+
+.scanner-overlay.active{
+  display:block;
+}
+
+.scanner-camera-wrap{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+#scannerVideo{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.scanner-top{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  z-index:3;
+
+  display:flex;
+  justify-content:space-between;
+
+  padding:18px;
+}
+
+.scanner-btn{
+  border:0;
+  border-radius:12px;
+  padding:12px 16px;
+
+  background:rgba(0,0,0,.65);
+  color:#fff;
+
+  font-size:15px;
+}
+
+.scan-frame{
+  position:absolute;
+
+  width:min(82vw,420px);
+  height:170px;
+
+  border:3px solid #00ff66;
+  border-radius:16px;
+
+  box-shadow:0 0 0 9999px rgba(0,0,0,.35);
+
+  overflow:hidden;
+}
+
+.scan-line{
+  position:absolute;
+
+  left:0;
+  right:0;
+
+  height:3px;
+
+  background:#00ff66;
+
+  animation:scanMove 1.7s linear infinite;
+}
+
+@keyframes scanMove{
+
+  0%{
+    top:0;
+  }
+
+  50%{
+    top:calc(100% - 3px);
+  }
+
+  100%{
+    top:0;
+  }
+
+}
+
+.scan-message{
+  position:absolute;
+
+  bottom:60px;
+  left:20px;
+  right:20px;
+
+  text-align:center;
+
+  font-size:16px;
+
+  background:rgba(0,0,0,.65);
+
+  padding:12px;
+
+  border-radius:12px;
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =========================
+     HEADER
+     ========================= -->
+
+<header class="header">
+
+  <div class="logo">
+    KısaKod
+  </div>
+
+  <input
+    id="searchBox"
+    class="search"
+    type="search"
+    placeholder="Ürün ara..."
+    autocomplete="off"
+  >
+
+  <button
+    id="barcodeButton"
+    class="barcode-button"
+    type="button"
+  >
+    📷 Barkod Tara
+  </button>
+
+</header>
+
+
+<!-- =========================
+     CONTENT
+     ========================= -->
+
+<main class="container">
+
+  <div id="status" class="status">
+    Ürünler yükleniyor...
+  </div>
+
+  <div id="cards" class="cards"></div>
+
+</main>
+
+
+<!-- =========================
+     SCANNER OVERLAY
+     ========================= -->
+
+<div
+  id="scannerOverlay"
+  class="scanner-overlay"
+  aria-hidden="true"
+>
+
+  <div class="scanner-top">
+
+    <button
+      id="closeScanner"
+      class="scanner-btn"
+      type="button"
+    >
+      ✕ Kapat
+    </button>
+
+    <button
+      id="flashBtn"
+      class="scanner-btn"
+      type="button"
+    >
+      🔦 Fener
+    </button>
+
+  </div>
+
+
+  <div class="scanner-camera-wrap">
+
+    <video
+      id="scannerVideo"
+      autoplay
+      muted
+      playsinline
+    ></video>
+
+    <div class="scan-frame">
+
+      <div class="scan-line"></div>
+
+    </div>
+
+    <div
+      id="scanMessage"
+      class="scan-message"
+    >
+      Barkodu yeşil alanın içine getir
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   API
+   ========================================================= */
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbx9zMcP46rPgPoJp9rD6QhoLsog1gLaz_Eo7_rpuExYIuVrAOcKmaNUOV_ZxLnfNjGQ/exec?func=READ_PRODUCTS3";
+
+
+/* =========================================================
+   GLOBAL DEĞİŞKENLER
+   ========================================================= */
+
+let products = [];
+
+let currentVisibleProducts = [];
+
+let searchTimer = null;
+
+
+/* =========================================================
+   TÜRKÇE NORMALIZE
+   ========================================================= */
+
+function normalize(text){
+
+  return String(text ?? "")
+    .toLocaleLowerCase("tr-TR")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/ı/g,"i")
+    .replace(/ğ/g,"g")
+    .replace(/ü/g,"u")
+    .replace(/ş/g,"s")
+    .replace(/ö/g,"o")
+    .replace(/ç/g,"c");
+
+}
+
+
+/* =========================================================
+   HTML GÜVENLİK
+   ========================================================= */
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================================================
+   SÜTUN BUL
+   ========================================================= */
+
+function findColumn(headers,names,fallback){
+
+  for(const name of names){
+
+    const wanted =
+      normalize(name)
+      .replace(/\s+/g,"");
+
+    const index =
+      headers.findIndex(h => {
+
+        const current =
+          normalize(h)
+          .replace(/\s+/g,"");
+
+        return current === wanted;
+
+      });
+
+    if(index >= 0){
+      return index;
+    }
+
+  }
+
+  return fallback;
+
+}
+
+
+/* =========================================================
+   BARKOD NORMALİZE
+   ========================================================= */
+
+function normalizeBarcode(value){
+
+  return String(value ?? "")
+    .trim()
+    .replace(/\s+/g,"")
+    .replace(/[^0-9]/g,"");
+
+}
+
+
+/* =========================================================
+   BARKOD KARŞILAŞTIRMA
+   ========================================================= */
+
+function barcodeEquals(a,b){
+
+  const x = normalizeBarcode(a);
+  const y = normalizeBarcode(b);
+
+  if(!x || !y){
+    return false;
+  }
+
+  /* Önce tam eşleşme */
+
+  if(x === y){
+    return true;
+  }
+
+  /*
+     Google Sheets bazen 0123456789012
+     değerini 123456789012 şeklinde tutabilir.
+     Bu nedenle baştaki sıfırları da kontrol ediyoruz.
+  */
+
+  const xNoZero = x.replace(/^0+/,"");
+  const yNoZero = y.replace(/^0+/,"");
+
+  if(
+    xNoZero &&
+    yNoZero &&
+    xNoZero === yNoZero
+  ){
+    return true;
+  }
+
+  return false;
+
+}
+
+
+/* =========================================================
+   BARKOD GÖRÜNÜYOR MU?
+   ========================================================= */
+
+function looksLikeBarcode(value){
+
+  const code = normalizeBarcode(value);
+
+  /*
+     Normal market barkodları genellikle
+     8-14 hanelidir.
+  */
+
+  return code.length >= 8 && code.length <= 14;
+
+}
+
+
+/* =========================================================
+   ÜRÜNÜN BARKODLARINI BUL
+   ========================================================= */
+
+function getProductBarcodes(product){
+
+  let result = [];
+
+  /*
+     Öncelikle özellikle barkod sütunundan gelen değer
+  */
+
+  if(product.barcode){
+    result.push(product.barcode);
+  }
+
+
+  /*
+     Sonra satırdaki diğer alanları kontrol ediyoruz.
+     Böylece API'deki sütun adı farklı olsa bile
+     barkodu yakalama şansımız oluyor.
+  */
+
+  if(Array.isArray(product.raw)){
+
+    for(const value of product.raw){
+
+      if(looksLikeBarcode(value)){
+
+        result.push(value);
+
+      }
+
+    }
+
+  }
+
+
+  return result;
+
+}
+
+
+/* =========================================================
+   TÜM ÜRÜNLERİ API'DEN BİR KERE AL
+   ========================================================= */
+
+async function loadProducts(){
+
+  const status =
+    document.getElementById("status");
+
+  try{
+
+    status.textContent =
+      "Ürünler yükleniyor...";
+
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+          cache:"no-store"
+        }
+      );
+
+
+    if(!response.ok){
+
+      throw new Error(
+        "API HTTP " + response.status
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !Array.isArray(data) ||
+      data.length < 2
+    ){
+
+      throw new Error(
+        "API beklenen JSON listesini döndürmedi."
+      );
+
+    }
+
+
+    /* İlk satır başlık */
+
+    const headers =
+      data[0].map(
+        x => String(x ?? "")
+      );
+
+
+    console.log(
+      "API BAŞLIKLARI:",
+      headers
+    );
+
+
+    /* =========================
+       SÜTUNLAR
+       ========================= */
+
+    const colCode =
+      findColumn(
+        headers,
+        [
+          "ÜRÜN KODU",
+          "STOKKOD",
+          "STOK KOD",
+          "KOD",
+          "KISA KOD",
+          "KISAKOD"
+        ],
+        0
+      );
+
+
+    const colName =
+      findColumn(
+        headers,
+        [
+          "AÇIKLAMA",
+          "ACIKLAMA",
+          "ÜRÜN",
+          "ÜRÜN ADI",
+          "MARKA"
+        ],
+        1
+      );
+
+
+    const colPrice =
+      findColumn(
+        headers,
+        [
+          "FİYAT",
+          "FIYAT"
+        ],
+        2
+      );
+
+
+    const colDate =
+      findColumn(
+        headers,
+        [
+          "TARİH",
+          "TARIH"
+        ],
+        3
+      );
+
+
+    const colImage =
+      findColumn(
+        headers,
+        [
+          "LINK",
+          "RESİM",
+          "RESIM",
+          "GÖRSEL",
+          "GORSEL",
+          "IMAGE",
+          "IMAGEURL",
+          "IMAGE URL"
+        ],
+        4
+      );
+
+
+    /*
+       ASIL DÜZELTME BURADA
+
+       Barkod için çok farklı sütun isimlerini
+       otomatik olarak kontrol ediyoruz.
+    */
+
+    const colBarcode =
+      findColumn(
+        headers,
+        [
+          "BARKOD",
+          "BARCODE",
+          "BARKOD NO",
+          "BARKOD NUMARASI",
+          "EAN",
+          "EAN13",
+          "EAN-13",
+          "EAN8",
+          "EAN-8",
+          "GTIN",
+          "GTIN13",
+          "GTIN-13",
+          "UPC",
+          "UPC-A",
+          "UPC-E"
+        ],
+        -1
+      );
+
+
+    console.log(
+      "Kod sütunu:",
+      colCode,
+      headers[colCode]
+    );
+
+    console.log(
+      "Barkod sütunu:",
+      colBarcode,
+      colBarcode >= 0
+        ? headers[colBarcode]
+        : "BARKOD SÜTUNU BULUNAMADI"
+    );
+
+
+    /* =========================
+       ÜRÜNLERİ HAZIRLA
+       ========================= */
+
+    products =
+      data
+        .slice(1)
+
+        .filter(
+          row =>
+            Array.isArray(row) &&
+            row.length
+        )
+
+        .map(row => {
+
+          return {
+
+            code:
+              row[colCode] ?? "",
+
+            name:
+              row[colName] ?? "",
+
+            price:
+              row[colPrice] ?? "",
+
+            date:
+              row[colDate] ?? "",
+
+            image:
+              row[colImage] ?? "",
+
+            /*
+               Gerçek barkod sütunu
+            */
+
+            barcode:
+              colBarcode >= 0
+                ? row[colBarcode] ?? ""
+                : "",
+
+            /*
+               Bütün satırı da saklıyoruz.
+               Barkod farklı sütundaysa buradan bulacağız.
+            */
+
+            raw: row
+
+          };
+
+        })
+
+        .filter(
+          p =>
+            p.name ||
+            p.code
+        );
+
+
+    /*
+       SAYFA AÇILDIĞINDA BÜTÜN ÜRÜNLERİ
+       EKRANA BASMIYORUZ.
+    */
+
+    currentVisibleProducts = [];
+
+    document.getElementById("cards").innerHTML = "";
+
+
+    status.textContent =
+      products.length +
+      " ürün hazır. Arama yapabilirsiniz.";
+
+
+    console.log(
+      "Toplam ürün:",
+      products.length
+    );
+
+  }
+
+  catch(error){
+
+    console.error(error);
+
+    status.innerHTML =
+      "Ürünler yüklenemedi.<br><small>" +
+      escapeHTML(error.message) +
+      "</small>";
+
+  }
+
+}
+
+
+/* =========================================================
+   ÜRÜN KARTLARINI GÖSTER
+   ========================================================= */
+
+function renderProducts(list){
+
+  const cards =
+    document.getElementById("cards");
+
+  const status =
+    document.getElementById("status");
+
+
+  currentVisibleProducts =
+    list.slice(0,300);
+
+
+  if(!currentVisibleProducts.length){
+
+    cards.innerHTML =
+      '<div class="empty">Ürün bulunamadı.</div>';
+
+    return;
+
+  }
+
+
+  status.textContent =
+    list.length +
+    " ürün bulundu";
+
+
+  cards.innerHTML =
+    currentVisibleProducts
+      .map((p,index) => {
+
+        const image =
+          String(p.image ?? "").trim();
+
+
+        return `
+
+          <article class="card">
+
+            ${
+              image
+              ?
+              `
+              <div class="product-image-wrap">
+
+                <img
+                  class="product-img"
+                  src="${escapeHTML(image)}"
+                  loading="lazy"
+                  onerror="this.style.display='none'"
+                >
+
+                <button
+                  class="share-button"
+                  type="button"
+                  data-share-index="${index}"
+                  title="Ürünü paylaş"
+                >
+                  📤
+                </button>
+
+              </div>
+              `
+              :
+              `
+              <button
+                class="share-button no-image"
+                type="button"
+                data-share-index="${index}"
+              >
+                📤 Paylaş
+              </button>
+              `
+            }
+
+
+            <div class="name">
+              ${escapeHTML(p.name)}
+            </div>
+
+
+            <div class="code">
+              Kısa Kod:
+              ${escapeHTML(p.code)}
+            </div>
+
+
+            ${
+              p.barcode
+              ?
+              `
+              <div class="barcode-info">
+                Barkod:
+                ${escapeHTML(p.barcode)}
+              </div>
+              `
+              :
+              ""
+            }
+
+
+            <div class="price">
+              ${escapeHTML(p.price)}
+            </div>
+
+
+            <div class="date">
+              ${escapeHTML(p.date)}
+            </div>
+
+          </article>
+
+        `;
+
+      })
+      .join("");
+
+}
+
+
+/* =========================================================
+   ARAMA
+   ========================================================= */
+
+document
+  .getElementById("searchBox")
+  .addEventListener(
+    "input",
+    function(){
+
+      clearTimeout(searchTimer);
+
+
+      searchTimer =
+        setTimeout(() => {
+
+          const query =
+            normalize(
+              this.value.trim()
+            );
+
+
+          /*
+             Arama boşsa ürünleri göstermiyoruz.
+             Böylece sayfa açılırken binlerce kart oluşmaz.
+          */
+
+          if(!query){
+
+            currentVisibleProducts = [];
+
+            document.getElementById("cards").innerHTML = "";
+
+            document.getElementById("status").textContent =
+              products.length +
+              " ürün hazır. Arama yapabilirsiniz.";
+
+            return;
+
+          }
+
+
+          const words =
+            query
+              .split(/\s+/)
+              .filter(Boolean);
+
+
+          const result =
+            products.filter(p => {
+
+              const text =
+                normalize(
+                  `${p.code} ${p.name} ${p.price} ${p.date} ${p.barcode}`
+                );
+
+
+              /*
+                 Ayrıca barkod alanlarını da kontrol ediyoruz.
+              */
+
+              const barcodeText =
+                getProductBarcodes(p)
+                  .map(x => normalizeBarcode(x))
+                  .join(" ");
+
+
+              const allText =
+                text +
+                " " +
+                barcodeText;
+
+
+              return words.every(
+                word =>
+                  allText.includes(word)
+              );
+
+            });
+
+
+          renderProducts(result);
+
+        },100);
+
+    }
+  );
+
+
+/* =========================================================
+   BARKOD TIKLAMA
+   ========================================================= */
+
+document
+  .getElementById("cards")
+  .addEventListener(
+    "click",
+    function(event){
+
+      const button =
+        event.target.closest(
+          ".share-button"
+        );
+
+
+      if(!button){
+        return;
+      }
+
+
+      const index =
+        Number(
+          button.dataset.shareIndex
+        );
+
+
+      const product =
+        currentVisibleProducts[index];
+
+
+      if(product){
+
+        shareProduct(product);
+
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   ÜRÜN PAYLAŞ
+   ========================================================= */
+
+async function shareProduct(product){
+
+  const productName =
+    String(product.name ?? "").trim();
+
+
+  const productCode =
+    String(product.code ?? "").trim();
+
+
+  const productPrice =
+    String(product.price ?? "").trim();
+
+
+  const productBarcode =
+    String(product.barcode ?? "").trim();
+
+
+  const imageUrl =
+    String(product.image ?? "").trim();
+
+
+  const shareText =
+    [
+      "KısaKod",
+      "",
+      productName,
+      "Kısa Kod: " + productCode,
+      productBarcode
+        ? "Barkod: " + productBarcode
+        : "",
+      productPrice
+        ? "Fiyat: " + productPrice
+        : ""
+    ]
+    .filter(Boolean)
+    .join("\n");
+
+
+  /*
+     Web Share desteklenmiyorsa
+  */
+
+  if(!navigator.share){
+
+    if(imageUrl){
+
+      window.open(
+        imageUrl,
+        "_blank"
+      );
+
+    }else{
+
+      alert(
+        "Bu cihazda paylaşım özelliği desteklenmiyor."
+      );
+
+    }
+
+    return;
+
+  }
+
+
+  /*
+     RESİM YOKSA
+     */
+
+  if(!imageUrl){
+
+    try{
+
+      await navigator.share({
+        title:"KısaKod",
+        text:shareText
+      });
+
+    }
+
+    catch(error){
+
+      if(error.name !== "AbortError"){
+
+        console.error(
+          "Paylaşım hatası:",
+          error
+        );
+
+      }
+
+    }
+
+    return;
+
+  }
+
+
+  /*
+     RESMİ İNDİRİP DOSYA OLARAK PAYLAŞMAYI DENE
+  */
+
+  try{
+
+    const response =
+      await fetch(
+        imageUrl,
+        {
+          mode:"cors",
+          cache:"no-store"
+        }
+      );
+
+
+    if(!response.ok){
+
+      throw new Error(
+        "Resim alınamadı."
+      );
+
+    }
+
+
+    const blob =
+      await response.blob();
+
+
+    let extension =
+      "jpg";
+
+
+    if(blob.type){
+
+      const parts =
+        blob.type.split("/");
+
+      if(parts.length === 2){
+
+        extension =
+          parts[1]
+            .replace("jpeg","jpg")
+            .replace(/[^a-zA-Z0-9]/g,"");
+
+      }
+
+    }
+
+
+    const safeName =
+      productName
+        .replace(/[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ\s-]/g,"")
+        .trim()
+        .replace(/\s+/g,"-")
+        .substring(0,60);
+
+
+    const fileName =
+      "KisaKod-" +
+      (safeName || "urun") +
+      "." +
+      extension;
+
+
+    const file =
+      new File(
+        [blob],
+        fileName,
+        {
+          type:
+            blob.type ||
+            "image/jpeg"
+        }
+      );
+
+
+    /*
+       Cihaz dosya paylaşımını destekliyor mu?
+    */
+
+    if(
+      navigator.canShare &&
+      navigator.canShare({
+        files:[file]
+      })
+    ){
+
+      await navigator.share({
+
+        title:
+          productName ||
+          "KısaKod",
+
+        text:
+          shareText,
+
+        files:[
+          file
+        ]
+
+      });
+
+
+      return;
+
+    }
+
+
+    /*
+       Dosya paylaşımı desteklenmiyorsa
+       normal paylaşım
+    */
+
+    await navigator.share({
+
+      title:
+        productName ||
+        "KısaKod",
+
+      text:
+        shareText +
+        "\n\nResim:\n" +
+        imageUrl
+
+    });
+
+
+  }
+
+  catch(error){
+
+    console.error(
+      "Resim paylaşım hatası:",
+      error
+    );
+
+
+    /*
+       Kullanıcı paylaşım ekranını kapattıysa
+       hata göstermiyoruz.
+    */
+
+    if(error.name === "AbortError"){
+      return;
+    }
+
+
+    /*
+       CORS veya başka bir nedenle
+       resim indirilemezse son çare:
+       resim bağlantısını paylaş.
+    */
+
+    try{
+
+      await navigator.share({
+
+        title:
+          productName ||
+          "KısaKod",
+
+        text:
+          shareText +
+          "\n\nResim:\n" +
+          imageUrl
+
+      });
+
+    }
+
+    catch(shareError){
+
+      if(
+        shareError.name !==
+        "AbortError"
+      ){
+
+        console.error(
+          shareError
+        );
+
+      }
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   BARKOD TARAYICI
+   ========================================================= */
+
+let scannerStream = null;
+
+let scannerRunning = false;
+
+let torchOn = false;
+
+let barcodeDetector = null;
+
+
+const scannerOverlay =
+  document.getElementById(
+    "scannerOverlay"
+  );
+
+
+const scannerVideo =
+  document.getElementById(
+    "scannerVideo"
+  );
+
+
+const scanMessage =
+  document.getElementById(
+    "scanMessage"
+  );
+
+
+const barcodeButton =
+  document.getElementById(
+    "barcodeButton"
+  );
+
+
+const closeScannerButton =
+  document.getElementById(
+    "closeScanner"
+  );
+
+
+const flashButton =
+  document.getElementById(
+    "flashBtn"
+  );
+
+
+/* =========================================================
+   SCANNER AÇ
+   ========================================================= */
+
+async function openBarcodeScanner(){
+
+  if(!window.isSecureContext){
+
+    alert(
+      "Kamera için HTTPS bağlantısı gerekir.\n\n" +
+      "Dosyayı file:// olarak açtıysanız kamera çalışmayabilir."
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !navigator.mediaDevices ||
+    !navigator.mediaDevices.getUserMedia
+  ){
+
+    alert(
+      "Bu tarayıcı kamera erişimini desteklemiyor."
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !("BarcodeDetector" in window)
+  ){
+
+    alert(
+      "Bu tarayıcı yerleşik barkod okuyucuyu desteklemiyor.\n\n" +
+      "Android Chrome'un güncel sürümünde deneyin."
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    barcodeDetector =
+      new BarcodeDetector({
+
+        formats:[
+          "ean_13",
+          "ean_8",
+          "upc_a",
+          "upc_e",
+          "code_128",
+          "code_39",
+          "itf",
+          "codabar",
+          "qr_code"
+        ]
+
+      });
+
+  }
+
+  catch(error){
+
+    barcodeDetector =
+      new BarcodeDetector();
+
+  }
+
+
+  try{
+
+    scannerStream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video:{
+          facingMode:{
+            ideal:"environment"
+          },
+
+          width:{
+            ideal:1280
+          },
+
+          height:{
+            ideal:720
+          }
+
+        },
+
+        audio:false
+
+      });
+
+
+    scannerVideo.srcObject =
+      scannerStream;
+
+
+    scannerOverlay.classList.add(
+      "active"
+    );
+
+
+    scannerOverlay.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+
+    scannerRunning =
+      true;
+
+
+    torchOn =
+      false;
+
+
+    scanMessage.textContent =
+      "Barkodu yeşil alanın içine getir";
+
+
+    await scannerVideo.play();
+
+
+    scanLoop();
+
+  }
+
+  catch(error){
+
+    console.error(error);
+
+
+    alert(
+      "Kamera açılamadı.\n\n" +
+      "Kamera iznini kontrol edin ve sayfayı HTTPS üzerinden açın."
+    );
+
+
+    closeBarcodeScanner();
+
+  }
+
+}
+
+
+/* =========================================================
+   BARKOD OKUMA DÖNGÜSÜ
+   ========================================================= */
+
+async function scanLoop(){
+
+  if(
+    !scannerRunning ||
+    !barcodeDetector
+  ){
+
+    return;
+
+  }
+
+
+  try{
+
+    if(
+      scannerVideo.readyState >= 2
+    ){
+
+      const codes =
+        await barcodeDetector.detect(
+          scannerVideo
+        );
+
+
+      if(
+        codes &&
+        codes.length > 0
+      ){
+
+        const code =
+          (
+            codes[0].rawValue ||
+            ""
+          ).trim();
+
+
+        if(code){
+
+          scanMessage.textContent =
+            "Barkod bulundu: " +
+            code;
+
+
+          handleScannedBarcode(code);
+
+
+          return;
+
+        }
+
+      }
+
+    }
+
+  }
+
+  catch(error){
+
+    console.log(
+      "Tarama:",
+      error
+    );
+
+  }
+
+
+  requestAnimationFrame(
+    scanLoop
+  );
+
+}
+
+
+/* =========================================================
+   TARAMA SONRASI ÜRÜN BUL
+   ========================================================= */
+
+function handleScannedBarcode(code){
+
+  const scanned =
+    normalizeBarcode(code);
+
+
+  console.log(
+    "TARANAN BARKOD:",
+    scanned
+  );
+
+
+  /*
+     Önce gerçek barkod sütununda arıyoruz.
+  */
+
+  let found =
+    products.filter(product => {
+
+      if(
+        product.barcode &&
+        barcodeEquals(
+          product.barcode,
+          code
+        )
+      ){
+
+        return true;
+
+      }
+
+
+      return false;
+
+    });
+
+
+  /*
+     Bulamadıysak satırdaki TÜM hücreleri
+     kontrol ediyoruz.
+  */
+
+  if(found.length === 0){
+
+    found =
+      products.filter(product => {
+
+        const barcodes =
+          getProductBarcodes(
+            product
+          );
+
+
+        return barcodes.some(
+          value =>
+            barcodeEquals(
+              value,
+              code
+            )
+        );
+
+      });
+
+  }
+
+
+  /*
+     Hâlâ bulamadıysak ürün kodunu da
+     kontrol ediyoruz.
+  */
+
+  if(found.length === 0){
+
+    found =
+      products.filter(product => {
+
+        return barcodeEquals(
+          product.code,
+          code
+        );
+
+      });
+
+  }
+
+
+  console.log(
+    "BARKOD SONUCU:",
+    found
+  );
+
+
+  closeBarcodeScanner();
+
+
+  const searchBox =
+    document.getElementById(
+      "searchBox"
+    );
+
+
+  if(found.length > 0){
+
+    /*
+       Arama kutusuna barkodu yaz.
+    */
+
+    searchBox.value =
+      code;
+
+
+    /*
+       Sadece bulunan ürünü göster.
+    */
+
+    renderProducts(
+      found
+    );
+
+
+    /*
+       İlk karta git.
+    */
+
+    setTimeout(() => {
+
+      const firstCard =
+        document.querySelector(
+          "#cards .card"
+        );
+
+
+      if(firstCard){
+
+        firstCard.scrollIntoView({
+
+          behavior:"smooth",
+
+          block:"start"
+
+        });
+
+      }
+
+    },100);
+
+
+  }
+
+  else{
+
+    searchBox.value =
+      code;
+
+
+    renderProducts([]);
+
+
+    alert(
+      "Bu barkod ürün listesinde bulunamadı:\n\n" +
+      code
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   FENER
+   ========================================================= */
+
+async function toggleFlash(){
+
+  if(!scannerStream){
+    return;
+  }
+
+
+  const track =
+    scannerStream.getVideoTracks()[0];
+
+
+  if(!track){
+    return;
+  }
+
+
+  try{
+
+    const capabilities =
+      track.getCapabilities();
+
+
+    if(!capabilities.torch){
+
+      alert(
+        "Bu cihazda fener kontrolü desteklenmiyor."
+      );
+
+      return;
+
+    }
+
+
+    torchOn =
+      !torchOn;
+
+
+    await track.applyConstraints({
+
+      advanced:[
+        {
+          torch:torchOn
+        }
+      ]
+
+    });
+
+
+    flashButton.textContent =
+      torchOn
+      ? "🔦 Fener Açık"
+      : "🔦 Fener";
+
+  }
+
+  catch(error){
+
+    console.error(error);
+
+
+    alert(
+      "Fener kontrol edilemedi."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SCANNER KAPAT
+   ========================================================= */
+
+function closeBarcodeScanner(){
+
+  scannerRunning =
+    false;
+
+
+  torchOn =
+    false;
+
+
+  if(scannerStream){
+
+    scannerStream
+      .getTracks()
+      .forEach(
+        track =>
+          track.stop()
+      );
+
+
+    scannerStream =
+      null;
+
+  }
+
+
+  scannerVideo.srcObject =
+    null;
+
+
+  scannerOverlay.classList.remove(
+    "active"
+  );
+
+
+  scannerOverlay.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+
+  flashButton.textContent =
+    "🔦 Fener";
+
+}
+
+
+/* =========================================================
+   SCANNER BUTONLARI
+   ========================================================= */
+
+barcodeButton.addEventListener(
+  "click",
+  openBarcodeScanner
+);
+
+
+closeScannerButton.addEventListener(
+  "click",
+  closeBarcodeScanner
+);
+
+
+flashButton.addEventListener(
+  "click",
+  toggleFlash
+);
+
+
+scannerOverlay.addEventListener(
+  "click",
+  function(event){
+
+    if(
+      event.target ===
+      scannerOverlay
+    ){
+
+      closeBarcodeScanner();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   UYGULAMAYI BAŞLAT
+   ========================================================= */
+
+loadProducts();
+
+</script>
+
+</body>
+</html>
