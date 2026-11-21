@@ -43,17 +43,24 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #fff;
-  padding: 12px;
-  border-bottom: 1px solid #ddd;
+  background: #172b3a;
+  color: #fff;
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid #0f202c;
 }
+.header-top{display:flex;align-items:center;gap:12px;margin-bottom:10px;min-height:42px}
+.menu-toggle{width:42px;height:42px;flex:0 0 42px;border:1px solid #ffffff55;border-radius:9px;background:#ffffff12;color:#fff;font-size:23px;cursor:pointer;display:grid;place-items:center}
+.title {flex:1;text-align:left;font-size:19px;font-weight:bold;margin:0}
 
-.title {
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
+.menu-backdrop{position:fixed;inset:0;background:#07132180;z-index:1000;opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease}
+.menu-backdrop.open{opacity:1;visibility:visible}
+#sideMenu{position:fixed;z-index:1001;top:0;bottom:0;left:0;width:min(82vw,310px);padding:18px 14px;background:#fff;box-shadow:8px 0 28px #00000030;display:flex;flex-direction:column;gap:9px;transform:translateX(-105%);transition:transform .26s cubic-bezier(.2,.75,.25,1);overflow-y:auto}
+#sideMenu.open{transform:translateX(0)}
+.menu-heading{display:flex;align-items:center;justify-content:space-between;padding:5px 3px 15px;margin-bottom:5px;border-bottom:1px solid #e2e8ed;color:#263746;font-weight:800;font-size:14px}
+.menu-close{border:0;background:#edf1f4;color:#263746;border-radius:8px;width:34px;height:34px;font-size:21px;cursor:pointer}
+#sideMenu a{min-height:49px;padding:15px 12px;border:1px solid #d5dde4;border-radius:9px;background:#f2f5f7;color:#263746;font-size:13px;font-weight:700;text-align:left;text-decoration:none}
+#sideMenu a.active{background:#16834b;border-color:#11683b;color:#fff}
+body.menu-open{overflow:hidden}
 
 .search-row {
   display: flex;
@@ -536,9 +543,9 @@ img {
 <body>
 
 <div class="header">
-  <div class="title">
-    🔎 KısaKod PLUS
-    <span class="app-version">v.1.0.9</span>
+  <div class="header-top">
+    <button class="menu-toggle" type="button" aria-label="Menüyü aç" aria-expanded="false" onclick="toggleAktuelMenu()" id="aktuelMenuToggle">☰</button>
+    <div class="title">🔎 KısaKod PLUS <span class="app-version">v.1.0.9</span></div>
   </div>
 
   <div class="search-row">
@@ -579,6 +586,14 @@ img {
     </button>
    </div>
 </div>
+<div class="menu-backdrop" id="aktuelMenuBackdrop" onclick="closeAktuelMenu()"></div>
+<nav id="sideMenu" aria-label="Aktüel ürünler menüsü">
+  <div class="menu-heading"><span>MAĞAZA ASİSTANI MENÜSÜ</span><button class="menu-close" type="button" aria-label="Menüyü kapat" onclick="closeAktuelMenu()">×</button></div>
+  <a href="anasayfa.html">⌂ Ana sayfaya dön</a>
+  <a href="index-kodular.html" class="active">🛍️ Aktüel Ürünler</a>
+  <a href="aktuel-afisler.html">🖼️ Aktüel Afişler</a>
+  <a href="eve-teslim-urunler.html">🚚 Eve Teslim Ürünler</a>
+</nav>
 
 <div id="recentSearches" class="recent-searches"></div>
 
@@ -1416,6 +1431,22 @@ window.addEventListener("scroll", function() {
 </script>
 
 <script>
+function toggleAktuelMenu(){
+  const menu=document.getElementById('sideMenu');
+  const backdrop=document.getElementById('aktuelMenuBackdrop');
+  const open=!menu.classList.contains('open');
+  menu.classList.toggle('open',open);
+  backdrop.classList.toggle('open',open);
+  document.body.classList.toggle('menu-open',open);
+  document.getElementById('aktuelMenuToggle').setAttribute('aria-expanded',String(open));
+}
+function closeAktuelMenu(){
+  document.getElementById('sideMenu').classList.remove('open');
+  document.getElementById('aktuelMenuBackdrop').classList.remove('open');
+  document.body.classList.remove('menu-open');
+  document.getElementById('aktuelMenuToggle').setAttribute('aria-expanded','false');
+}
+
 // Sağ tık engeli
 document.addEventListener("contextmenu", function(e) {
   if (e.target.closest(
