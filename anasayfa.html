@@ -147,7 +147,7 @@ body.loading-active{overflow:hidden}
       <span class="card-desc">Yeni hazırlanacak mağaza içi yardımcı araçlar</span>
       <span class="card-arrow" aria-hidden="true">›</span>
     </button>
-    <button class="menu-card" type="button" onclick="bilgiGoster('Çalışma Planı')">
+    <button class="menu-card" type="button" onclick="calismaPlaniAc()">
       <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M7.5 3v4M16.5 3v4M3.5 9h17M8 13h3M8 16h3M15 13h1"/></svg></span>
       <span class="card-title">Çalışma Planı</span>
       <span class="card-desc">Vardiya ve çalışma programı işlemleri</span>
@@ -205,6 +205,14 @@ function sayfaAc(sayfa){
   window.location.href='magaza-defteri.html';
 }
 
+function calismaPlaniAc(){
+  if(sayfaGecisiBasladi) return;
+  sayfaGecisiBasladi=true;
+  var buton=document.querySelector('.menu-card[onclick*="calismaPlaniAc"]');
+  if(buton) buton.disabled=true;
+  yuklemeEkraniGoster('Çalışma Programı açılıyor...','Lütfen bekleyiniz, çalışma planınız hazırlanıyor.');
+  window.location.href='calisma-programi.html';
+}
 function bilgiGoster(ad){
   alert(ad + ' bölümü henüz ana sayfaya bağlanmadı.');
 }
