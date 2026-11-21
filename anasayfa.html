@@ -191,15 +191,18 @@ function yuklemeEkraniGoster(baslik, mesaj){
 }
 function sayfaAc(sayfa){
   if(sayfaGecisiBasladi) return;
-  if (window.AppInventor && window.AppInventor.setWebViewString) {
-    sayfaGecisiBasladi=true;
-    var buton=document.querySelector('.menu-card[onclick*="MAGAZA_DEFTERI"]');
-    if(buton) buton.disabled=true;
-    yuklemeEkraniGoster('Mağaza Defteri açılıyor...','Lütfen bekleyiniz, mağaza defteri hazırlanıyor.');
-    window.AppInventor.setWebViewString(sayfa);
-  } else {
-    alert('Kodular bağlantısı bulunamadı.');
-  }
+  sayfaGecisiBasladi=true;
+
+  var buton=document.querySelector('.menu-card[onclick*="MAGAZA_DEFTERI"]');
+  if(buton) buton.disabled=true;
+
+  yuklemeEkraniGoster(
+    'Mağaza Defteri açılıyor...',
+    'Lütfen bekleyiniz, mağaza defteri hazırlanıyor.'
+  );
+
+  // GitHub Pages üzerinde aynı klasördeki Mağaza Defteri sayfasını açar.
+  window.location.href='magaza-defteri.html';
 }
 
 function bilgiGoster(ad){
