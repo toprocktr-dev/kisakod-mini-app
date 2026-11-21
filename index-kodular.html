@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script>
+const KISAKOD_SURUM = "1.0.7";
+console.log("KısaKod sürüm:", KISAKOD_SURUM);
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>KısaKod PLUS</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-version {
+  font-size: 10px;
+  font-weight: normal;
+  color: #999;
+  margin-left: 5px;
+  vertical-align: bottom;
+}
+  
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  background: #f4f5f7;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fff;
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.search-row {
+  display: flex;
+  gap: 7px;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  height: 45px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 16px;
+  outline: none;
+  background: #fff;
+}
+
+.search-input:focus {
+  border-color: #777;
+}
+
+.search-button {
+  width: 70px;
+  height: 45px;
+  border: 0;
+  border-radius: 10px;
+  background: #111;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.barcode-button {
+  width: 48px;
+  height: 45px;
+  border: 0;
+  border-radius: 10px;
+  background: #e9eaed;
+  font-size: 22px;
+}
+
+.search-button:active,
+.barcode-button:active {
+  transform: scale(.96);
+}
+
+.status {
+  text-align: center;
+  padding: 12px;
+  font-size: 14px;
+  color: #666;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 10px 20px;
+}
+
+.product-card {
+  width: 100%;
+  background: #fff;
+  border-radius: 12px;
+  padding: 9px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e3e3e3;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+
+.product-image {
+  width: 90px;
+  height: 90px;
+  min-width: 90px;
+  border-radius: 9px;
+  object-fit: cover;
+  background: #eee;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+
+.product-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-favorite-button {
+   flex: 0 0 34px;
+   width: 34px;
+   height: 38px;
+   padding: 0;
+   border: 0;
+   border-radius: 9px;
+   background: #f5f5f5;
+   color: #777;
+   font-size: 23px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+.product-favorite-button.is-favorite {
+   background: #fff4d6;
+   color: #d49a00;
+}
+
+.product-name {
+  font-size: 15px;
+  font-weight: bold;
+  line-height: 1.25;
+  margin-bottom: 7px;
+  word-break: break-word;
+}
+
+.product-code {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.product-price {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.product-date {
+  font-size: 13px;
+  color: #666;
+}
+
+.empty {
+  text-align: center;
+  padding: 35px 15px;
+  color: #777;
+  font-size: 15px;
+}
+
+.loading {
+  text-align: center;
+  padding: 25px;
+  color: #666;
+}
+
+/* ÖZEL YÜKLENME EKRANI */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(244,245,247,.96);
+}
+
+.loading-box {
+  width: 100%;
+  max-width: 320px;
+  padding: 30px 20px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #e5e9f0;
+  border-radius: 22px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.10);
+}
+
+.custom-spinner {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  border: 6px solid #e5edff;
+  border-top-color: #2468df;
+  border-right-color: #2468df;
+  border-radius: 50%;
+  animation: kisakodSpin .8s linear infinite;
+}
+
+@keyframes kisakodSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-title {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1.4;
+  color: #202938;
+}
+
+.loading-description {
+  margin-top: 9px;
+  color: #778196;
+  font-size: 13px;
+}
+
+/* ÜRÜN DETAY PENCERESİ */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-box {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-image {
+  display: block;
+  width: 100%;
+  height: 190px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #fff;
+  margin: 0 auto 12px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: center;
+  margin: 8px 0 15px;
+  color: #202938;
+}
+
+.modal-qr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0 17px;
+}
+
+#qrCode {
+  min-width: 148px;
+  min-height: 148px;
+  padding: 8px;
+  background: white;
+  border: 1px solid #e6eaf0;
+  border-radius: 12px;
+}
+
+#qrCode img,
+#qrCode canvas {
+  display: block;
+  width: 132px !important;
+  height: 132px !important;
+}
+
+.modal-price {
+  padding: 12px;
+  margin: 0 0 16px;
+  border-radius: 12px;
+  text-align: center;
+  background: #fff0f0;
+  color: #cf3434;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.modal-details {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.modal-detail-item {
+  min-width: 0;
+}
+
+.modal-detail-item + .modal-detail-item {
+  border-left: 1px solid #e1e5ec;
+  padding-left: 12px;
+}
+
+.modal-detail-label {
+  font-size: 12px;
+  color: #788397;
+  margin-bottom: 6px;
+}
+
+.modal-detail-value {
+  font-size: 15px;
+  font-weight: 800;
+  color: #202938;
+  overflow-wrap: anywhere;
+}
+
+.detail-favorite-button {
+   width: 100%;
+   margin-top: 15px;
+   min-height: 43px;
+   border: 1px solid #ead9a7;
+   border-radius: 10px;
+   background: #fff8e6;
+   color: #765900;
+   font-size: 15px;
+   font-weight: bold;
+}
+
+.favorites-empty {
+   text-align: center;
+   padding: 28px 15px;
+   color: #777;
+   font-size: 14px;
+   line-height: 1.6;
+   background: #fff;
+   border: 1px solid #e3e3e3;
+   border-radius: 12px;
+}
+
+.close-button {
+  width: 100%;
+  margin-top: 15px;
+  height: 43px;
+  border: 0;
+  border-radius: 10px;
+  background: #111;
+  color: white;
+  font-size: 15px;
+}
+
+@media (max-width: 360px) {
+  .modal-box {
+    padding: 16px;
+  }
+
+  .modal-price {
+    font-size: 25px;
+  }
+
+  .modal-detail-value {
+    font-size: 13px;
+  }
+}
+
+/* BARKOD TARAYICI */
+.scanner {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: #000;
+}
+
+#scannerViewport {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#scannerViewport video {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#scannerViewport canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.scanner-close {
+  position: absolute;
+  z-index: 201;
+  top: 20px;
+  right: 15px;
+  width: 45px;
+  height: 45px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,.9);
+  font-size: 22px;
+}
+
+  .scanner-torch {
+  position: absolute;
+  z-index: 201;
+  top: 20px;
+  left: 15px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 25px;
+  background: rgba(255,255,255,.9);
+  color: #111;
+  font-size: 14px;
+  font-weight: bold;
+}
+.scanner-line {
+  position: absolute;
+  z-index: 10;
+  left: 10%;
+  right: 10%;
+  top: 50%;
+  height: 2px;
+  background: red;
+}
+</style>
+
+<style>
+/* Metin koruması */
+body, body * {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none;
+}
+
+/* Kullanıcı giriş alanları serbest */
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+}
+
+/* Görseller */
+img {
+  -webkit-user-drag: none;
+}
+  .recent-searches {
+  display: none;
+  position: relative;
+  margin: 5px 12px 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 50;
+}
+
+.recent-search-item {
+  padding: 11px 14px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.recent-search-item:last-child {
+  border-bottom: none;
+}
+
+.recent-search-item:active {
+  background: #f1f1f1;
+}
+</style>
+  
+</head>
+
+<body>
+
+<div class="header">
+  <div class="title">
+    🔎 KısaKod PLUS
+    <span class="app-version">v.1.0.9</span>
+  </div>
+
+  <div class="search-row">
+    <input
+      id="searchInput"
+      onfocus="sonAramalariGoster()"
+      class="search-input"
+      type="search"
+      placeholder="Ürün adı, kod veya barkod"
+      autocomplete="off"
+      autocorrect="off"
+      spellcheck="false"
+      
+    >
+
+    <button
+      id="searchButton"
+      class="search-button"
+    >
+      Ara
+    </button>
+
+    <button
+      id="barcodeButton"
+      class="barcode-button"
+    >
+      📷
+    </button>
+
+    <button
+      id="favoriteButton"
+      class="favorite-button"
+      type="button"
+      aria-label="Favori ürünler"
+      title="Favori ürünler"
+    >
+      ⭐<span id="favoriteCount" class="favorite-count">0</span>
+    </button>
+   </div>
+</div>
+
+<div id="recentSearches" class="recent-searches"></div>
+
+<div id="status" class="status">
+  Hazırlanıyor...
+</div>
+
+<div id="results" class="results"></div>
+
+<!-- ÖZEL YÜKLENME EKRANI -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="loading-box">
+    <div class="custom-spinner"></div>
+    <div id="loadingTitle" class="loading-title">
+      Bağlantı kuruluyor...
+    </div>
+    <div id="loadingDescription" class="loading-description">
+      Lütfen bekleyin.
+    </div>
+  </div>
+</div>
+
+<!-- ÜRÜN DETAY -->
+<div id="productModal" class="modal">
+  <div class="modal-box">
+    <img
+      id="modalImage"
+      class="modal-image"
+      src=""
+      alt="Ürün görseli"
+    >
+
+    <div id="modalTitle" class="modal-title"></div>
+
+    <div class="modal-qr">
+      <div id="qrCode"></div>
+    </div>
+
+    <div id="modalPrice" class="modal-price"></div>
+
+    <div class="modal-details">
+      <div class="modal-detail-item">
+        <div class="modal-detail-label">Ürün Kodu</div>
+        <div id="modalCode" class="modal-detail-value"></div>
+      </div>
+
+      <div class="modal-detail-item">
+        <div class="modal-detail-label">Satış Tarihi</div>
+        <div id="modalDate" class="modal-detail-value"></div>
+      </div>
+    </div>
+
+    <button id="detailFavoriteButton" class="detail-favorite-button" type="button">
+      ☆ Favorilere ekle
+    </button>
+
+    <button id="closeModal" class="close-button">
+      Kapat
+    </button>
+  </div>
+</div>
+
+<!-- FAVORİ ÜRÜNLER PENCERESİ -->
+<div id="favoritesModal" class="modal">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;">
+      <div style="font-size:18px;font-weight:800;color:#202938;">⭐ Favori Ürünlerim</div>
+      <button id="closeFavorites" type="button" aria-label="Favorileri kapat" style="width:36px;height:36px;border:0;border-radius:50%;background:#f0f1f3;font-size:22px;">×</button>
+    </div>
+    <div id="favoritesStatus" style="font-size:13px;color:#788397;margin-bottom:12px;"></div>
+    <div id="favoritesResults" class="results" style="padding:0;gap:8px;"></div>
+  </div>
+</div>
+
+<!-- BARKOD -->
+<div id="scanner" class="scanner">
+  <div id="scannerViewport"></div>
+  <div class="scanner-line"></div>
+  <button
+  id="scannerTorch"
+  class="scanner-torch"
+  onclick="toggleScannerTorch()">
+  ⚡ Flaş Aç
+</button>
+  <button id="scannerClose" class="scanner-close">✕</button>
+</div>
+
+<script>
+/*************************************************
+ * API
+ *************************************************/
+
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbwfh8M8RUYOgEnoq4a4b7MCg8TwaKPTRaC2Eros9zy-JFoatnNU3LyJfuT0ISDo62lm4g/exec";
+
+/*************************************************
+ * ELEMENTLER
+ *************************************************/
+
+const searchInput =
+  document.getElementById("searchInput");
+
+const searchButton =
+  document.getElementById("searchButton");
+
+const barcodeButton =
+  document.getElementById("barcodeButton");
+
+const favoriteButton =
+  document.getElementById("favoriteButton");
+
+const favoriteCount =
+  document.getElementById("favoriteCount");
+
+const favoritesModal =
+  document.getElementById("favoritesModal");
+
+const favoritesResults =
+  document.getElementById("favoritesResults");
+
+const favoritesStatus =
+  document.getElementById("favoritesStatus");
+
+const detailFavoriteButton =
+  document.getElementById("detailFavoriteButton");
+
+let seciliUrun = null;
+const FAVORITES_STORAGE_KEY = "kisakod_plus_favorites_v1";
+let favoriUrunler = favorileriYukle();
+
+function favorileriYukle() {
+  try {
+    const kayit = localStorage.getItem(FAVORITES_STORAGE_KEY);
+    const liste = kayit ? JSON.parse(kayit) : [];
+    return Array.isArray(liste) ? liste : [];
+  } catch (e) {
+    console.warn("Favoriler okunamadı:", e);
+    return [];
+  }
+}
+
+function urunFavoriAnahtari(urun) {
+  if (!urun) return "";
+  return String(urun.urunKodu || urun.barkod || urun.kod || urun.link || "");
+}
+
+function urunFavorideMi(urun) {
+  const anahtar = urunFavoriAnahtari(urun);
+  return !!anahtar && favoriUrunler.some(function(item) {
+    return urunFavoriAnahtari(item) === anahtar;
+  });
+}
+
+function favorileriKaydet() {
+  try {
+    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriUrunler));
+  } catch (e) {
+    console.warn("Favoriler kaydedilemedi:", e);
+    alert("Favoriler bu cihazda kaydedilemedi. Tarayıcı depolama alanını kontrol edin.");
+  }
+  favoriSayisiniGuncelle();
+}
+
+function favoriSayisiniGuncelle() {
+  favoriteCount.textContent = String(favoriUrunler.length);
+  favoriteCount.style.display = "flex";
+}
+
+function favoriDurumunuGuncelle() {
+  if (!seciliUrun) return;
+  const favoride = urunFavorideMi(seciliUrun);
+  detailFavoriteButton.textContent = favoride
+    ? "★ Favorilerden çıkar"
+    : "☆ Favorilere ekle";
+  detailFavoriteButton.style.background = favoride ? "#fff0c2" : "#fff8e6";
+}
+
+function favoriDegistir(urun) {
+  const anahtar = urunFavoriAnahtari(urun);
+  if (!anahtar) {
+    alert("Bu ürün favorilere eklenemedi; ürün kodu bulunamadı.");
+    return;
+  }
+
+  const mevcutIndex = favoriUrunler.findIndex(function(item) {
+    return urunFavoriAnahtari(item) === anahtar;
+  });
+
+   if (mevcutIndex >= 0) {
+    // Favoride varsa listeden çıkar.
+    favoriUrunler.splice(mevcutIndex, 1);
+  } else {
+    // En fazla 10 favori ürün eklenebilir.
+    if (favoriUrunler.length >= 10) {
+      alert("⭐ En fazla 10 ürün favorilere ekleyebilirsiniz.");
+      return;
+    }
+
+    favoriUrunler.push(urun);
+  }
+
+  favorileriKaydet();
+  favoriDurumunuGuncelle();
+  mevcutKartYildizlariniGuncelle();
+
+  if (favoritesModal.style.display === "flex") {
+    favoriListesiniGoster();
+  }
+}
+
+function mevcutKartYildizlariniGuncelle() {
+  document.querySelectorAll(".product-favorite-button").forEach(function(button) {
+    const anahtar = button.dataset.favoriteKey || "";
+    const favoride = favoriUrunler.some(function(item) {
+      return urunFavoriAnahtari(item) === anahtar;
+    });
+    button.textContent = favoride ? "★" : "☆";
+    button.classList.toggle("is-favorite", favoride);
+    button.setAttribute("aria-label", favoride ? "Favorilerden çıkar" : "Favorilere ekle");
+  });
+}
+
+function favoriListesiniGoster() {
+  favoritesResults.innerHTML = "";
+  favoritesStatus.textContent = favoriUrunler.length
+    ? favoriUrunler.length + " favori ürün"
+    : "Favori listen henüz boş.";
+
+  if (!favoriUrunler.length) {
+    const empty = document.createElement("div");
+    empty.className = "favorites-empty";
+    empty.textContent = "⭐ Henüz favori ürün eklemedin. Ürün kartındaki yıldız simgesine dokunarak ürünleri buraya kaydedebilirsin.";
+    favoritesResults.appendChild(empty);
+    return;
+  }
+
+  favoriUrunler.forEach(function(urun) {
+    favoritesResults.appendChild(urunKartiOlustur(urun, true));
+  });
+}
+
+function favoriPenceresiniAc() {
+  favoriListesiniGoster();
+  favoritesModal.style.display = "flex";
+}
+
+function favoriPenceresiniKapat() {
+  favoritesModal.style.display = "none";
+}
+
+const results =
+  document.getElementById("results");
+
+const status =
+  document.getElementById("status");
+
+const loadingScreen =
+  document.getElementById("loadingScreen");
+
+const loadingTitle =
+  document.getElementById("loadingTitle");
+
+const loadingDescription =
+  document.getElementById("loadingDescription");
+
+/*************************************************
+ * YÜKLENME EKRANI
+ *************************************************/
+
+function progressGoster(baslik, aciklama) {
+  results.innerHTML = "";
+
+  loadingTitle.textContent = baslik;
+  loadingDescription.textContent =
+    aciklama || "Lütfen bekleyin.";
+
+  loadingScreen.style.display = "flex";
+}
+
+function progressGizle() {
+  loadingScreen.style.display = "none";
+}
+
+/*************************************************
+ * ÜRÜNLERİ BİR KEZ YÜKLE — SPOT_ÜRÜNLER
+ *************************************************/
+let tumUrunVerisi = [];
+let urunVerisiHazir = false;
+
+async function urunleriYukle() {
+  progressGoster("Bağlantı kuruluyor...", "Ürün listesine erişiliyor. Lütfen bekleyin.");
+  try {
+    const url = API_URL + "?func=" + encodeURIComponent("SPOT_ÜRÜNLER");
+    loadingTitle.textContent = "Ürünler yükleniyor...";
+    loadingDescription.textContent = "Ürün listesi hazırlanıyor. Bu işlem biraz sürebilir.";
+
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error("Sunucu yanıt vermedi: " + response.status);
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error("Ürün verisi geçersiz.");
+
+    // İlk satır başlık satırı kabul edilir.
+    tumUrunVerisi = data.slice(1).map(function(row) {
+      return {
+        urunKodu: String(row[0] ?? ""),
+        kod: String(row[1] ?? ""),
+        fiyat: String(row[2] ?? ""),
+        tarih: String(row[3] ?? ""),
+        link: String(row[4] ?? ""),
+        barkod: String(row[5] ?? "")
+      };
+    });
+
+    urunVerisiHazir = true;
+    status.textContent = tumUrunVerisi.length.toLocaleString("tr-TR") + " ürün yüklendi. Aramaya hazır.";
+  } catch (error) {
+    console.error("Ürün yükleme hatası:", error);
+    status.textContent = "❌ Ürünler yüklenemedi.";
+    results.innerHTML = '<div class="empty">Ürün listesi alınamadı. İnternet bağlantısını kontrol edip sayfayı yenileyin.</div>';
+  } finally {
+    progressGizle();
+  }
+}
+
+let sonArama = "";
+// SON 4 ARAMAYI KAYDET VE GÖSTER
+function sonAramalariGoster() {
+  const alan = document.getElementById("recentSearches");
+  const liste = JSON.parse(
+    localStorage.getItem("kisakod_son_aramalar") || "[]"
+  );
+
+  if (!liste.length) {
+    alan.style.display = "none";
+    return;
+  }
+
+  alan.innerHTML = liste.map((urun, index) => `
+    <div class="recent-search-item"
+         onclick="sonAramayiSec(${index})">
+      🕘 ${urun.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+    </div>
+  `).join("");
+
+  alan.style.display = "block";
+}
+
+function sonAramayiKaydet(query) {
+  let liste = JSON.parse(
+    localStorage.getItem("kisakod_son_aramalar") || "[]"
+  );
+
+  liste = liste.filter(x => x !== query);
+  liste.unshift(query);
+  liste = liste.slice(0, 4);
+
+  localStorage.setItem(
+    "kisakod_son_aramalar",
+    JSON.stringify(liste)
+  );
+}
+
+function sonAramayiSec(index) {
+  const liste = JSON.parse(
+    localStorage.getItem("kisakod_son_aramalar") || "[]"
+  );
+
+  if (!liste[index]) return;
+
+  searchInput.value = liste[index];
+
+  document.getElementById("recentSearches").style.display = "none";
+
+  searchProducts(true);
+}
+function searchProducts(force = false) {
+  const query = String(searchInput.value || "").trim().toLocaleLowerCase("tr-TR");
+  if (!query) { results.innerHTML = ""; status.textContent = ""; return; }
+  if (query.length < 3) {
+    results.innerHTML = "";
+    status.textContent = "🔎 Arama yapmak için en az 3 harf yazın.";
+    return;
+  }
+  if (!urunVerisiHazir) { status.textContent = "Ürün listesi henüz yüklenmedi."; return; }
+  if (!force && query === sonArama) return;
+
+  sonArama = query;
+  sonAramayiKaydet(query);
+  document.getElementById("recentSearches").style.display = "none";
+  searchButton.disabled = true;
+  progressGoster("Ürünler aranıyor...", "Ürünler cihazınızda aranıyor.");
+  try {
+    const bulunanlar = tumUrunVerisi.filter(function(urun) {
+      const metin = [urun.kod, urun.urunKodu, urun.fiyat, urun.tarih, urun.barkod]
+        .join(" ").toLocaleLowerCase("tr-TR");
+      return metin.includes(query);
+    });
+    renderResults(bulunanlar);
+  } finally {
+    progressGizle();
+    searchButton.disabled = false;
+  }
+}
+
+/*************************************************
+ * SONUÇLARI GÖSTER
+ *************************************************/
+
+let tumUrunler = [];
+let gosterilenUrunSayisi = 0;
+
+const ILK_GOSTERIM = 20;
+const SONRAKI_GOSTERIM = 10;
+
+function renderResults(data) {
+  results.innerHTML = "";
+
+  tumUrunler = Array.isArray(data)
+    ? data
+    : [];
+
+  gosterilenUrunSayisi = 0;
+
+  if (tumUrunler.length === 0) {
+    status.textContent = "❌ Ürün bulunamadı.";
+
+    results.innerHTML =
+      '<div class="empty">Ürün bulunamadı.</div>';
+
+    return;
+  }
+
+  status.textContent =
+    tumUrunler.length + " ürün bulundu.";
+
+  sonrakiUrunleriGoster(ILK_GOSTERIM);
+}
+
+
+
+function urunKartiOlustur(urun, favoriPenceresinde) {
+  const card = document.createElement("div");
+  card.className = "product-card";
+
+  const img = document.createElement("img");
+  img.className = "product-image";
+  img.alt = urun.kod || "Ürün";
+  if (urun.link) {
+    img.src = urun.link;
+  } else {
+    img.style.visibility = "hidden";
+  }
+
+  const info = document.createElement("div");
+  info.className = "product-info";
+
+  const name = document.createElement("div");
+  name.className = "product-name";
+  name.textContent = urun.kod || "Ürün";
+
+  const code = document.createElement("div");
+  code.className = "product-code";
+  code.textContent = "🔢 Kod: " + (urun.urunKodu || "");
+
+  const price = document.createElement("div");
+  price.className = "product-price";
+  price.textContent = "💰 Fiyat: " + (urun.fiyat || "");
+
+  const date = document.createElement("div");
+  date.className = "product-date";
+  date.textContent = "📅 Satış Tarihi: " + (urun.tarih || "");
+
+  info.appendChild(name);
+  info.appendChild(code);
+  info.appendChild(price);
+  info.appendChild(date);
+
+  const favorite = document.createElement("button");
+  favorite.type = "button";
+  favorite.className = "product-favorite-button";
+  favorite.dataset.favoriteKey = urunFavoriAnahtari(urun);
+  favorite.textContent = urunFavorideMi(urun) ? "★" : "☆";
+  favorite.classList.toggle("is-favorite", urunFavorideMi(urun));
+  favorite.setAttribute("aria-label", urunFavorideMi(urun) ? "Favorilerden çıkar" : "Favorilere ekle");
+  favorite.addEventListener("click", function(event) {
+    event.stopPropagation();
+    favoriDegistir(urun);
+  });
+
+  card.appendChild(img);
+  card.appendChild(info);
+  card.appendChild(favorite);
+
+  card.addEventListener("click", function() {
+    if (favoriPenceresinde) favoriPenceresiniKapat();
+    showProductDetail(urun);
+  });
+
+  return card;
+}
+
+function sonrakiUrunleriGoster(adet) {
+  const baslangic = gosterilenUrunSayisi;
+
+  const bitis = Math.min(
+    gosterilenUrunSayisi + adet,
+    tumUrunler.length
+  );
+
+  for (let i = baslangic; i < bitis; i++) {
+    results.appendChild(urunKartiOlustur(tumUrunler[i], false));
+  }
+
+  gosterilenUrunSayisi = bitis;
+
+  status.textContent =
+    gosterilenUrunSayisi +
+    " / " +
+    tumUrunler.length +
+    " ürün gösteriliyor.";
+}
+
+/*************************************************
+ * ÜRÜN DETAY PENCERESİ
+ *************************************************/
+
+function showProductDetail(urun) {
+  seciliUrun = urun;
+  const modal = document.getElementById("productModal");
+  const modalImage = document.getElementById("modalImage");
+
+  document.getElementById("modalTitle").textContent =
+    urun.kod || "Ürün";
+
+  document.getElementById("modalPrice").textContent =
+    urun.fiyat || "";
+
+  document.getElementById("modalCode").textContent =
+    urun.urunKodu || "";
+
+  document.getElementById("modalDate").textContent =
+    urun.tarih || "";
+
+  if (urun.link) {
+    modalImage.src = urun.link;
+    modalImage.style.display = "block";
+  } else {
+    modalImage.removeAttribute("src");
+    modalImage.style.display = "none";
+  }
+
+  const qr = document.getElementById("qrCode");
+  qr.innerHTML = "";
+
+  if (typeof QRCode !== "undefined" && urun.urunKodu) {
+    new QRCode(qr, {
+      text: String(urun.urunKodu),
+      width: 132,
+      height: 132,
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } else {
+    qr.textContent = "QR kod oluşturulamadı.";
+  }
+
+  favoriDurumunuGuncelle();
+  modal.style.display = "flex";
+}
+
+/*************************************************
+ * HTML GÜVENLİ
+ *************************************************/
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/*************************************************
+ * MODAL KAPAT
+ *************************************************/
+
+document
+  .getElementById("closeModal")
+  .addEventListener("click", function() {
+    document.getElementById("productModal").style.display = "none";
+  });
+
+document
+  .getElementById("productModal")
+  .addEventListener("click", function(e) {
+    if (e.target === this) {
+      this.style.display = "none";
+    }
+  });
+
+/*************************************************
+ * ARAMA BUTONU
+ *************************************************/
+
+searchButton.addEventListener("click", function() {
+  searchProducts(true);
+});
+
+/*************************************************
+ * ENTER TUŞU
+ *************************************************/
+
+searchInput.addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    searchProducts(true);
+  }
+});
+
+/*************************************************
+ * KLAVYE KAPANINCA ARA
+ *************************************************/
+
+let keyboardWasOpen = false;
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", function() {
+    const height = window.visualViewport.height;
+    const windowHeight = window.innerHeight;
+
+    const keyboardOpen =
+      windowHeight - height > 150;
+
+    if (keyboardOpen) {
+      keyboardWasOpen = true;
+
+    } else if (keyboardWasOpen) {
+      keyboardWasOpen = false;
+
+      if (searchInput.value.trim()) {
+        searchProducts(true);
+      }
+    }
+  });
+}
+
+/*************************************************
+ * FAVORİ BUTONLARI
+ *************************************************/
+
+favoriteButton.addEventListener("click", favoriPenceresiniAc);
+
+document.getElementById("closeFavorites").addEventListener("click", favoriPenceresiniKapat);
+
+favoritesModal.addEventListener("click", function(e) {
+  if (e.target === favoritesModal) favoriPenceresiniKapat();
+});
+
+detailFavoriteButton.addEventListener("click", function() {
+  if (seciliUrun) favoriDegistir(seciliUrun);
+});
+
+favoriSayisiniGuncelle();
+
+/*************************************************
+ * BARKOD TARAYICI
+ *************************************************/
+
+let scannerInitialized = false;
+let scannerOpen = false;
+let scannerDetected = false;
+let torchEnabled = false;
+
+async function toggleScannerTorch() {
+  try {
+    if (!window.Quagga || !scannerInitialized) return;
+
+    if (torchEnabled) {
+      await Quagga.CameraAccess.disableTorch();
+      torchEnabled = false;
+      document.getElementById("scannerTorch").textContent = "⚡ Flaş Aç";
+    } else {
+      await Quagga.CameraAccess.enableTorch();
+      torchEnabled = true;
+      document.getElementById("scannerTorch").textContent = "⚡ Flaş Kapat";
+    }
+
+  } catch (error) {
+    alert("Bu cihazda kamera flaşı desteklenmiyor.");
+  }
+}
+  
+function scannerDetectedHandler(result) {
+  if (!result || !result.codeResult || scannerDetected) return;
+
+  const barkod = result.codeResult.code;
+
+  if (!barkod) return;
+
+  scannerDetected = true;
+
+  stopScanner();
+
+  searchInput.value = barkod;
+  searchProducts(true);
+}
+
+async function startScanner() {
+  const scanner = document.getElementById("scanner");
+  const viewport = document.getElementById("scannerViewport");
+
+  if (!window.Quagga) {
+    alert("Barkod okuyucu yüklenemedi. Sayfayı yenileyin.");
+    return;
+  }
+
+  scannerOpen = true;
+  scannerDetected = false;
+  scannerInitialized = false;
+
+  scanner.style.display = "block";
+  viewport.innerHTML = "";
+
+  Quagga.offDetected(scannerDetectedHandler);
+  Quagga.onDetected(scannerDetectedHandler);
+
+  Quagga.init({
+    inputStream: {
+      type: "LiveStream",
+      target: viewport,
+      constraints: {
+        facingMode: { ideal: "environment" },
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    },
+
+    locator: {
+      halfSample: true,
+      patchSize: "medium"
+    },
+
+    decoder: {
+      readers: [
+        "ean_reader",
+        "ean_8_reader",
+        "upc_reader",
+        "code_128_reader",
+        "code_39_reader",
+        "i2of5_reader"
+      ]
+    },
+
+    locate: true
+  }, function(err) {
+
+    if (err) {
+      console.error("Quagga kamera hatası:", err);
+      alert("Kamera açılamadı. Kamera iznini kontrol edin.");
+      stopScanner();
+      return;
+    }
+
+    scannerInitialized = true;
+
+    if (!scannerOpen) {
+      stopScanner();
+      return;
+    }
+
+    Quagga.start();
+  });
+}
+
+function stopScanner() {
+  scannerOpen = false;
+
+  if (window.Quagga) {
+    Quagga.offDetected(scannerDetectedHandler);
+  if (torchEnabled) {
+  Quagga.CameraAccess.disableTorch().catch(() => {});
+  torchEnabled = false;
+}
+    if (scannerInitialized) {
+      Quagga.stop();
+    }
+  }
+
+  scannerInitialized = false;
+  torchEnabled = false;
+  document.getElementById("scannerTorch").textContent = "⚡ Flaş Aç";
+  const scanner = document.getElementById("scanner");
+  const viewport = document.getElementById("scannerViewport");
+
+  scanner.style.display = "none";
+  viewport.innerHTML = "";
+}
+
+/*************************************************
+ * BARKOD BUTONU
+ *************************************************/
+
+barcodeButton.addEventListener("click", function() {
+  startScanner();
+});
+
+/*************************************************
+ * SCANNER KAPAT
+ *************************************************/
+
+document
+  .getElementById("scannerClose")
+  .addEventListener("click", function() {
+    stopScanner();
+  });
+
+document.addEventListener("DOMContentLoaded", function() {
+  urunleriYukle();
+});
+
+window.addEventListener("scroll", function() {
+  const scrollPosition =
+    window.innerHeight + window.scrollY;
+
+  const documentHeight =
+    document.documentElement.scrollHeight;
+
+  if (scrollPosition >= documentHeight - 300) {
+    if (gosterilenUrunSayisi < tumUrunler.length) {
+      sonrakiUrunleriGoster(SONRAKI_GOSTERIM);
+    }
+  }
+});
+
+</script>
+
+<script>
+// Sağ tık engeli
+document.addEventListener("contextmenu", function(e) {
+  if (e.target.closest(
+    'input, textarea, select, [contenteditable="true"], .search-box, .search-input'
+  )) return;
+
+  e.preventDefault();
+});
+
+// Kopyalama engeli
+document.addEventListener("copy", function(e) {
+  if (e.target.closest(
+    'input, textarea, select, [contenteditable="true"], .search-box, .search-input'
+  )) return;
+
+  e.preventDefault();
+});
+
+// Kesme engeli
+document.addEventListener("cut", function(e) {
+  if (e.target.closest(
+    'input, textarea, select, [contenteditable="true"], .search-box, .search-input'
+  )) return;
+
+  e.preventDefault();
+});
+
+// Sürükleme engeli
+document.addEventListener("dragstart", function(e) {
+  e.preventDefault();
+});
+</script>
+
+</body>
+</html>
