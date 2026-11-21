@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mağaza Asistanı</title>
+<style>
+:root{
+  --green:#16834b;
+  --green-dark:#11683b;
+  --nav:#172b3a;
+  --bg:#eef1f3;
+  --border:#c5cdd3;
+  --head:#dce5eb;
+  --text:#17232d;
+  --muted:#64727d;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}
+header{
+  min-height:72px;
+  padding:13px 16px;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  color:#fff;
+  background:var(--nav);
+  box-shadow:0 2px 7px #172b3a25;
+}
+.brand-mark{
+  width:43px;height:43px;flex:0 0 43px;
+  display:grid;place-items:center;
+  border:1px solid #ffffff55;
+  border-radius:10px;
+  background:#ffffff12;
+  font-size:23px;
+}
+.card-icon svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.header-copy{min-width:0}
+header h1{margin:0 0 4px;font-size:19px;letter-spacing:.4px;font-weight:700}
+header p{margin:0;color:#d3dde5;font-size:11px}
+main{width:100%;max-width:760px;margin:0 auto;padding:18px 13px 28px}
+.welcome{
+  padding:17px 15px;
+  margin-bottom:14px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.welcome h2{margin:0 0 6px;font-size:16px;color:#263746}
+.welcome p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+.menu-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.menu-card{
+  position:relative;
+  min-height:150px;
+  padding:15px 13px 13px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  text-align:left;
+  border:1px solid #c5cdd3;
+  border-radius:9px;
+  background:#fff;
+  color:var(--text);
+  font:inherit;
+  cursor:pointer;
+  box-shadow:0 1px 3px #172b3a0d;
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.menu-card:active{transform:scale(.985);border-color:var(--green);box-shadow:0 2px 8px #172b3a16}
+.menu-card:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.card-icon{
+  width:43px;height:43px;margin-bottom:12px;
+  display:grid;place-items:center;
+  border-radius:9px;
+  background:#e8f2ec;
+  color:var(--green-dark);
+  font-size:23px;
+}
+.card-icon svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.menu-card:nth-child(2) .card-icon{background:#eaf0f4;color:#385b72}
+.menu-card:nth-child(3) .card-icon{background:#f1f3e9;color:#64743c}
+.menu-card:nth-child(4) .card-icon{background:#f0edf4;color:#66527c}
+.card-title{font-size:14px;font-weight:700;margin-bottom:6px;color:#263746}
+.card-desc{font-size:11px;line-height:1.45;color:var(--muted);padding-right:8px}
+.card-arrow{position:absolute;right:13px;bottom:13px;color:#87949d;font-size:18px}
+.section-note{
+  margin-top:15px;padding:11px 12px;
+  border:1px solid #d5dde4;border-radius:7px;
+  background:#f7f9fa;color:#64727d;
+  font-size:10px;line-height:1.5;text-align:center;
+}
+footer{padding:8px 12px 18px;text-align:center;color:#87949d;font-size:10px}
+@media(max-width:360px){
+  main{padding:12px 9px 22px}
+  .menu-grid{gap:8px}
+  .menu-card{min-height:143px;padding:12px 10px}
+  .card-title{font-size:13px}
+  .card-desc{font-size:10px}
+}
+
+/* Sayfa geçiş yükleniyor ekranı */
+.loading-overlay{position:fixed;inset:0;z-index:999999;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(238,241,243,.96);}
+.loading-overlay.active{display:flex}
+.loading-card{width:100%;max-width:310px;padding:25px 20px 22px;text-align:center;background:#fff;border:1px solid #c5cdd3;border-radius:12px;box-shadow:0 5px 22px #172b3a20}
+.loading-spinner{width:43px;height:43px;margin:0 auto 15px;border:4px solid #dce8e0;border-top-color:#16834b;border-radius:50%;animation:loadingSpin .8s linear infinite}
+@keyframes loadingSpin{to{transform:rotate(360deg)}}
+.loading-title{margin:0 0 7px;color:#263746;font-size:16px;font-weight:700}
+.loading-message{margin:0;color:#64727d;font-size:12px;line-height:1.5}
+.loading-wait{margin-top:13px;color:#16834b;font-size:10px;font-weight:700}
+body.loading-active{overflow:hidden}
+.menu-card:disabled{opacity:.65;pointer-events:none}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="brand-mark" aria-hidden="true">▤</div>
+  <div class="header-copy">
+    <h1>MAĞAZA ASİSTANI</h1>
+    <p>Mağaza işlemleri ve yardımcı araçlar</p>
+  </div>
+</header>
+<main>
+  <section class="welcome">
+    <h2>Hoş geldiniz</h2>
+    <p>İhtiyacınız olan mağaza işlemini aşağıdaki bölümlerden seçebilirsiniz.</p>
+  </section>
+
+  <section class="menu-grid" aria-label="Ana menü">
+    <button class="menu-card" type="button" onclick="sayfaAc('MAGAZA_DEFTERI')">
+      <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M9 3.5v17M12 8h4M12 12h4M12 16h4"/></svg></span>
+      <span class="card-title">Mağaza Defteri</span>
+      <span class="card-desc">Elektrik okuma, kasiyer farkları, fire ve bilanço</span>
+      <span class="card-arrow" aria-hidden="true">›</span>
+    </button>
+    <button class="menu-card" type="button" onclick="bilgiGoster('Mağaza Araçları')">
+      <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M9 9.5V20M15 9.5V20M8 7h.01M12 7h.01M16 7h.01"/></svg></span>
+      <span class="card-title">Mağaza Araçları</span>
+      <span class="card-desc">Yeni hazırlanacak mağaza içi yardımcı araçlar</span>
+      <span class="card-arrow" aria-hidden="true">›</span>
+    </button>
+    <button class="menu-card" type="button" onclick="bilgiGoster('Çalışma Planı')">
+      <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M7.5 3v4M16.5 3v4M3.5 9h17M8 13h3M8 16h3M15 13h1"/></svg></span>
+      <span class="card-title">Çalışma Planı</span>
+      <span class="card-desc">Vardiya ve çalışma programı işlemleri</span>
+      <span class="card-arrow" aria-hidden="true">›</span>
+    </button>
+    <button class="menu-card" type="button" onclick="bilgiGoster('Diğer İşlemler')">
+      <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6 18 18M18 6l-1.4 1.4M7.4 16.6 6 18"/><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2.2"/></svg></span>
+      <span class="card-title">Diğer İşlemler</span>
+      <span class="card-desc">İleride eklenecek diğer özellikler</span>
+      <span class="card-arrow" aria-hidden="true">›</span>
+    </button>
+  </section>
+
+  <div class="section-note">Bölümler hazırlandıkça bu ana menü üzerinden açılacaktır.</div>
+</main>
+<footer>MAĞAZA ASİSTANI</footer>
+<div id="pageLoading" class="loading-overlay" role="status" aria-live="polite" aria-hidden="true">
+  <div class="loading-card">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <h2 class="loading-title" id="loadingTitle">Sayfa açılıyor...</h2>
+    <p class="loading-message" id="loadingMessage">Lütfen bekleyiniz, sayfanız hazırlanıyor.</p>
+    <div class="loading-wait" id="loadingWait">İŞLEM DEVAM EDİYOR</div>
+  </div>
+</div>
+<script>
+var sayfaGecisiBasladi = false;
+var yuklemeMesajZamanlayici = null;
+function yuklemeEkraniGoster(baslik, mesaj){
+  var ekran=document.getElementById('pageLoading');
+  document.getElementById('loadingTitle').textContent=baslik;
+  document.getElementById('loadingMessage').textContent=mesaj;
+  document.getElementById('loadingWait').textContent='İŞLEM DEVAM EDİYOR';
+  ekran.classList.add('active');
+  ekran.setAttribute('aria-hidden','false');
+  document.body.classList.add('loading-active');
+  if(yuklemeMesajZamanlayici) clearTimeout(yuklemeMesajZamanlayici);
+  yuklemeMesajZamanlayici=setTimeout(function(){
+    document.getElementById('loadingMessage').textContent='Bağlantı biraz yavaş. Sayfanız hazırlanıyor, lütfen beklemeye devam edin.';
+    document.getElementById('loadingWait').textContent='BAĞLANTI BEKLENİYOR';
+  },10000);
+}
+function sayfaAc(sayfa){
+  if(sayfaGecisiBasladi) return;
+  if (window.AppInventor && window.AppInventor.setWebViewString) {
+    sayfaGecisiBasladi=true;
+    var buton=document.querySelector('.menu-card[onclick*="MAGAZA_DEFTERI"]');
+    if(buton) buton.disabled=true;
+    yuklemeEkraniGoster('Mağaza Defteri açılıyor...','Lütfen bekleyiniz, mağaza defteri hazırlanıyor.');
+    window.AppInventor.setWebViewString(sayfa);
+  } else {
+    alert('Kodular bağlantısı bulunamadı.');
+  }
+}
+
+function bilgiGoster(ad){
+  alert(ad + ' bölümü henüz ana sayfaya bağlanmadı.');
+}
+</script>
+</body>
+</html>
