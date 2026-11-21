@@ -474,19 +474,16 @@ function anaSayfaYuklemeEkraniGoster(){
 }
 function anaSayfayaDon(){
   if(anaSayfaGecisiBasladi)return;
-  // Açık sayfada bekleyen girişleri ana sayfaya geçmeden önce kaydet.
+  // Sayfadan ayrılmadan önce mevcut girişleri kalıcı olarak localStorage'a yaz.
   try{saveElectric();}catch(e){}
   try{saveCashier();}catch(e){}
+  try{if(typeof tumVerileriKaydet==='function')tumVerileriKaydet();}catch(e){}
   closeMenu();
-  if(window.AppInventor && typeof window.AppInventor.setWebViewString==='function'){
-    anaSayfaGecisiBasladi=true;
-    var donusButonu=document.querySelector('.home-return-button');
-    if(donusButonu)donusButonu.disabled=true;
-    anaSayfaYuklemeEkraniGoster();
-    window.AppInventor.setWebViewString('ANA_SAYFA');
-  }else{
-    alert('Ana sayfaya dönüş için Kodular WebViewString bağlantısı bulunamadı.');
-  }
+  anaSayfaGecisiBasladi=true;
+  var donusButonu=document.querySelector('.home-return-button');
+  if(donusButonu)donusButonu.disabled=true;
+  // GitHub Pages'teki ana sayfaya aynı origin içinde dön.
+  window.location.href='index.html';
 }
 function showPage(id){
   if(!pageOrder.includes(id)||id===currentPage||pageFlipBusy)return;
