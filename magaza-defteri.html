@@ -732,15 +732,16 @@ var anaSayfaBeklemeZamanlayici=null;
 
 function anaSayfayaDon(){
   if(anaSayfaGecisiBasladi)return;
-  // Sayfadan ayrılmadan önce mevcut girişleri kalıcı olarak localStorage'a yaz.
+
+  // Mevcut kayıtları koru.
   try{saveElectric();}catch(e){}
   try{saveCashier();}catch(e){}
   try{if(typeof tumVerileriKaydet==='function')tumVerileriKaydet();}catch(e){}
-  closeMenu();
+
   anaSayfaGecisiBasladi=true;
-  var donusButonu=document.querySelector('.home-return-button');
-  if(donusButonu)donusButonu.disabled=true;
-  // GitHub Pages'teki ana sayfaya aynı origin içinde dön.
+  closeMenu();
+
+  // Çalışma Planı ile aynı şekilde ana sayfaya git.
   window.location.href='anasayfa.html';
 }
 
