@@ -13,9 +13,9 @@ header{background:#172b3a;color:#fff;display:flex;align-items:center;gap:13px;te
 .header-title{min-width:0}
 header h1{font-size:19px;letter-spacing:.4px;margin:0 0 4px}
 header p{font-size:11px;color:#d3dde5;margin:0}
-.menu-backdrop{position:fixed;inset:0;background:#07132180;z-index:1000;opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease}
+.menu-backdrop{position:fixed;inset:0;background:#07132180;z-index:1000;opacity:0;visibility:hidden;transition:none}
 .menu-backdrop.open{opacity:1;visibility:visible}
-nav{position:fixed;z-index:1001;top:0;bottom:0;left:0;width:min(82vw,310px);padding:18px 14px;background:#fff;box-shadow:8px 0 28px #00000030;display:flex;flex-direction:column;gap:9px;transform:translateX(-105%);transition:transform .26s cubic-bezier(.2,.75,.25,1);overflow-y:auto}
+nav{position:fixed;z-index:1001;top:0;bottom:0;left:0;width:min(82vw,310px);padding:18px 14px;background:#fff;box-shadow:8px 0 28px #00000030;display:flex;flex-direction:column;gap:9px;transform:translateX(-105%);transition:none;overflow-y:auto}
 nav.open{transform:translateX(0)}
 .menu-heading{display:flex;align-items:center;justify-content:space-between;padding:5px 3px 15px;margin-bottom:5px;border-bottom:1px solid #e2e8ed;color:#263746;font-weight:800;font-size:14px}
 .menu-close{border:0;background:#edf1f4;color:#263746;border-radius:8px;width:34px;height:34px;font-size:21px;cursor:pointer}
@@ -26,30 +26,10 @@ body.menu-open{overflow:hidden}
 main{max-width:1500px;margin:0 auto;padding:10px}
 .page{display:none}.page.active{display:block}
 
-/* Defter sayfası çevirme efekti: tablo, hücre ve giriş ölçülerine dokunmaz */
-main{perspective:1800px;perspective-origin:50% 20%}
-.page{display:none;transform-origin:left center;backface-visibility:hidden}
-.page.active{display:block;animation:pageSettle .48s cubic-bezier(.2,.72,.25,1) both}
-.page.turn-out-next{display:block;transform-origin:right center;animation:pageTurnNext .48s cubic-bezier(.45,.05,.7,.4) both;pointer-events:none}
-.page.turn-out-prev{display:block;transform-origin:left center;animation:pageTurnPrev .48s cubic-bezier(.45,.05,.7,.4) both;pointer-events:none}
-.page.active::after{content:"";display:block;position:absolute;pointer-events:none;inset:0;border-radius:2px;opacity:0;box-shadow:inset 12px 0 18px -18px #172b3a}
-@keyframes pageTurnNext{
-  0%{transform:rotateY(0) translateX(0);filter:brightness(1);opacity:1}
-  45%{filter:brightness(.91);box-shadow:0 8px 22px #172b3a22}
-  100%{transform:rotateY(-13deg) translateX(-16px);filter:brightness(.88);opacity:0}
-}
-@keyframes pageTurnPrev{
-  0%{transform:rotateY(0) translateX(0);filter:brightness(1);opacity:1}
-  45%{filter:brightness(.91);box-shadow:0 8px 22px #172b3a22}
-  100%{transform:rotateY(13deg) translateX(16px);filter:brightness(.88);opacity:0}
-}
-@keyframes pageSettle{
-  0%{transform:rotateY(9deg) translateX(12px);filter:brightness(.9);opacity:.65}
-  100%{transform:rotateY(0) translateX(0);filter:brightness(1);opacity:1}
-}
-@media(prefers-reduced-motion:reduce){
- .page.active,.page.turn-out-next,.page.turn-out-prev{animation:none!important}
-}
+/* Sayfa geçiş animasyonları kaldırıldı. */
+main{perspective:none}
+.page{display:none;transform:none;animation:none;backface-visibility:visible}
+.page.active{display:block;animation:none}
 
 .panel{background:#fff;border:1px solid #c5cdd3;padding:10px;margin-bottom:10px}
 .sheet-title{text-align:center;font-weight:700;font-size:15px;margin:2px 0 10px}
@@ -187,9 +167,30 @@ table.sheet td input:focus{outline:1px solid var(--green);border-color:var(--gre
 #balance-page .hafiza-bilgi{font-size:10px;color:#487448;margin-top:4px;text-align:right}
 #balance-page .hedef-buton{height:30px;padding:4px 10px;border:1px solid #4472c4;border-radius:4px;background:#4472c4;color:white;font-weight:bold;font-size:12px;cursor:pointer;white-space:nowrap}
 #balance-page .hedef-buton:hover{background:#315a9e}
-#balance-page .hedef-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:12px}
+#balance-page .hedef-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:12px;overflow:hidden}
 #balance-page .hedef-modal.aktif{display:flex}
-#balance-page .hedef-modal-icerik{width:100%;max-width:520px;max-height:90vh;overflow-y:auto;background:#fff;border-radius:8px;padding:16px;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+#balance-page .hedef-modal-icerik{position:relative}
+#balance-page .planlama-bolum{border:1px solid #cbd3dc;border-radius:7px;padding:12px;margin:10px 0;background:#fff}
+#balance-page .planlama-bolum-baslik{font-size:16px;font-weight:bold;text-align:center;margin-bottom:9px}
+#balance-page .planlama-aciklama{font-size:12px;color:#626b75;line-height:1.45;margin-bottom:9px}
+#balance-page .planlama-aksiyonlar{display:flex;gap:8px;flex-wrap:wrap}
+#balance-page .planlama-aksiyonlar button{flex:1;min-height:40px;border:1px solid #b8c2cc;border-radius:6px;background:#f3f6f9;font-weight:bold;padding:7px}
+#balance-page .planlama-secim-ozet{font-size:12px;color:#344054;margin-top:8px}
+#balance-page .alt-modal{display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,.62);align-items:center;justify-content:center;padding:12px;overflow:hidden}
+#balance-page .alt-modal.aktif{display:flex}
+#balance-page .alt-modal-icerik{width:100%;max-width:460px;max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;background:#fff;border-radius:9px;padding:15px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+#balance-page .alt-modal-baslik{font-size:16px;font-weight:bold;text-align:center;margin-bottom:12px}
+#balance-page .personel-secenek{min-height:70px}
+#balance-page .personel-ikon{font-size:22px;letter-spacing:-5px}
+#balance-page .sevkiyat-gunleri{grid-template-columns:repeat(2,minmax(0,1fr))}
+#balance-page .ozel-gun-satiri{display:flex;gap:7px;margin:7px 0}
+#balance-page .ozel-gun-satiri input,#balance-page .ozel-gun-satiri select{min-width:0;flex:1;height:36px;border:1px solid #aaa;border-radius:5px;padding:5px}
+#balance-page .ozel-gun-satiri button{width:36px;border:0;border-radius:5px;background:#fce4d6;color:#a00;font-weight:bold}
+#balance-page .hedef-modal-icerik{width:100%;max-width:520px;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;background:#fff;border-radius:8px;padding:16px;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+/* Planlama penceresini ilk açılışta görünür ekranın tam ortasında tut */
+#balance-page .hedef-modal{align-items:center;justify-content:center;padding:16px;overflow-y:auto;overscroll-behavior:contain}
+#balance-page .hedef-modal-icerik{margin:auto;flex:0 1 520px;max-height:calc(100dvh - 32px);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto}
+
 #balance-page .hedef-modal-baslik{font-size:17px;font-weight:bold;text-align:center;margin-bottom:12px}
 #balance-page .hedef-aciklama{font-size:12px;color:#555;margin-bottom:12px;line-height:1.5}
 #balance-page .hedef-tarih-listesi{display:flex;flex-direction:column;gap:8px}
@@ -203,6 +204,22 @@ table.sheet td input:focus{outline:1px solid var(--green);border-color:var(--gre
 #balance-page .hedef-ekle{background:#e2efda}
 #balance-page .hedef-uygula{background:#4472c4;color:white;border-color:#4472c4!important}
 #balance-page .hedef-kapat{background:#eee}
+#balance-page .sevkiyat-gunleri{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:12px 0}
+#balance-page .sevkiyat-gun{display:flex;align-items:center;gap:6px;padding:9px 7px;border:1px solid #ccd3da;border-radius:6px;background:#f7f9fb;font-size:12px}
+#balance-page .sevkiyat-gun input{width:17px;height:17px;accent-color:#4472c4}
+#balance-page .personel-secim{display:none;margin-top:14px;padding-top:12px;border-top:1px solid #ddd}
+#balance-page .personel-secim.aktif{display:block}
+#balance-page .personel-secim-baslik{font-weight:bold;text-align:center;margin-bottom:10px}
+#balance-page .personel-secenekler{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#balance-page .personel-secenek{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid #cbd5df;border-radius:7px;background:#f8fafc;font-size:13px}
+#balance-page .personel-secenek input{accent-color:#4472c4;width:17px;height:17px}
+#balance-page .personel-ikon{font-size:19px;letter-spacing:-5px;margin-right:4px}
+#balance-page .personel-bilgi{font-size:11px;color:#596675;margin-top:9px;text-align:center}
+#balance-page .paylas-alani{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid #cbd3dc}
+#balance-page .paylas-alani button{min-height:40px;padding:9px 15px;border:0;border-radius:6px;background:#16834b;color:#fff;font-weight:bold;cursor:pointer}
+#balance-page .paylas-alani button:last-child{background:#4472c4}
+#balance-page .paylas-not{width:100%;text-align:center;color:#66727d;font-size:11px}
+@media(max-width:500px){#balance-page .sevkiyat-gunleri{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){#balance-page{padding:4px}
 #balance-page .container{padding:5px}
 #balance-page .baslik{font-size:17px}
@@ -228,7 +245,212 @@ table.sheet td input:focus{outline:1px solid var(--green);border-color:var(--gre
 body.navigation-loading{overflow:hidden}
 .home-return-button:disabled{opacity:.65;pointer-events:none}
 
+
+/* Planlama penceresi: ekranın tam ortası, içerik kendi içinde kayar */
+#balance-page .hedef-modal{
+ position:fixed !important;
+ inset:0 !important;
+ width:100vw !important;
+ height:100vh !important;
+ height:100dvh !important;
+ display:none;
+ align-items:center !important;
+ justify-content:center !important;
+ padding:12px !important;
+ overflow-y:auto !important;
+ overflow-x:hidden !important;
+ overscroll-behavior:contain;
+ z-index:99999 !important;
+}
+#balance-page .hedef-modal.aktif{display:flex !important}
+#balance-page .hedef-modal-icerik{
+ width:100% !important;
+ max-width:520px !important;
+ max-height:calc(100vh - 24px) !important;
+ max-height:calc(100dvh - 24px) !important;
+ margin:auto !important;
+ overflow-y:auto !important;
+ overscroll-behavior:contain;
+ flex:0 1 520px;
+}
+
+
+@page{
+ size:11in 17in;
+ margin:0;
+}
+@media print{
+ html,body{
+  width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  background:#fff !important;
+ }
+ body *{
+  visibility:hidden !important;
+ }
+ #balance{
+  display:block !important;
+  position:static !important;
+  width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+ }
+ #balance-page,
+ #balance-page .tablo-alan,
+ #balance-page .tablo-alan table,
+ #balance-page .tablo-alan table *{
+  visibility:visible !important;
+ }
+ #balance-page{
+  position:absolute !important;
+  top:0 !important;
+  left:0 !important;
+  width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  background:#fff !important;
+ }
+ #balance-page .container{
+  width:100% !important;
+  max-width:none !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  background:#fff !important;
+ }
+ #balance-page .baslik,
+ #balance-page .ust-bilgi,
+ #balance-page .paylas-alani,
+ #balance-page #durum,
+ #balance-page .hafiza-bilgi,
+ #hedefModal,
+ #personelModal,
+ #sevkiyatModal{
+  display:none !important;
+  visibility:hidden !important;
+ }
+ #balance-page .tablo-alan{
+  display:block !important;
+  width:100% !important;
+  overflow:visible !important;
+  margin:0 !important;
+  padding:0 !important;
+ }
+ #balance-page table{
+  display:table !important;
+  width:100% !important;
+  min-width:0 !important;
+  max-width:none !important;
+  table-layout:fixed !important;
+  border-collapse:collapse !important;
+  margin:0 !important;
+  background:#fff !important;
+  page-break-inside:auto !important;
+ }
+ #balance-page thead{display:table-header-group !important}
+ #balance-page tfoot{display:table-footer-group !important}
+ #balance-page tr{
+  page-break-inside:avoid !important;
+  break-inside:avoid !important;
+ }
+ #balance-page th,
+ #balance-page td{
+  height:19px !important;
+  padding:2px 1px !important;
+  font-family:Arial,Helvetica,sans-serif !important;
+  font-size:7pt !important;
+  line-height:1.05 !important;
+  white-space:nowrap !important;
+  text-align:center !important;
+  border:1px solid #777 !important;
+  overflow:hidden !important;
+  color:#111 !important;
+  -webkit-print-color-adjust:exact !important;
+  print-color-adjust:exact !important;
+ }
+ #balance-page thead tr:first-child th{background:#d9e2f3 !important}
+ #balance-page thead tr:nth-child(2) th{background:#e2efda !important}
+ #balance-page .plan-giris,
+ #balance-page .plan-giris input{background:#fffde8 !important}
+ #balance-page .giris,
+ #balance-page .giris input{background:#fffde8 !important}
+ #balance-page .kumulatif{background:#f2f2f2 !important}
+ #balance-page .performans{background:#e2f0d9 !important}
+ #balance-page .toplam td{background:#d9ead3 !important;font-weight:bold !important}
+ #balance-page .hedef-toplam td{background:#cfe2f3 !important;font-weight:bold !important}
+ #balance-page .hafta-sonu{background:#fce4d6 !important}
+ #balance-page td input{
+  width:100% !important;
+  min-width:0 !important;
+  height:14px !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  outline:0 !important;
+  background:transparent !important;
+  color:#111 !important;
+  font-size:7pt !important;
+  text-align:center !important;
+ }
+}
+
+/* PERSONEL VE SEVKIYAT PENCERELERİNİ ÖN PLANA AL */
+#balance-page .alt-modal{
+  position:fixed !important;
+  inset:0 !important;
+  width:100vw !important;
+  height:100vh !important;
+  height:100dvh !important;
+  z-index:100001 !important;
+  display:none;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:12px !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  background:rgba(0,0,0,.62) !important;
+}
+
+#balance-page .alt-modal.aktif{
+  display:flex !important;
+}
+
+#balance-page .alt-modal-icerik{
+  position:relative !important;
+  z-index:100002 !important;
+  width:100% !important;
+  max-width:460px !important;
+  max-height:calc(100vh - 24px) !important;
+  max-height:calc(100dvh - 24px) !important;
+  margin:auto !important;
+  overflow-y:auto !important;
+  background:#fff !important;
+  border-radius:9px !important;
+  padding:15px !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.3) !important;
+}
+
 </style>
+<script>
+/* KODULAR TINYDB KOPRUSU: sayfa acilmadan once WebViewString'e verilen kaydi geri yukler. */
+(function(){
+  try{
+    if(!window.Kodular || typeof window.Kodular.getWebViewString!=='function') return;
+    var raw=window.Kodular.getWebViewString();
+    if(!raw) return;
+    var paket=JSON.parse(raw);
+    if(paket && (paket.type==='RESTORE_MA_DATA'||paket.type==='STORE_MA_DATA') && paket.data){
+      Object.keys(paket.data).forEach(function(k){
+        if(typeof paket.data[k]==='string') localStorage.setItem(k,paket.data[k]);
+      });
+    }
+  }catch(e){console.warn('TinyDB kaydi geri yuklenemedi',e);}
+})();
+</script>
+
 </head>
 <body>
 <header>
@@ -403,10 +625,14 @@ body.navigation-loading{overflow:hidden}
 <tr class="hedef-toplam">
  <td colspan="2">HEDEF TOPLAM</td>
  <td id="hedefToplam">0</td>
- <td colspan="12">ÇALIŞMA GÜNÜ × HEDEF</td>
+ <td colspan="12" id="planlamaOzet">Planlama bilgileri burada görünecek.</td>
 </tr>
 </tfoot>
 </table>
+</div>
+<div class="paylas-alani">
+ <button type="button" onclick="bilancoPaylas('pdf')">📄 TABLOYU PDF OLARAK PAYLAŞ</button>
+ <div class="paylas-not">Yalnızca bilanço tablosunun tamamı PDF olarak aktarılır.</div>
 </div>
 
 <div id="durum"></div>
@@ -415,18 +641,60 @@ body.navigation-loading{overflow:hidden}
 
 <div id="hedefModal" class="hedef-modal">
  <div class="hedef-modal-icerik">
-  <div class="hedef-modal-baslik">GÜNLÜK CİRO HEDEFİ PLANLAMA</div>
-  <div class="hedef-aciklama">
-   Önemli günleri veya mağazanın kapalı olacağı tarihleri seçin.
-   Özel gün artışları diğer açık günlere eşit şekilde dağıtılarak
-   aylık hedef toplamı korunur.
-  </div>
-  <div id="hedefTarihListesi" class="hedef-tarih-listesi"></div>
+  <div class="hedef-modal-baslik">PLANLAMA</div>
+  <section class="planlama-bolum">
+   <div class="planlama-bolum-baslik">GÜNLÜK CİRO HEDEFİ PLANLAMA</div>
+   <div class="planlama-aciklama">Önemli günleri veya mağazanın kapalı olacağı tarihleri seçin. Özel gün artışları diğer açık günlere eşit şekilde dağıtılarak aylık hedef toplamı korunur.</div>
+   <div id="ozelGunListesi" class="hedef-tarih-listesi"></div>
+   <button type="button" class="hedef-ekle" onclick="ozelGunEkle()" style="width:100%;min-height:38px;border:1px solid #aaa;border-radius:5px;font-weight:bold">+ TARİH EKLE</button>
+  </section>
+  <section class="planlama-bolum">
+   <div class="planlama-bolum-baslik">ÇALIŞMA SAATİ PLANLAMA</div>
+   <div class="planlama-aciklama">Personel sayısını ve sevkiyat günlerini belirleyin. Sevkiyat günlerine %12 fazla çalışma saati planlanır.</div>
+   <div class="planlama-aksiyonlar">
+    <button type="button" onclick="personelSeciminiAc()">👥 PERSONEL SAYISI</button>
+    <button type="button" onclick="sevkiyatSeciminiAc()">🚚 SEVKİYAT GÜNLERİ</button>
+   </div>
+   <div id="personelOzet" class="planlama-secim-ozet">Personel seçimi yapılmadı.</div>
+   <div id="sevkiyatOzet" class="planlama-secim-ozet">Sevkiyat günü seçilmedi.</div>
+  </section>
   <div class="hedef-modal-alt">
-   <button type="button" class="hedef-ekle" onclick="hedefTarihSatiriEkle()">+ TARİH EKLE</button>
    <button type="button" class="hedef-kapat" onclick="hedefPenceresiKapat()">KAPAT</button>
    <button type="button" class="hedef-uygula" onclick="hedefleriDagit()">HESAPLA</button>
   </div>
+ </div>
+</div>
+<div id="personelModal" class="alt-modal">
+ <div class="alt-modal-icerik">
+  <div class="alt-modal-baslik">MAĞAZADA KAÇ PERSONEL ÇALIŞACAK?</div>
+  <div class="personel-secenekler">
+   <label class="personel-secenek"><input type="radio" name="personelSayisi" value="4"><span class="personel-ikon">👥</span> 4 personel</label>
+   <label class="personel-secenek"><input type="radio" name="personelSayisi" value="4.1"><span class="personel-ikon">👥</span> 4+1 personel</label>
+   <label class="personel-secenek"><input type="radio" name="personelSayisi" value="5"><span class="personel-ikon">👥</span> 5 personel</label>
+   <label class="personel-secenek"><input type="radio" name="personelSayisi" value="5.1"><span class="personel-ikon">👥</span> 5+1 personel</label>
+   <label class="personel-secenek"><input type="radio" name="personelSayisi" value="6"><span class="personel-ikon">👥</span> 6 personel</label>
+   <label class="personel-secenek"><input type="radio" name="personelSayisi" value="6.1"><span class="personel-ikon">👥</span> 6+1 personel</label>
+   <label class="personel-secenek"><input type="radio" name="personelSayisi" value="7"><span class="personel-ikon">👥</span> 7 personel</label>
+   <label class="personel-secenek"><input type="radio" name="personelSayisi" value="7.1"><span class="personel-ikon">👥</span> 7+1 personel</label>
+  </div>
+  <div class="personel-bilgi">Her personel 195 saat · +1 personel 127,5 saat</div>
+  <div class="hedef-modal-alt"><button type="button" class="hedef-kapat" onclick="altModalKapat('personelModal')">GERİ DÖN</button></div>
+ </div>
+</div>
+<div id="sevkiyatModal" class="alt-modal">
+ <div class="alt-modal-icerik">
+  <div class="alt-modal-baslik">SEVKİYAT GÜNLERİNİ SEÇİN</div>
+  <div class="hedef-aciklama">Seçilen günlerin çalışma saati normal günlere göre %12 fazla planlanır.</div>
+  <div class="sevkiyat-gunleri" id="sevkiyatGunleri">
+   <label class="sevkiyat-gun"><input type="checkbox" value="1"> Pazartesi</label>
+   <label class="sevkiyat-gun"><input type="checkbox" value="2"> Salı</label>
+   <label class="sevkiyat-gun"><input type="checkbox" value="3"> Çarşamba</label>
+   <label class="sevkiyat-gun"><input type="checkbox" value="4"> Perşembe</label>
+   <label class="sevkiyat-gun"><input type="checkbox" value="5"> Cuma</label>
+   <label class="sevkiyat-gun"><input type="checkbox" value="6"> Cumartesi</label>
+   <label class="sevkiyat-gun"><input type="checkbox" value="0"> Pazar</label>
+  </div>
+  <div class="hedef-modal-alt"><button type="button" class="hedef-kapat" onclick="altModalKapat('sevkiyatModal')">GERİ DÖN</button></div>
  </div>
 </div>
 </div></section>
@@ -474,65 +742,51 @@ function anaSayfaYuklemeEkraniGoster(){
 }
 function anaSayfayaDon(){
   if(anaSayfaGecisiBasladi)return;
-  // Sayfadan ayrılmadan önce mevcut girişleri kalıcı olarak localStorage'a yaz.
+  // Açık sayfada bekleyen girişleri ana sayfaya geçmeden önce kaydet.
   try{saveElectric();}catch(e){}
   try{saveCashier();}catch(e){}
-  try{if(typeof tumVerileriKaydet==='function')tumVerileriKaydet();}catch(e){}
   closeMenu();
-  anaSayfaGecisiBasladi=true;
-  var donusButonu=document.querySelector('.home-return-button');
-  if(donusButonu)donusButonu.disabled=true;
-  // GitHub Pages'teki ana sayfaya aynı origin içinde dön.
-  window.location.href='anasayfa.html';
+  if(window.Kodular && typeof window.Kodular.setWebViewString==='function'){
+    anaSayfaGecisiBasladi=true;
+    var donusButonu=document.querySelector('.home-return-button');
+    if(donusButonu)donusButonu.disabled=true;
+    anaSayfaYuklemeEkraniGoster();
+    window.Kodular.setWebViewString('ANA_SAYFA');
+  }else{
+    alert('Ana sayfaya dönüş için Kodular WebViewString bağlantısı bulunamadı.');
+  }
 }
 function showPage(id){
-  if(!pageOrder.includes(id)||id===currentPage||pageFlipBusy)return;
-  const fromIndex=pageOrder.indexOf(currentPage),toIndex=pageOrder.indexOf(id);
-  const direction=toIndex>fromIndex?'next':'prev';
-  const outgoing=document.getElementById(currentPage);
-  const incoming=document.getElementById(id);
-  pageFlipBusy=true;
-  outgoing.classList.remove('active');
-  outgoing.classList.add(direction==='next'?'turn-out-next':'turn-out-prev');
-  incoming.classList.add('active');
+  if(!pageOrder.includes(id)||id===currentPage)return;
+  document.getElementById(currentPage).classList.remove('active');
+  document.getElementById(id).classList.add('active');
   document.querySelectorAll('nav button[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
   currentPage=id;
-  window.setTimeout(()=>{
-    outgoing.classList.remove('turn-out-next','turn-out-prev');
-    pageFlipBusy=false;
-  },490);
 }
-// Ekranın sağ/sol kenarından sürükleme: sayfa çevirmeyi taklit eder.
-// Tablo alanları ve form kontrolleri bu harekete dahil edilmez.
-let flipStart=null;
-document.addEventListener('pointerdown',e=>{
-  if(e.pointerType==='mouse' && e.button!==0)return;
-  const x=e.clientX, edge=30;
-  if(x>edge && x<window.innerWidth-edge)return;
-  if(e.target.closest('input,select,button,textarea,.table-scroll,.meter-area'))return;
-  flipStart={x,y:e.clientY};
-},{passive:true});
-document.addEventListener('pointerup',e=>{
-  if(!flipStart)return;
-  const dx=e.clientX-flipStart.x,dy=e.clientY-flipStart.y;
-  const startedAt=flipStart.x;flipStart=null;
-  if(Math.abs(dx)<55||Math.abs(dx)<Math.abs(dy)*1.25)return;
-  const i=pageOrder.indexOf(currentPage);
-  if(dx<0 && i<pageOrder.length-1)showPage(pageOrder[i+1]);
-  else if(dx>0 && i>0)showPage(pageOrder[i-1]);
-},{passive:true});
-document.addEventListener('pointercancel',()=>{flipStart=null},{passive:true});
+
 
 function keyFor(type,year,month){return STORE+'_'+type+'_'+year+'_'+month}
 /* ELEKTRİK VE KASİYER HAFIZASI: Bilanço sayfasındaki gibi tek localStorage kaydı içinde dönemlere göre tutulur. */
 const MAGAZA_HAFIZA_ANAHTARI='magaza_defteri_hafiza_v1';
+/* Elektrik, Kasiyer ve Bilanco kayitlarini tek paket halinde Kodular'a gonderir. */
+function apkTinyDBKaydet(){
+  try{
+    if(!window.Kodular || typeof window.Kodular.setWebViewString!=='function') return;
+    const paket={type:'STORE_MA_DATA',data:{
+      magaza_defteri_hafiza_v1:localStorage.getItem('magaza_defteri_hafiza_v1')||'{}',
+      bilanco_hafiza_v2:localStorage.getItem('bilanco_hafiza_v2')||'{}'
+    }};
+    window.Kodular.setWebViewString(JSON.stringify(paket));
+  }catch(e){console.warn('TinyDB kaydi gonderilemedi',e);}
+}
+
 let magazaHafiza={};
 function magazaHafizayiOku(){
   try{magazaHafiza=JSON.parse(localStorage.getItem(MAGAZA_HAFIZA_ANAHTARI)||'{}')||{};}
   catch(e){magazaHafiza={};}
 }
 function magazaHafizayaYaz(){
-  try{localStorage.setItem(MAGAZA_HAFIZA_ANAHTARI,JSON.stringify(magazaHafiza));}
+  try{localStorage.setItem(MAGAZA_HAFIZA_ANAHTARI,JSON.stringify(magazaHafiza)); apkTinyDBKaydet();}
   catch(e){console.warn('Mağaza defteri hafızaya kaydedilemedi',e);}
 }
 function donemKayitAnahtari(year,month){return String(year)+'-'+String(Number(month)+1).padStart(2,'0');}
@@ -634,7 +888,7 @@ function mevcutDonemAnahtari(){
 function donemVerisi(){
  const anahtar=mevcutDonemAnahtari();
  if(!hafizaVerisi[anahtar]){
-  hafizaVerisi[anahtar]={ust:{},gunler:{},ozelGunler:[]};
+  hafizaVerisi[anahtar]={ust:{},gunler:{},ozelGunler:[],sevkiyatGunleri:[],personelSecimi:""};
  }
  return hafizaVerisi[anahtar];
 }
@@ -643,21 +897,13 @@ function hafizayaYaz(){
  if(!hafizaHazir||tabloKuruluyor)return;
  try{
   localStorage.setItem(HAFIZA_ANAHTARI,JSON.stringify(hafizaVerisi));
+  apkTinyDBKaydet();
   document.getElementById("hafizaBilgi").textContent="Hafızaya kaydedildi.";
  }catch(e){
   document.getElementById("hafizaBilgi").textContent="Hafıza kaydedilemedi.";
  }
 }
 
-function ozelGunleriOkuSessiz(){
- const liste=[];
- document.querySelectorAll("#hedefTarihListesi .hedef-tarih-satiri").forEach(function(satir){
-  const tarih=satir.querySelector(".ozel-hedef-tarih").value;
-  const tur=satir.querySelector(".ozel-hedef-tur").value;
-  if(tarih)liste.push({tarih,tur});
- });
- return liste;
-}
 
 function tumVerileriKaydet(){
  if(!hafizaHazir||tabloKuruluyor)return;
@@ -680,7 +926,10 @@ function tumVerileriKaydet(){
   veri.gunler[String(gun)]=alanlar;
  });
 
- veri.ozelGunler=ozelGunleriOkuSessiz();
+ veri.sevkiyatGunleri=Array.from(document.querySelectorAll("#sevkiyatGunleri input:checked")).map(x=>Number(x.value));
+ const seciliPersonel=document.querySelector("input[name=personelSayisi]:checked");
+ veri.personelSecimi=seciliPersonel?seciliPersonel.value:"";
+ veri.ozelGunler=Array.from(document.querySelectorAll("#ozelGunListesi .ozel-gun-satiri")).map(r=>({tarih:r.querySelector("input").value,oran:r.querySelector("select").value})).filter(x=>x.tarih);
  hafizayaYaz();
 }
 
@@ -729,12 +978,12 @@ function tabloOlustur(){
   tr.innerHTML=`
    <td class="tarih">${tarihFormat(tarih)}</td>
    <td class="gun">${gunAdi(tarih)}</td>
-   <td class="plan-giris"><input type="number" class="ciro-plan" data-gun="${i}"></td>
-   <td class="giris"><input type="number" class="ciro-olan" data-gun="${i}"></td>
+   <td class="plan-giris"><input type="text" inputmode="numeric" autocomplete="off" class="ciro-plan plan-binlik" data-gun="${i}"></td>
+   <td class="giris"><input type="text" inputmode="numeric" autocomplete="off" class="ciro-olan plan-binlik" data-gun="${i}"></td>
    <td class="kumulatif kum-ciro-plan">0</td>
    <td class="kumulatif kum-ciro-olan">0</td>
    <td class="kumulatif ciro-ortalama">0</td>
-   <td class="plan-giris"><input type="number" class="saat-plan" data-gun="${i}"></td>
+   <td class="plan-giris"><input type="text" inputmode="numeric" autocomplete="off" class="saat-plan plan-binlik" data-gun="${i}"></td>
    <td class="giris"><input type="number" class="saat-olan" data-gun="${i}"></td>
    <td class="kumulatif kum-saat-plan">0</td>
    <td class="kumulatif kum-saat-olan">0</td>
@@ -753,10 +1002,13 @@ function tabloOlustur(){
  }
 
  tabloKuruluyor=false;
- ozelGunleriYukle(donem.ozelGunler||[]);
+
+
+ planlananAlanlariBicimlendir();
 
  document.querySelectorAll("#tablo input").forEach(function(input){
   input.addEventListener("input",function(){
+   if(input.classList.contains("plan-binlik"))planBinlikFormatla(input,true);
    hesapla();
    tumVerileriKaydet();
   });
@@ -767,15 +1019,48 @@ function tabloOlustur(){
   "Dönem: "+donemAnahtari(ay,yil)+" — kayıtlar yüklendi.";
 }
 
+/* PLANLANAN ALANLAR: ekranda binlik ayırıcı, hesaplamada gerçek sayı */
+function planSayiOku(deger){
+ const temiz=String(deger??"").replace(/\./g,"").replace(/[^\d-]/g,"");
+ const n=Number(temiz);
+ return Number.isFinite(n)?n:0;
+}
+
+function planBinlikFormatla(input,imleciKoru=true){
+ const eski=input.value;
+ const konum=imleciKoru?(input.selectionStart??eski.length):0;
+ const solRakamSayisi=(eski.slice(0,konum).match(/\d/g)||[]).length;
+ const rakamlar=eski.replace(/\D/g,"");
+ const yeni=rakamlar.replace(/\B(?=(\d{3})+(?!\d))/g,".");
+ if(yeni===eski)return;
+
+ input.value=yeni;
+
+ if(imleciKoru){
+  let yeniKonum=0,gorulen=0;
+  while(yeniKonum<yeni.length && gorulen<solRakamSayisi){
+   if(/\d/.test(yeni[yeniKonum]))gorulen++;
+   yeniKonum++;
+  }
+  /* Eşleşme mümkün değilse imleç rakamların soluna alınır. */
+  if(gorulen!==solRakamSayisi)yeniKonum=0;
+  try{input.setSelectionRange(yeniKonum,yeniKonum);}catch(e){}
+ }
+}
+
+function planlananAlanlariBicimlendir(){
+ document.querySelectorAll("#tablo .plan-binlik").forEach(input=>planBinlikFormatla(input,false));
+}
+
 /* TABLO HESAPLAMALARI */
 function hesapla(){
  let kumCiroPlan=0,kumCiroOlan=0,kumSaatPlan=0,kumSaatOlan=0,kumMusteri=0;
  let toplamCiroPlan=0,toplamCiroOlan=0,toplamSaatPlan=0,toplamSaatOlan=0;
 
  document.querySelectorAll("#tablo tr").forEach(function(tr,index){
-  const cp=Number(tr.querySelector(".ciro-plan").value)||0;
-  const co=Number(tr.querySelector(".ciro-olan").value)||0;
-  const sp=Number(tr.querySelector(".saat-plan").value)||0;
+  const cp=planSayiOku(tr.querySelector(".ciro-plan").value);
+  const co=planSayiOku(tr.querySelector(".ciro-olan").value);
+  const sp=planSayiOku(tr.querySelector(".saat-plan").value);
   const so=Number(tr.querySelector(".saat-olan").value)||0;
   const mu=Number(tr.querySelector(".musteri").value)||0;
 
@@ -828,273 +1113,88 @@ const gunOranlari={
 };
 
 function hedefPenceresiAc(){
- ozelGunleriYukle(donemVerisi().ozelGunler||[]);
+ const hedef=Number(document.getElementById("hedef").value)||0;
+ if(hedef<=0){alert("Lütfen önce HEDEF çalışma cirosunu girin.");document.getElementById("hedef").focus();return;}
+ const veri=donemVerisi();
+ document.querySelectorAll("#sevkiyatGunleri input").forEach(x=>x.checked=(veri.sevkiyatGunleri||[]).includes(Number(x.value)));
+ document.querySelectorAll("input[name=personelSayisi]").forEach(x=>x.checked=x.value===(veri.personelSecimi||""));
+ document.getElementById("ozelGunListesi").innerHTML="";
+ (veri.ozelGunler||[]).forEach(x=>ozelGunEkle(x.tarih,x.oran));
+ ozetleriGuncelle();
  document.getElementById("hedefModal").classList.add("aktif");
 }
+function hedefPenceresiKapat(){document.getElementById("hedefModal").classList.remove("aktif");altModalKapat("personelModal");altModalKapat("sevkiyatModal");tumVerileriKaydet();}
+function personelSeciminiAc(){document.getElementById("personelModal").classList.add("aktif");}
+function sevkiyatSeciminiAc(){document.getElementById("sevkiyatModal").classList.add("aktif");}
+function altModalKapat(id){document.getElementById(id).classList.remove("aktif");ozetleriGuncelle();tumVerileriKaydet();}
+function ozetleriGuncelle(){
+ const p=document.querySelector("input[name=personelSayisi]:checked");
+ const po=document.getElementById("personelOzet");
+ if(p){const a=p.value.split("."),n=Number(a[0]),plus=a.length>1,total=n*195+(plus?127.5:0);po.textContent="Seçilen: "+n+(plus?"+1":"")+" personel · Toplam "+sayiFormat(total)+" saat";}else po.textContent="Personel seçimi yapılmadı.";
+ const names=["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
+ const days=Array.from(document.querySelectorAll("#sevkiyatGunleri input:checked")).map(x=>names[Number(x.value)]);
+ document.getElementById("sevkiyatOzet").textContent=days.length?"Sevkiyat: "+days.join(", "):"Sevkiyat günü seçilmedi.";
+ const toplamSaat = p
+  ? Number(p.value.split(".")[0])*195 + (p.value.includes(".")?127.5:0)
+  : 0;
 
-function hedefPenceresiKapat(){
- document.getElementById("hedefModal").classList.remove("aktif");
- tumVerileriKaydet();
+ document.getElementById("planlamaOzet").textContent =
+  "Toplam çalışma saati: "+sayiFormat(toplamSaat)+" saat | "+
+  "Personel sayısı: "+(p ? p.value.replace(".", "+") : "Seçilmedi")+" | "+
+  "Sevkiyat günleri: "+(days.length ? days.join(", ") : "Seçilmedi");
+}
+function ozelGunEkle(tarih="",oran="10"){
+ const row=document.createElement("div");row.className="ozel-gun-satiri";
+ row.innerHTML='<input type="date" aria-label="Özel gün tarihi"><select aria-label="Özel gün oranı"><option value="10">Özel gün +%10</option><option value="20">Özel gün +%20</option><option value="30">Özel gün +%30</option><option value="40">Özel gün +%40</option><option value="50">Özel gün +%50</option><option value="0">Kapalı gün</option></select><button type="button" aria-label="Tarihi sil">×</button>';
+ row.querySelector("input").value=tarih;row.querySelector("select").value=String(oran);
+ row.querySelector("button").onclick=()=>{row.remove();tumVerileriKaydet();};
+ row.querySelectorAll("input,select").forEach(x=>x.addEventListener("change",tumVerileriKaydet));
+ document.getElementById("ozelGunListesi").appendChild(row);
 }
 
-function hedefTarihSatiriEkle(eskiKayit){
- const ay=Number(document.getElementById("ay").value);
- const yil=Number(document.getElementById("yil").value);
- const ayMetni=String(ay).padStart(2,"0");
- const sonGun=new Date(yil,ay,0).getDate();
-
- const satir=document.createElement("div");
- satir.className="hedef-tarih-satiri";
-
- satir.innerHTML=`
-  <input type="date" class="ozel-hedef-tarih"
-   min="${yil}-${ayMetni}-01"
-   max="${yil}-${ayMetni}-${String(sonGun).padStart(2,"0")}"
-   aria-label="Özel gün tarihi">
-  <select class="ozel-hedef-tur" aria-label="Özel gün türü">
-   <option value="1.15">Özel gün +%15</option>
-   <option value="1.40">Özel gün +%40</option>
-   <option value="1.50">Özel gün +%50</option>
-   <option value="0">Mağaza kapalı</option>
-  </select>
-  <button type="button" class="hedef-sil" title="Tarihi sil">×</button>`;
-
- if(eskiKayit){
-  satir.querySelector(".ozel-hedef-tarih").value=eskiKayit.tarih;
-  satir.querySelector(".ozel-hedef-tur").value=eskiKayit.tur;
- }
-
- satir.querySelector(".hedef-sil").addEventListener("click",function(){
-  satir.remove();
-  tumVerileriKaydet();
- });
-
- satir.querySelectorAll("input,select").forEach(function(el){
-  el.addEventListener("change",tumVerileriKaydet);
- });
-
- document.getElementById("hedefTarihListesi").appendChild(satir);
-}
-
-function ozelGunleriYukle(liste){
- const alan=document.getElementById("hedefTarihListesi");
- alan.innerHTML="";
- (liste||[]).forEach(function(kayit){hedefTarihSatiriEkle(kayit);});
-}
-
-function ozelHedefleriOku(){
- const ozelGunler={};
- const ay=Number(document.getElementById("ay").value);
- const yil=Number(document.getElementById("yil").value);
-
- document.querySelectorAll("#hedefTarihListesi .hedef-tarih-satiri").forEach(function(satir){
-  const tarih=satir.querySelector(".ozel-hedef-tarih").value;
-  const tur=Number(satir.querySelector(".ozel-hedef-tur").value);
-  if(!tarih)return;
-
-  const d=new Date(tarih+"T12:00:00");
-  if(d.getFullYear()!==yil||d.getMonth()!==ay-1){
-   throw new Error("Tüm özel tarihler seçili ay ve yıla ait olmalıdır.");
-  }
-  if(Object.prototype.hasOwnProperty.call(ozelGunler,tarih)){
-   throw new Error("Aynı tarih birden fazla seçilmiş. Lütfen düzeltin.");
-  }
-  ozelGunler[tarih]=tur;
- });
- return ozelGunler;
-}
-
-/* ÖZEL GÜN ARTIRIMINI DİĞER AÇIK GÜNLERDEN EŞİT DÜŞ */
-function esitAzalt(hamDagilim,verenIndeksleri,azaltilacak){
- let kalan=Math.max(0,azaltilacak);
- let aktif=verenIndeksleri.slice();
- const EPS=0.000001;
-
- while(kalan>EPS&&aktif.length){
-  const pay=kalan/aktif.length;
-  let yeniKalan=0;
-  const yeniAktif=[];
-
-  aktif.forEach(function(i){
-   const alinabilir=Math.max(0,hamDagilim[i]);
-   const dusum=Math.min(alinabilir,pay);
-   hamDagilim[i]-=dusum;
-   yeniKalan+=pay-dusum;
-
-   if(hamDagilim[i]>EPS)yeniAktif.push(i);
-  });
-
-  if(yeniAktif.length===aktif.length&&Math.abs(yeniKalan-kalan)<EPS){
-   break;
-  }
-
-  kalan=yeniKalan;
-  aktif=yeniAktif;
- }
-}
-
-/* HEDEF DAĞITIMI */
+/* HEDEF CİRO VE ÇALIŞMA SAATİ DAĞITIMI */
 function hedefleriDagit(){
  const hedef=Number(document.getElementById("hedef").value)||0;
  const calismaGunu=Number(document.getElementById("calismaGunu").value)||0;
-
- if(hedef<=0||calismaGunu<=0){
-  alert("Lütfen geçerli bir HEDEF ve ÇALIŞMA GÜNÜ girin.");
-  return;
- }
-
- let ozelGunler;
- try{
-  ozelGunler=ozelHedefleriOku();
- }catch(hata){
-  alert(hata.message);
-  return;
- }
-
+ const seciliPersonel=document.querySelector("input[name=personelSayisi]:checked");
+ if(!seciliPersonel){alert("Lütfen personel sayısını seçin.");personelSeciminiAc();return;}
+ if(hedef<=0||calismaGunu<=0){alert("Lütfen geçerli bir HEDEF ve ÇALIŞMA GÜNÜ girin.");return;}
  const satirlar=Array.from(document.querySelectorAll("#tablo tr"));
- if(!satirlar.length){
-  alert("Önce aylık tabloyu oluşturun.");
-  return;
- }
-
- const gunler=satirlar.map(function(tr){
-  const p=tr.querySelector(".tarih").textContent.trim().split(".");
-  const gun=Number(p[0]),ay=Number(p[1]),yil=Number(p[2]);
-  const tarih=new Date(yil,ay-1,gun);
-  const anahtar=yil+"-"+String(ay).padStart(2,"0")+"-"+String(gun).padStart(2,"0");
-
-  let oran=gunOranlari[tarih.getDay()];
-  let ozelArtis=0;
-  let kapali=false;
-
-  if(Object.prototype.hasOwnProperty.call(ozelGunler,anahtar)){
-   const secim=ozelGunler[anahtar];
-   if(secim===0){
-    kapali=true;
-    oran=0;
-   }else{
-    ozelArtis=secim-1;
-   }
-  }
-
-  return {tr,anahtar,oran,ozelArtis,kapali};
+ if(!satirlar.length){alert("Önce aylık tabloyu oluşturun.");return;}
+ const secim=seciliPersonel.value.split("."),normalPersonel=Number(secim[0]),artiBir=secim.length>1?1:0;
+ const toplamSaat=normalPersonel*195+artiBir*127.5;
+ const sevkiyatGunleri=Array.from(document.querySelectorAll("#sevkiyatGunleri input:checked")).map(x=>Number(x.value));
+ const ozelGunler=Array.from(document.querySelectorAll("#ozelGunListesi .ozel-gun-satiri")).map(r=>({tarih:r.querySelector("input").value,oran:Number(r.querySelector("select").value)})).filter(x=>x.tarih);
+ const ozelMap=new Map(ozelGunler.map(x=>[x.tarih,x.oran]));
+ const gunler=satirlar.map(tr=>{
+  const parca=tr.querySelector(".tarih").textContent.trim().split("."),tarih=new Date(Number(parca[2]),Number(parca[1])-1,Number(parca[0]));
+  const key=[tarih.getFullYear(),String(tarih.getMonth()+1).padStart(2,"0"),String(tarih.getDate()).padStart(2,"0")].join("-");
+  const oran=ozelMap.has(key)?ozelMap.get(key):null;
+  return {tr,gun:tarih.getDay(),key,kapali:oran===0,agirlik:sevkiyatGunleri.includes(tarih.getDay())?1.12:1,ciroAgirlik:gunOranlari[tarih.getDay()]*(oran===null?1:(1+oran/100))};
  });
-
- const acikIndeksleri=[];
- const ozelIndeksleri=[];
- const verenIndeksleri=[];
- let toplamAgirlik=0;
-
- gunler.forEach(function(g,i){
-  if(g.kapali)return;
-  acikIndeksleri.push(i);
-  toplamAgirlik+=g.oran;
-
-  if(g.ozelArtis>0)ozelIndeksleri.push(i);
-  else verenIndeksleri.push(i);
- });
-
- if(!acikIndeksleri.length){
-  alert("Açık gün bulunamadı. Özel tarih seçimlerini kontrol edin.");
-  return;
- }
-
- const aylikHedef=Math.round(calismaGunu*hedef);
-
- /*
-  1. Önce açık günlere haftalık oranlarla temel dağılım yapılır.
-  2. Kapalı günler sıfır kalır.
-  3. Özel gün artışları, günlük HEDEF × seçilen artış oranı olarak hesaplanır.
-  4. Bu artışlar, özel gün olmayan açık günlerden eşit miktarda düşülür.
-  5. Toplamı korumak için son açık güne kalan tutar yazılır.
- */
-
- const hamDagilim=gunler.map(function(g){
-  return g.kapali?0:(aylikHedef*g.oran/toplamAgirlik);
- });
-
- let toplamOzelArtis=0;
- ozelIndeksleri.forEach(function(i){
-  const artis=hedef*gunler[i].ozelArtis;
-  hamDagilim[i]+=artis;
-  toplamOzelArtis+=artis;
- });
-
- if(verenIndeksleri.length>0&&toplamOzelArtis>0){
-  // İstenen artış, veren günlerin toplam cirosunu aşarsa
-  // mevcut toplamın korunması için artış orantılı sınırlandırılır.
-  const verenToplami=verenIndeksleri.reduce(function(s,i){
-   return s+hamDagilim[i];
-  },0);
-
-  if(toplamOzelArtis>verenToplami&&toplamOzelArtis>0){
-   const katsayi=verenToplami/toplamOzelArtis;
-   ozelIndeksleri.forEach(function(i){
-    const istenen=hedef*gunler[i].ozelArtis;
-    hamDagilim[i]-=istenen*(1-katsayi);
-   });
-   toplamOzelArtis=verenToplami;
-  }
-
-  esitAzalt(hamDagilim,verenIndeksleri,toplamOzelArtis);
- }else if(toplamOzelArtis>0&&verenIndeksleri.length===0){
-  alert("Özel gün artışını diğer açık günlerden düşmek için en az bir özel gün olmayan açık gün bulunmalıdır. Özel gün seçimlerini kontrol edin.");
-  return;
- }
-
- /*
-  Günlük rakamları en yakın 10.000 TL'ye yuvarla.
-  Son açık gün, aylık toplam hedefi tam tutturmak için
-  kalan tutarı alır.
- */
- const sonAcikIndex=acikIndeksleri[acikIndeksleri.length-1];
- let dagitilan=0;
-
- acikIndeksleri.forEach(function(i){
-  if(i===sonAcikIndex)return;
-  hamDagilim[i]=Math.max(0,Math.round(hamDagilim[i]/10000)*10000);
-  dagitilan+=hamDagilim[i];
- });
-
- if(dagitilan>aylikHedef){
-  // Yuvarlama sebebiyle hedef aşılırsa son açık günden önceki
-  // açık günleri 10.000 TL basamaklarıyla azalt.
-  let fazla=dagitilan-aylikHedef;
-
-  for(let j=acikIndeksleri.length-2;j>=0&&fazla>0;j--){
-   const i=acikIndeksleri[j];
-   const mevcut=hamDagilim[i];
-   const dusum=Math.min(mevcut,Math.ceil(fazla/10000)*10000);
-   hamDagilim[i]=Math.max(0,mevcut-dusum);
-   fazla-=mevcut-hamDagilim[i];
-  }
-
-  dagitilan=acikIndeksleri.reduce(function(s,i){
-   return i===sonAcikIndex?s:s+hamDagilim[i];
-  },0);
- }
-
- gunler.forEach(function(g,i){
-  g.tr.querySelector(".ciro-plan").value=g.kapali?0:"";
- });
-
- hamDagilim[sonAcikIndex]=aylikHedef-dagitilan;
-
- gunler.forEach(function(g,i){
-  g.tr.querySelector(".ciro-plan").value=
-   g.kapali?0:Math.round(hamDagilim[i]);
- });
-
- const veri=donemVerisi();
- veri.ozelGunler=ozelGunleriOkuSessiz();
-
- hesapla();
- tumVerileriKaydet();
- hedefPenceresiKapat();
-
- document.getElementById("durum").textContent=
-  "Ciro dağıtımı tamamlandı. Planlanan toplam: "+sayiFormat(aylikHedef);
+ const acikGunler=gunler.filter(g=>!g.kapali);
+ if(!acikGunler.length){alert("Planlama için en az bir açık gün bulunmalı.");return;}
+ const agirlikToplami=acikGunler.reduce((t,g)=>t+g.agirlik,0);
+ const raw=acikGunler.map(g=>toplamSaat*g.agirlik/agirlikToplami);
+ const rounded=raw.map(Math.floor);let kalan=Math.round(toplamSaat)-rounded.reduce((a,b)=>a+b,0);
+ raw.map((v,i)=>({i,frac:v-Math.floor(v)})).sort((a,b)=>b.frac-a.frac).slice(0,kalan).forEach(x=>rounded[x.i]++);
+ gunler.forEach(g=>g.tr.querySelector(".saat-plan").value="0");
+ acikGunler.forEach((g,i)=>g.tr.querySelector(".saat-plan").value=String(rounded[i]));
+ // Ciro hedefi: haftalık oranlar ve seçilen özel gün oranları birlikte uygulanır.
+ const aylikHedef=Math.round(calismaGunu*hedef),ciroAgirlikToplami=acikGunler.reduce((a,g)=>a+g.ciroAgirlik,0);
+ let dagitilanCiro=0;
+ acikGunler.forEach((g,i)=>{const ciro=i===acikGunler.length-1?aylikHedef-dagitilanCiro:Math.round((aylikHedef*g.ciroAgirlik/ciroAgirlikToplami)/10000)*10000;g.tr.querySelector(".ciro-plan").value=Math.max(0,ciro);dagitilanCiro+=Math.max(0,ciro);});
+ // Ayın son gününe denk gelen her özel günün günlük hedefini seçilen oran kadar ayrıca artır.
+ const sonGunTarihi=gunler.length?gunler[gunler.length-1].key:null;
+ gunler.filter(g=>g.key===sonGunTarihi && ozelMap.has(g.key) && !g.kapali).forEach(g=>{const mevcut=planSayiOku(g.tr.querySelector(".ciro-plan").value);const artis=ozelMap.get(g.key)||0;if(artis>0)g.tr.querySelector(".ciro-plan").value=Math.round((mevcut*(1+artis/100))/10000)*10000;});
+ gunler.filter(g=>g.kapali).forEach(g=>g.tr.querySelector(".ciro-plan").value=0);
+ planlananAlanlariBicimlendir();
+ const veri=donemVerisi();veri.sevkiyatGunleri=sevkiyatGunleri;veri.personelSecimi=seciliPersonel.value;veri.ozelGunler=ozelGunler;
+ hesapla();tumVerileriKaydet();hedefPenceresiKapat();
+ document.getElementById("durum").textContent="Planlama tamamlandı. Toplam çalışma saati: "+sayiFormat(toplamSaat)+" saat ("+normalPersonel+" × 195"+(artiBir?" + 127,5":"")+"). Sevkiyat günleri %12 fazla planlandı.";
 }
+
+document.querySelectorAll("input[name=personelSayisi],#sevkiyatGunleri input").forEach(x=>x.addEventListener("change",ozetleriGuncelle));
 
 /* ÜST ALAN DEĞİŞİKLİKLERİ */
 ["calismaGunu","butce","hedef"].forEach(function(id){
@@ -1106,6 +1206,16 @@ function hedefleriDagit(){
 
 document.getElementById("ay").addEventListener("change",tabloOlustur);
 document.getElementById("yil").addEventListener("change",tabloOlustur);
+
+/* YALNIZCA BİLANÇO TABLOSUNU YAZDIR / PDF OLARAK KAYDET */
+function bilancoPaylas(){
+ const tablo=document.querySelector("#balance-page .tablo-alan > table");
+ if(!tablo){
+  alert("Bilanço tablosu bulunamadı.");
+  return;
+ }
+ window.print();
+}
 
 /* BAŞLAT */
 hafizaOku();
