@@ -729,17 +729,7 @@ function closeMenu(){
 function selectPage(id){closeMenu();showPage(id)}
 var anaSayfaGecisiBasladi=false;
 var anaSayfaBeklemeZamanlayici=null;
-function anaSayfaYuklemeEkraniGoster(){
-  var ekran=document.getElementById('navigationLoading');
-  ekran.classList.add('active');
-  ekran.setAttribute('aria-hidden','false');
-  document.body.classList.add('navigation-loading');
-  if(anaSayfaBeklemeZamanlayici) clearTimeout(anaSayfaBeklemeZamanlayici);
-  anaSayfaBeklemeZamanlayici=setTimeout(function(){
-    document.getElementById('navigationLoadingMessage').textContent='Bağlantı biraz yavaş. Ana sayfanız hazırlanıyor, lütfen beklemeye devam edin.';
-    document.getElementById('navigationLoadingWait').textContent='BAĞLANTI BEKLENİYOR';
-  },10000);
-}
+
 function anaSayfayaDon(){
   if(anaSayfaGecisiBasladi)return;
   // Sayfadan ayrılmadan önce mevcut girişleri kalıcı olarak localStorage'a yaz.
