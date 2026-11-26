@@ -483,7 +483,7 @@ body.navigation-loading{overflow:hidden}
   }catch(e){console.warn('TinyDB kaydi geri yuklenemedi',e);}
 })();
 </script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 <header>
@@ -1385,7 +1385,7 @@ async function bilancoPaylas() {
                 },
 
                 html2canvas: {
-                    scale: 2,
+                    scale: 1,
                     useCORS: true,
                     backgroundColor: "#ffffff",
                     scrollX: 0,
@@ -1430,7 +1430,7 @@ tabloOlustur();
   <div class="version-info">
     Mağaza Defteri
     <br>
-    Sürüm <strong>4.0.1</strong>
+    Sürüm <strong>4.0.2</strong>
     · Güncelleme: 27.11.2026
     <br>
     <button onclick="document.getElementById('versionNotes').classList.toggle('active')">
@@ -1438,7 +1438,7 @@ tabloOlustur();
     </button>
 
     <div id="versionNotes" class="version-notes">
-        <strong>Mağaza Defteri v4.0.1</strong>
+        <strong>Mağaza Defteri v4.0.2</strong>
         <ul>
             <li>Mağaza Defteri bölümleri güncellendi.</li>
             <li>Kayıt ve hafıza sistemi iyileştirildi.</li>
