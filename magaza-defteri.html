@@ -432,7 +432,40 @@ body.navigation-loading{overflow:hidden}
   padding:15px !important;
   box-shadow:0 4px 20px rgba(0,0,0,.3) !important;
 }
+/* MAĞAZA DEFTERİ SÜRÜM BİLGİSİ */
+.version-info {
+    text-align:center;
+    padding:12px 8px;
+    margin-top:15px;
+    font-size:11px;
+    color:#777;
+    border-top:1px solid #ddd;
+}
 
+.version-info button {
+    border:0;
+    background:none;
+    color:#4472c4;
+    font-weight:bold;
+    font-size:11px;
+    cursor:pointer;
+}
+
+.version-notes {
+    display:none;
+    text-align:left;
+    margin:10px auto 0;
+    max-width:500px;
+    padding:12px;
+    background:#f3f6fb;
+    border-radius:8px;
+    color:#333;
+    line-height:1.7;
+}
+
+.version-notes.active {
+    display:block;
+}
 </style>
 <script>
 /* KODULAR TINYDB KOPRUSU: sayfa acilmadan once WebViewString'e verilen kaydi geri yukler. */
@@ -1197,18 +1230,222 @@ document.getElementById("ay").addEventListener("change",tabloOlustur);
 document.getElementById("yil").addEventListener("change",tabloOlustur);
 
 /* YALNIZCA BİLANÇO TABLOSUNU YAZDIR / PDF OLARAK KAYDET */
-function bilancoPaylas(){
- const tablo=document.querySelector("#balance-page .tablo-alan > table");
- if(!tablo){
-  alert("Bilanço tablosu bulunamadı.");
-  return;
- }
- window.print();
+
+async function bilancoPaylas() {
+    const kaynak = document.querySelector(
+        "#balance-page .tablo-alan > table"
+    );
+
+    if (!kaynak) {
+        alert("Bilanço tablosu bulunamadı.");
+        return;
+    }
+
+    if (typeof html2pdf === "undefined") {
+        alert("PDF kütüphanesi yüklenemedi. İnternet bağlantısını kontrol edin.");
+        return;
+    }
+
+    const buton = document.querySelector(
+        "#balance-page .paylas-alani button"
+    );
+
+    if (buton) {
+        buton.disabled = true;
+        buton.textContent = "PDF HAZIRLANIYOR...";
+    }
+
+    let geciciAlan;
+
+    try {
+        // PDF için ayrı bir alan oluştur
+        geciciAlan = document.createElement("div");
+        geciciAlan.id = "balance-page";
+
+        geciciAlan.style.cssText = `
+            position:fixed;
+            left:-20000px;
+            top:0;
+            width:1600px;
+            background:#ffffff;
+            z-index:-1;
+        `;
+
+        const container = document.createElement("div");
+        container.className = "container";
+        container.style.cssText = `
+            width:100%;
+            max-width:none;
+            margin:0;
+            padding:0;
+            background:#fff;
+            box-shadow:none;
+            border:0;
+        `;
+
+        const tabloAlan = document.createElement("div");
+        tabloAlan.className = "tablo-alan";
+        tabloAlan.style.cssText = `
+            width:100%;
+            overflow:visible;
+        `;
+
+        const tablo = kaynak.cloneNode(true);
+
+        // Tabloyu PDF sayfasına uygun hale getir
+        tablo.style.cssText = `
+            width:100%;
+            min-width:0;
+            max-width:none;
+            table-layout:fixed;
+            border-collapse:collapse;
+            background:#fff;
+        `;
+
+        // 15 sütun için dengeli genişlikler
+        const genislikler = [
+            5, 4, 7, 7, 7, 7, 7, 6,
+            6, 6, 6, 7, 7, 5, 6
+        ];
+
+        const colgroup = document.createElement("colgroup");
+
+        genislikler.forEach(orani => {
+            const col = document.createElement("col");
+            col.style.width = orani + "%";
+            colgroup.appendChild(col);
+        });
+
+        tablo.insertBefore(colgroup, tablo.firstChild);
+
+        // Input değerlerini görünür metne dönüştür
+        const kaynakInputlar = kaynak.querySelectorAll("input");
+        const pdfInputlar = tablo.querySelectorAll("input");
+
+        pdfInputlar.forEach((input, i) => {
+            const span = document.createElement("span");
+            span.textContent = kaynakInputlar[i]?.value || "";
+
+            span.style.cssText = `
+                display:block;
+                width:100%;
+                min-height:18px;
+                text-align:center;
+                font-family:Arial,sans-serif;
+                font-size:10px;
+                color:#111;
+                background:transparent;
+                white-space:nowrap;
+            `;
+
+            input.parentNode.replaceChild(span, input);
+        });
+
+        // Renkleri ve tablo görünümünü koru
+        tablo.querySelectorAll("th,td").forEach(cell => {
+            cell.style.border = "1px solid #777";
+            cell.style.padding = "3px 2px";
+            cell.style.textAlign = "center";
+            cell.style.verticalAlign = "middle";
+            cell.style.fontFamily = "Arial,Helvetica,sans-serif";
+            cell.style.fontSize = "9px";
+            cell.style.lineHeight = "1.15";
+            cell.style.whiteSpace = "normal";
+            cell.style.overflow = "hidden";
+            cell.style.height = "auto";
+            cell.style.color = "#111";
+            cell.style.webkitPrintColorAdjust = "exact";
+            cell.style.printColorAdjust = "exact";
+        });
+
+        tabloAlan.appendChild(tablo);
+        container.appendChild(tabloAlan);
+        geciciAlan.appendChild(container);
+        document.body.appendChild(geciciAlan);
+
+        // PDF oluştur ve indir
+        const aySecim = document.getElementById("ay");
+        const yil = document.getElementById("yil").value;
+
+        const ayAdi = aySecim.options[
+            aySecim.selectedIndex
+        ].text;
+
+        const dosyaAdi = "Bilanco_" + ayAdi + "_" + yil + ".pdf";
+
+        await html2pdf()
+            .set({
+                margin: [5, 5, 5, 5],
+
+                filename: dosyaAdi,
+
+                image: {
+                    type: "jpeg",
+                    quality: 1
+                },
+
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: "#ffffff",
+                    scrollX: 0,
+                    scrollY: 0
+                },
+
+                jsPDF: {
+                    unit: "mm",
+                    format: "a3",
+                    orientation: "landscape",
+                    compress: true
+                },
+
+                pagebreak: {
+                    mode: ["css", "legacy"]
+                }
+            })
+            .from(geciciAlan)
+            .save();
+
+    } catch (hata) {
+        console.error("PDF oluşturma hatası:", hata);
+        alert("PDF oluşturulamadı. Tekrar deneyin.");
+
+    } finally {
+        if (geciciAlan) {
+            geciciAlan.remove();
+        }
+
+        if (buton) {
+            buton.disabled = false;
+            buton.textContent = "📄 TABLOYU PDF OLARAK PAYLAŞ";
+        }
+    }
 }
+
 
 /* BAŞLAT */
 hafizaOku();
 tabloOlustur();
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </script>
+  <div class="version-info">
+    Mağaza Defteri
+    <br>
+    Sürüm <strong>4.0.0</strong>
+    · Güncelleme: 27.11.2026
+    <br>
+    <button onclick="document.getElementById('versionNotes').classList.toggle('active')">
+        SÜRÜM YENİLİKLERİ
+    </button>
+
+    <div id="versionNotes" class="version-notes">
+        <strong>Mağaza Defteri v4.0.0</strong>
+        <ul>
+            <li>Mağaza Defteri bölümleri güncellendi.</li>
+            <li>Kayıt ve hafıza sistemi iyileştirildi.</li>
+            <li>Sayfa tasarımı ve kullanım kolaylığı geliştirildi.</li>
+        </ul>
+    </div>
+</div>
 </body>
 </html>
