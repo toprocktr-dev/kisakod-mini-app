@@ -1731,26 +1731,14 @@ async function scanLoop(){
         codes.length > 0
       ){
 
-        const code =
-          (
-            codes[0].rawValue ||
-            ""
-          ).trim();
+        const code = (codes[0].rawValue || "").trim();
+const format = codes[0].format;
 
-
-        if(code){
-
-          scanMessage.textContent =
-            "Barkod bulundu: " +
-            code;
-
-
-          handleScannedBarcode(code);
-
-
-          return;
-
-        }
+if (code) {
+  scanMessage.textContent = "Ürün aranıyor...";
+  handleScannedBarcode(code, format);
+  return;
+}
 
       }
 
@@ -1779,171 +1767,49 @@ async function scanLoop(){
    TARAMA SONRASI ÜRÜN BUL
    ========================================================= */
 
-function handleScannedBarcode(code){
+function handleScannedBarcode(rawCode, format){
 
-  const scanned =
-    normalizeBarcode(code);
+  // QR kod ise sadece kısa kodu al
+  let searchCode = rawCode;
 
-
-  console.log(
-    "TARANAN BARKOD:",
-    scanned
-  );
-
-
-  /*
-     Önce gerçek barkod sütununda arıyoruz.
-  */
-
-  let found =
-    products.filter(product => {
-
-      if(
-        product.barcode &&
-        barcodeEquals(
-          product.barcode,
-          code
-        )
-      ){
-
-        return true;
-
-      }
-
-
-      return false;
-
-    });
-
-
-  /*
-     Bulamadıysak satırdaki TÜM hücreleri
-     kontrol ediyoruz.
-  */
-
-  if(found.length === 0){
-
-    found =
-      products.filter(product => {
-
-        const barcodes =
-          getProductBarcodes(
-            product
-          );
-
-
-        return barcodes.some(
-          value =>
-            barcodeEquals(
-              value,
-              code
-            )
-        );
-
-      });
-
+  if(format === "qr_code"){
+    searchCode = rawCode.split("-")[0].trim();
   }
 
+  const normalized = normalizeBarcode(searchCode);
 
-  /*
-     Hâlâ bulamadıysak ürün kodunu da
-     kontrol ediyoruz.
-  */
+  // Ürünleri ara
+  const found = products.filter(p => {
+    const productCode = normalizeBarcode(p.code);
+    return productCode === normalized;
+  });
 
-  if(found.length === 0){
-
-    found =
-      products.filter(product => {
-
-        return barcodeEquals(
-          product.code,
-          code
-        );
-
-      });
-
-  }
-
-
-  console.log(
-    "BARKOD SONUCU:",
-    found
-  );
-
-
+  // Kamerayı kapat
   closeBarcodeScanner();
 
-
-  const searchBox =
-    document.getElementById(
-      "searchBox"
-    );
-
-
+  // Arama kutusuna hiçbir şey yazma
   if(found.length > 0){
 
-    /*
-       Arama kutusuna barkodu yaz.
-    */
+    renderProducts(found);
 
-    searchBox.value =
-      code;
-
-
-    /*
-       Sadece bulunan ürünü göster.
-    */
-
-    renderProducts(
-      found
-    );
-
-
-    /*
-       İlk karta git.
-    */
-
+    // Sonuçlara kaydır
     setTimeout(() => {
-
-      const firstCard =
-        document.querySelector(
-          "#cards .card"
-        );
-
+      const firstCard = document.querySelector("#cards article");
 
       if(firstCard){
-
         firstCard.scrollIntoView({
-
           behavior:"smooth",
-
           block:"start"
-
         });
-
       }
-
     },100);
 
-
-  }
-
-  else{
-
-    searchBox.value =
-      code;
-
+  }else{
 
     renderProducts([]);
 
-
-    alert(
-      "Bu barkod ürün listesinde bulunamadı:\n\n" +
-      code
-    );
-
+    alert("Okunan kodla eşleşen ürün bulunamadı.");
   }
-
 }
 
 
