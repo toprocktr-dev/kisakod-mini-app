@@ -11,7 +11,7 @@ console.log("KısaKod sürüm:", KISAKOD_SURUM);
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <style>
 * {
   box-sizing: border-box;
@@ -545,7 +545,7 @@ img {
 <div class="header">
   <div class="header-top">
     <button class="menu-toggle" type="button" aria-label="Menüyü aç" aria-expanded="false" onclick="toggleAktuelMenu()" id="aktuelMenuToggle">☰</button>
-    <div class="title">🔎 KısaKod PLUS <span class="app-version">v.1.1.1</span></div>
+    <div class="title">🔎 KısaKod PLUS <span class="app-version">v.1.5.1</span></div>
   </div>
 
   <div class="search-row">
@@ -1263,6 +1263,60 @@ favoriSayisiniGuncelle();
  *************************************************/
 
 let scannerInitialized = false;
+  let qrAnimationFrame = null;
+const qrCanvas = document.createElement("canvas");
+const qrContext = qrCanvas.getContext("2d", {
+  willReadFrequently: true
+});
+
+function qrTaramaBaslat() {
+  const viewport = document.getElementById("scannerViewport");
+
+  function tara() {
+    if (!scannerOpen || scannerDetected) return;
+
+    const video = viewport.querySelector("video");
+
+    if (
+      video &&
+      video.readyState === video.HAVE_ENOUGH_DATA &&
+      window.jsQR
+    ) {
+      qrCanvas.width = video.videoWidth;
+      qrCanvas.height = video.videoHeight;
+
+      qrContext.drawImage(
+        video,
+        0,
+        0,
+        qrCanvas.width,
+        qrCanvas.height
+      );
+
+      const imageData = qrContext.getImageData(
+        0,
+        0,
+        qrCanvas.width,
+        qrCanvas.height
+      );
+
+      const qr = jsQR(
+        imageData.data,
+        imageData.width,
+        imageData.height
+      );
+
+      if (qr && qr.data) {
+        scannerKodunuAra(qr.data, true);
+        return;
+      }
+    }
+
+    qrAnimationFrame = requestAnimationFrame(tara);
+  }
+
+  qrAnimationFrame = requestAnimationFrame(tara);
+}
 let scannerOpen = false;
 let scannerDetected = false;
 let torchEnabled = false;
@@ -1290,17 +1344,30 @@ function scannerDetectedHandler(result) {
   if (!result || !result.codeResult || scannerDetected) return;
 
   const barkod = result.codeResult.code;
-
   if (!barkod) return;
+
+  scannerKodunuAra(barkod, false);
+}
+
+function scannerKodunuAra(kod, qrMi) {
+  if (scannerDetected) return;
 
   scannerDetected = true;
 
+  let aranacakKod = String(kod).trim();
+
+  // QR kod ise sadece kısa kodu al
+  if (qrMi) {
+    aranacakKod = aranacakKod.split("-")[0].trim();
+  }
+
   stopScanner();
 
-  searchInput.value = barkod;
+  // Arama kutusunu göstermeden arama yap
+  searchInput.value = aranacakKod;
   searchProducts(true);
+  searchInput.value = "";
 }
-
 async function startScanner() {
   const scanner = document.getElementById("scanner");
   const viewport = document.getElementById("scannerViewport");
@@ -1365,10 +1432,15 @@ async function startScanner() {
     }
 
     Quagga.start();
+    qrTaramaBaslat();
   });
 }
 
 function stopScanner() {
+  if (qrAnimationFrame) {
+  cancelAnimationFrame(qrAnimationFrame);
+  qrAnimationFrame = null;
+}
   scannerOpen = false;
 
   if (window.Quagga) {
